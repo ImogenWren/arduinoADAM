@@ -63,12 +63,14 @@ An output bit with value 1 is sent to Channel 2 of the digital output module at
 Address 01h.
 Channel 2 of the digital output module is thus set to ON.
 '''
+
 # Pi Specific Commands
 GET_DO       = b"$021\r"
 
 # Ethernet Delarations (Only used for Example main()
-ADAM_IP = "192.168.4.22"
-PORT = 1025
+ADAM_6052_IP = "192.168.1.111"
+ADAM_6217_IP = "192.168.1.112"
+PORT = 1025    #1024-1029 valid
 BUFFER = 1024
 
 
@@ -152,7 +154,7 @@ class adamConnect:
 
 
     def set_all_do(self, channel_status: bytes):         # Sate byte passed as 8 bits representing the sate if each output channel
-        print(F"Setting DOs")
+        print(F"Setting DO.s")
         command = com_start
         command += "00"
         command += "1"
@@ -273,20 +275,25 @@ class adamConnect:
 
 def main():
     while True:
+        print("Start Loop")
         counter = 0
-        adam = adamConnect(ADAM_IP, PORT)
-        connected = adam.open_socket()
+        adam_DO = adamConnect(ADAM_6052_IP, PORT)
+        print("finished adamConnect")
+        connected = adam_DO.open_socket()
         print(f"Connected = {connected}")
-        adam.set_do_state(1, 1)
+        adam_DO.set_do_state(0, 1)
         while connected:
-            connected = adam.read_di_state()
+            print("reading DI state..")
+            connected = adam_DO.read_di_state()
+            print(connected)
             time.sleep(5)
             print(str(counter) + "\n")
             counter += 1
         print("Connection May Have Been Lost, Retrying Connection...")
+        time.sleep(2)
 
 
-#main()
+main()
 
 
 
