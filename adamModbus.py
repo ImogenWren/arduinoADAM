@@ -70,7 +70,7 @@ class adam6052ModBus:
 
 
     def get_input(self, DI_number):
-        print(f"adam6052: Reading Input DI_{DI_number}")
+        #print(f"adam6052: Reading Input DI_{DI_number}")
         inputs_list = self.adam6052.read_discrete_inputs(DI_number, 1)
         inputs_list = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
@@ -81,7 +81,7 @@ class adam6052ModBus:
             return "ERROR"
 
     def get_all_inputs(self):
-        print("adam6052: Reading all Inputs")
+        #print("adam6052: Reading all Inputs")
         inputs_list = self.adam6052.read_discrete_inputs (0, 8)
         self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
@@ -102,26 +102,42 @@ class adam6217ModBus:
         self.adam6217 = ModbusClient(host=self._IP, port=self.port, unit_id=1, auto_open=True)
 
     def get_all_inputs(self):
-        print("adam6217: Reading all Inputs")
+        #print("adam6217: Reading all Inputs")
         inputs_list = self.adam6217.read_input_registers(0, 8)
         #self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
-            print(f"DI_0-7: {inputs_list}")
-            return inputs_list
+            #print(f"AI_0-7: {inputs_list}")
+            i = 0
+            for value in inputs_list:
+                #print(f"AI_{i}:",end=" " )
+                voltage = self.calculate_voltage(value)
+                self.AI_state[i] = voltage
+                i = i+1
+            print(f"AI_0-7: {self.AI_state}")
+            return self.AI_state
         else:
             print("Unable to read inputs :(")
             return "ERROR"
+
+    def calculate_voltage(self, inputValue):
+        # Offset is 32768
+        voltage = inputValue - 32768
+        #with offset removed 3v input = 9772 returned
+        voltage = round(voltage/3257.333,2)
+        #print(f"Measured Voltage: {voltage}")
+        return voltage
 
 
 
 def main():
     print("Starting adam Modbus control")
     iteration = 0
-    #adam6052 = adam6052ModBus(ADAM_6052_IP, PORT)
+    adam6052 = adam6052ModBus(ADAM_6052_IP, PORT)
     adam6217 = adam6217ModBus(ADAM_6217_IP, PORT)
     while (True):
         print(f"{iteration}:", end=" ")
-        #adam6052.get_all_inputs()
+        adam6052.get_all_inputs()
+        print(f"{iteration}:", end=" ")
         adam6217.get_all_inputs()
         time.sleep(2)
         iteration = iteration + 1
