@@ -19,55 +19,130 @@ Example: Force Coil DO 0 (Address 00017 (0x11)) to ON in an ADAM-6000 module.
 # READ THE DOCS!
 https://pypi.org/project/pyModbusTCP/
 '''
-# Ethernet Delarations
-ADAM_6052_IP = "192.168.1.111"
-ADAM_6217_IP = "192.168.1.112"
-#PORT = 1025    #1024-1029 valid for http
-PORT = 502
-BUFFER = 1024
-
-
-DO_0 = 0x10  # THIS MAKES NO SENSE!! should be 0x11 given documentation!
-DO_1 = 0x11
-DO_2 = 0x12
-DO_3 = 0x13
-DO_4 = 0x14
-DO_5 = 0x15
-DO_6 = 0x16
-DO_7 = 0x17
-
-DO_list = [DO_0,DO_1,DO_2,DO_3,DO_4,DO_5,DO_6,DO_7]
 
 ## Init
 from pyModbusTCP.client import ModbusClient
 import time
 
-# Create a Modbus TCP client
-#Module init (TCP always open)
-adam6052 = ModbusClient(host=ADAM_6052_IP,port=PORT, unit_id=1, auto_open=True)
-bit = True
-
-
-def adam6052_set_coil(DO_number, state):
-    no_error = adam6052.write_single_coil(DO_list[DO_number], state)
-    # no_error = client.w
-    time.sleep(0.5)
-    if (no_error):
-        print(f"adam6052: coil DO_{DO_number}: Written to {state}")
-        return 0   # return false if complete
-    else:
-        print(f"adam6052: coil DO_{DO_number}: Unable to write to {state}")
-        return 1  # error code can be returned here
+# Ethernet Delarations
+ADAM_6052_IP = "192.168.1.111"
+ADAM_6217_IP = "192.168.1.112"
+#PORT = 1025    #1024-1029 valid for http
+PORT = 502
 
 
 
-## Main Loop
-while True:
-    print("Starting Modbus Connection")
-    adam6052_set_coil(0, True)
-    time.sleep(4)
-    adam6052_set_coil(0, False)
-    time.sleep(4)
+class adam6052ModBus:
+    def __init__(self, adam_ip, port = 502):
+        print(f'Initializing adam6052 8-DI 8-DO ModBus...')
+        self._IP = adam_ip
+        self.port = port
+        self.DO_list = [0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17]  #DO_0 to DO_7
+        self.DO_state = [0,0,0,0,0,0,0,0]   # Dont rely too much on this untill checking added
+        self.DI_list = [0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07]
+        self.DI_state = [0,0,0,0,0,0,0,0]
+        # Create a Modbus TCP client
+        # Module init (TCP always open)
+        self.adam6052 = ModbusClient(host=self._IP, port=self.port, unit_id=1, auto_open=True)
 
+
+    def set_coil(self, DO_number, state):
+        no_error = self.adam6052.write_single_coil(self.DO_list[DO_number], state)
+        self.DO_state[DO_number] = state
+        time.sleep(0.5)
+        if (no_error):
+            print(f"adam6052: coil DO_{DO_number}: Written to {state}")
+            return 0   # return false if complete
+        else:
+            print(f"adam6052: coil DO_{DO_number}: Unable to write to {state}")
+            return 1  # error code can be returned here
+
+    def set_all_coils(self, states):
+        no_error = (self.adam6052.write_multiple_coils(self.DO_list[0], states))
+        self.DO_state = states
+        time.sleep(0.5)
+        if (no_error):
+            print(f"adam6052: all coils: Written to {states}")
+            return 0  # return false if complete
+        else:
+            print(f"adam6052: all coils: Unable to write to {states}")
+            return 1  # error code can be returned here
+
+
+    def get_input(self, DI_number):
+        print(f"adam6052: Reading Input DI_{DI_number}")
+        inputs_list = self.adam6052.read_discrete_inputs(DI_number, 1)
+        inputs_list = [int(val) for val in inputs_list]   ## turn bool list into int list
+        if inputs_list:
+            print(f"DI_{DI_number}: {inputs_list}")
+            return inputs_list
+        else:
+            print("Unable to read inputs :(")
+            return "ERROR"
+
+    def get_all_inputs(self):
+        print("adam6052: Reading all Inputs")
+        inputs_list = self.adam6052.read_discrete_inputs (0, 8)
+        self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
+        if inputs_list:
+            print(f"DI_0-7: {self.DI_state}")
+            return self.DI_state
+        else:
+            print("Unable to read inputs :(")
+            return "ERROR"
+
+
+class adam6217ModBus:
+    def __init__(self, adam_ip, port = 502):
+        print(f'Initializing adam6217 8-AI ModBus...')
+        self._IP = adam_ip
+        self.port = port
+        self.AI_list = [0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07]
+        self.AI_state = [0,0,0,0,0,0,0,0]
+        self.adam6217 = ModbusClient(host=self._IP, port=self.port, unit_id=1, auto_open=True)
+
+    def get_all_inputs(self):
+        print("adam6217: Reading all Inputs")
+        inputs_list = self.adam6217.read_input_registers(0, 8)
+        #self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
+        if inputs_list:
+            print(f"DI_0-7: {inputs_list}")
+            return inputs_list
+        else:
+            print("Unable to read inputs :(")
+            return "ERROR"
+
+
+
+def main():
+    print("Starting adam Modbus control")
+    iteration = 0
+    #adam6052 = adam6052ModBus(ADAM_6052_IP, PORT)
+    adam6217 = adam6217ModBus(ADAM_6217_IP, PORT)
+    while (True):
+        print(f"{iteration}:", end=" ")
+        #adam6052.get_all_inputs()
+        adam6217.get_all_inputs()
+        time.sleep(2)
+        iteration = iteration + 1
+
+
+    # adam6052_set_coil(0, True)
+    # time.sleep(4)
+    # adam6052_set_coil(0, False)
+    # time.sleep(4)
+    # time.sleep(5)
+    # adam6052_set_all_coils(DO_state)
+    # time.sleep(4)
+    # time.sleep(5)
+    # adam6052_set_all_coils([0,0,0,0,0,0,0,0])
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
 
 
