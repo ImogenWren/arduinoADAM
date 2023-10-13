@@ -64,7 +64,7 @@ class adam6052ModBus:
             print(f"DI_{DI_number}: {inputs_list}")
             return inputs_list
         else:
-            print("Unable to read inputs :(")
+            print("adam6052: Unable to read digital input :(")
             return "ERROR"
 
     def get_all_inputs(self):
@@ -75,5 +75,5 @@ class adam6052ModBus:
             print(f"DI_0-7: {self.DI_state}")
             return self.DI_state
         else:
-            print("Unable to read inputs :(")
+            print("adam6052: Unable to read digital inputs :(")
             return "ERROR"

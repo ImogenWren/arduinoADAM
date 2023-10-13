@@ -33,18 +33,17 @@ Example: Force Coil DO 0 (Address 00017 (0x11)) to ON in an ADAM-6000 module.
 from pyModbusTCP.client import ModbusClient
 import time
 
-import adam6052ModBus as adamDIO
-import adam6217ModBus as adamAI
-import adam6018ModBus as adamTC
+import adam6052ModBus as adam6052
+import adam6217ModBus as adam6217
+import adam6018ModBus as adam6018
 
 
 # Ethernet Delarations
 ADAM_6052_IP = "192.168.1.111"
 ADAM_6217_IP = "192.168.1.112"
 ADAM_6018_IP = "192.168.1.113"
+ADAM_6024_IP = "192.168.1.114"
 
-
-#PORT = 1025    #1024-1029 valid for http
 PORT = 502
 
 
@@ -68,65 +67,80 @@ In directory: adam-user-manuals:
 
 
 
+#TODO Add analog outputs
 
 class adam6024ModBus:
     def __init__(self, adam_ip, port = 502):
-        print(f'Initializing adam6024 8-DI 8-DO Universal IO ModBus...')
+        print(f'Initializing adam6024 6-AI 2-AO 2-DI 2-DO Universal IO ModBus...')
         self._IP = adam_ip
         self.port = port
+        self.AI_list = [0x11, 0x9c41, 0x9c42,0x9c43,0x9c44,0x9c45]
+        self.AI_state = [0,0,0,0,0,0]
         self.DO_list = [0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17]  #DO_0 to DO_7
         self.DO_state = [0,0,0,0,0,0,0,0]   # Dont rely too much on this untill checking added
         self.DI_list = [0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07]
         self.DI_state = [0,0,0,0,0,0,0,0]
         # Create a Modbus TCP client
         # Module init (TCP always open)
-        self.adam6052 = ModbusClient(host=self._IP, port=self.port, unit_id=1, auto_open=True)
+        self.adam6024 = ModbusClient(host=self._IP, port=self.port, unit_id=1, auto_open=True)
 
 
     def set_coil(self, DO_number, state):
-        no_error = self.adam6052.write_single_coil(self.DO_list[DO_number], state)
+        no_error = self.adam6024.write_single_coil(self.DO_list[DO_number], state)
         self.DO_state[DO_number] = state
         time.sleep(0.5)
         if (no_error):
-            print(f"adam6052: coil DO_{DO_number}: Written to {state}")
+            print(f"adam6024: coil DO_{DO_number}: Written to {state}")
             return 0   # return false if complete
         else:
-            print(f"adam6052: coil DO_{DO_number}: Unable to write to {state}")
+            print(f"adam6024: coil DO_{DO_number}: Unable to write to {state}")
             return 1  # error code can be returned here
 
     def set_all_coils(self, states):
-        no_error = (self.adam6052.write_multiple_coils(self.DO_list[0], states))
+        no_error = (self.adam6024.write_multiple_coils(self.DO_list[0], states))
         self.DO_state = states
         time.sleep(0.5)
         if (no_error):
-            print(f"adam6052: all coils: Written to {states}")
+            print(f"adam6024: all coils: Written to {states}")
             return 0  # return false if complete
         else:
-            print(f"adam6052: all coils: Unable to write to {states}")
+            print(f"adam6024: all coils: Unable to write to {states}")
             return 1  # error code can be returned here
 
 
-    def get_input(self, DI_number):
+    def get_digital_inputs(self):
         #print(f"adam6052: Reading Input DI_{DI_number}")
-        inputs_list = self.adam6052.read_discrete_inputs(DI_number, 1)
+        inputs_list = self.adam6024.read_discrete_inputs(0, 2)
         inputs_list = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
-            print(f"DI_{DI_number}: {inputs_list}")
+            print(f"DI_0-1: {inputs_list}")
             return inputs_list
         else:
-            print("Unable to read inputs :(")
+            print("adam6024: Unable to read Digital input :(")
             return "ERROR"
 
-    def get_all_inputs(self):
+    def get_analog_inputs(self):
         #print("adam6052: Reading all Inputs")
-        inputs_list = self.adam6052.read_discrete_inputs (0, 8)
+        inputs_list = self.adam6024.read_input_registers (0,6)
         if inputs_list:
-            self.DI_state = [int(val) for val in inputs_list]  ## turn bool list into int list
-            print(f"DI_0-7: {self.DI_state}")
-            return self.DI_state
+            i = 0
+            for value in inputs_list:
+                voltage = self.calculate_voltage(value)
+                self.AI_state[i] = voltage
+                i = i+1
+            print(f"AI_0-5: {self.AI_state}")
+            return self.AI_state
         else:
-            print("Unable to read inputs :(")
+            print("adam6024: Unable to read Analog inputs :(")
             return "ERROR"
+
+    def calculate_voltage(self, inputValue):
+        # Offset is 32768
+        voltage = inputValue - 32768
+        #with offset removed 3v input = 9772 returned
+        voltage = round(voltage/3257.333,2)
+        #print(f"Measured Voltage: {voltage}")
+        return voltage
 
 
 
@@ -136,16 +150,23 @@ class adam6024ModBus:
 def main():
     print("Starting ADAM Modbus control")
     iteration = 0
-    adam6052 = adamDIO.adam6052ModBus(ADAM_6052_IP, PORT)
-    adam6217 = adamAI.adam6217ModBus(ADAM_6217_IP, PORT)
-    adam6018 = adamTC.adam6018ModBus(ADAM_6018_IP, PORT, tc_type="K")
+    adamDIO = adam6052.adam6052ModBus(ADAM_6052_IP, PORT)
+    adamAI = adam6217.adam6217ModBus(ADAM_6217_IP, PORT)
+    adamTC = adam6018.adam6018ModBus(ADAM_6018_IP, PORT, tc_type="K")   ## tc_type does nothing at the moment! (set type in adam utility)
+    adamUIO = adam6024ModBus(ADAM_6024_IP, PORT)
     while (True):
         print(f"{iteration}:", end="\n")
-        adam6018.get_all_inputs()
-        adam6052.get_all_inputs()
-        #print(f"{iteration}:", end=" ")
-        adam6217.get_all_inputs()
-        time.sleep(2)
+        adamDIO.get_all_inputs()
+        adamAI.get_all_inputs()
+        adamTC.get_all_inputs()
+        adamUIO.get_analog_inputs()
+        adamUIO.get_digital_inputs()
+        adamDIO.set_coil(0, True)
+        adamUIO.set_all_coils([1,0])
+        time.sleep(5)
+        adamDIO.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])
+        adamUIO.set_all_coils([0,1])
+        time.sleep(3)
         iteration = iteration + 1
 
 

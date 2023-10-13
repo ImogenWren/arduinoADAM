@@ -1,7 +1,7 @@
 '''
 adam6217 Controller - 8AI - ModBus
 
-Advantech ADAM 6217 Data Acquisition Module - Analog  driver
+Advantech ADAM 6217 Data Acquisition Module - Analog In -  driver
 
 - 8 Analog Inputs (-10/+10 v), (0/20mA)
 
@@ -41,7 +41,7 @@ class adam6217ModBus:
             print(f"AI_0-7: {self.AI_state}")
             return self.AI_state
         else:
-            print("Unable to read inputs :(")
+            print("adam6217: Unable to read Analog inputs :(")
             return "ERROR"
 
     def calculate_voltage(self, inputValue):
