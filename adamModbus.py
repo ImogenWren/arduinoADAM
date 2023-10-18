@@ -150,16 +150,20 @@ class adam6024ModBus:
         return voltage
 
     def set_analog_output(self,channel,setPoint):
+        bit_addr = 400  # This is writing to something who knows what
         
-        no_error = self.adam6024.custom_request()
-        (channel, setPoint)
+        setPoint = 0
+        #no_error = self.adam6024.write_single_coil(bit_addr, setPoint )
+        no_error = self.adam6024.write_single_register(bit_addr, setPoint)
+        #no_error = self.adam6024.custom_request(010105.555)
+        print(no_error)
         self.AO_state = setPoint
         time.sleep(0.5)
         if (no_error):
-            print(f"adam6024: coils: Written to {setPoint}")
+            print(f"adam6024: coil: {setPoint} Written to {bit_addr}")
             return 0  # return false if complete
         else:
-            print(f"adam6024: coils: Unable to write {setPoint} to channel {channel}")
+            print(f"adam6024: coils: Unable to write {setPoint} to channel {bit_addr}")
             return 1  # error code can be returned here
 
 
