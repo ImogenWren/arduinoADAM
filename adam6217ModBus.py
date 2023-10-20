@@ -32,7 +32,6 @@ class adam6217ModBus:
     def get_all_inputs(self):
         #print("adam6217: Reading all Inputs")
         inputs_list = self.adam6217.read_input_registers(0, 8)
-        #self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
             #print(f"AI_0-7: {inputs_list}")
             i = 0
@@ -48,19 +47,40 @@ class adam6217ModBus:
             return "ERROR"
 
 
+
+    def get_voltage_inputs(self):
+        #print("adam6217: Reading all Inputs")
+        inputs_list = self.adam6217.read_input_registers(0, 8)
+        if inputs_list:
+            #print(f"AI_0-7: {inputs_list}")
+            i = 0
+            for value in inputs_list:
+                #print(f"AI_{i}:",end=" " )
+                voltage = self.calculate_voltage(value)
+                self.AI_state[i] = voltage
+                i = i+1
+            print(f"AI_0-7: {self.AI_state} V")
+            return self.AI_state
+        else:
+            print("adam6217: Unable to read Analog inputs :(")
+            return "ERROR"
+
+
+
+
     def get_current_inputs(self):     #4-20mA input
         # print("adam6217: Reading all Inputs")
         inputs_list = self.adam6217.read_input_registers(0, 8)
         # self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
-            print(f"AI_0-7: {inputs_list}")
+            print(f"AI_0-7: {inputs_list} DAC_val")
             i = 0
             for value in inputs_list:
                 #print(f"AI_{i}:",end=" " )
-                current = self.calculate_current_4(value)
+                current = self.calculate_current_0(value)
                 self.AI_state[i] = current
                 i = i + 1
-            print(f"AI_0-7: {self.AI_state}")
+            print(f"AI_0-7: {self.AI_state} mA")
             return self.AI_state
         else:
             print("adam6217: Unable to read Analog inputs (4-20mA) :(")
@@ -76,7 +96,7 @@ class adam6217ModBus:
         #print(f"Measured Voltage: {voltage}")
         return voltage
 
-    def calculate_current_4(self, inputValue):
-        # 9772/20 =
-        current = round(inputValue/488.6,2)
+    def calculate_current_0(self, inputValue):   ## Maths for channel set to 0-20mA
+        #13022 = 3.974
+        current = round(inputValue/3276.799,3)
         return current
