@@ -35,13 +35,23 @@ class adam6052ModBus:
 
     def set_coil(self, DO_number, state):
         no_error = self.adam6052.write_single_coil(self.DO_list[DO_number], state)
-        self.DO_state[DO_number] = state
         time.sleep(0.5)
         if (no_error):
-            print(f"adam6052: coil DO_{DO_number}: Written to {state}")
+            #print(f"adam6052: coil DO_{DO_number}: Written to {state}")
             return 0   # return false if complete
         else:
             print(f"adam6052: coil DO_{DO_number}: Unable to write to {state}")
+            return 1  # error code can be returned here
+
+
+    def set_output(self, output, state):
+        no_error = self.adam6052.write_single_coil(output, state)
+        time.sleep(0.5)
+        if (no_error):
+            #print(f"adam6052: output {output}: Written to {state}")
+            return 0   # return false if complete
+        else:
+            print(f"adam6052: output {output}: Unable to write to {state}")
             return 1  # error code can be returned here
 
     def set_all_coils(self, states):
@@ -49,7 +59,7 @@ class adam6052ModBus:
         self.DO_state = states
         time.sleep(0.5)
         if (no_error):
-            print(f"adam6052: all coils: Written to {states}")
+            #print(f"adam6052: all coils: Written to {states}")
             return 0  # return false if complete
         else:
             print(f"adam6052: all coils: Unable to write to {states}")
@@ -61,7 +71,7 @@ class adam6052ModBus:
         inputs_list = self.adam6052.read_discrete_inputs(DI_number, 1)
         inputs_list = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
-            print(f"DI_{DI_number}: {inputs_list}")
+            #print(f"DI_{DI_number}: {inputs_list}")
             return inputs_list
         else:
             print("adam6052: Unable to read digital input :(")
@@ -72,8 +82,42 @@ class adam6052ModBus:
         inputs_list = self.adam6052.read_discrete_inputs (0, 8)
         if inputs_list:
             self.DI_state = [int(val) for val in inputs_list]  ## turn bool list into int list
-            print(f"DI_0-7: {self.DI_state}")
+            #print(f"DI_0-7: {self.DI_state}")
             return self.DI_state
         else:
             print("adam6052: Unable to read digital inputs :(")
+            return "ERROR"
+
+    def get_coil_state(self, coilNumber):
+        #print("adam6052: Reading all Inputs")
+        inputs_list = self.adam6052.read_discrete_inputs (self.DO_list[coilNumber], 1)
+        if inputs_list:
+            self.DI_state = [int(val) for val in inputs_list]  ## turn bool list into int list
+            #print(f"DI_{coilNumber}: {self.DI_state}")
+            return self.DI_state
+        else:
+            print(f"adam6052: Unable to read coil DO_{coilNumber} :(")
+            return "ERROR"
+
+    def get_all_coils(self):
+        #print("adam6052: Reading all Inputs")
+        inputs_list = self.adam6052.read_discrete_inputs (self.DO_list[0], 8)
+        if inputs_list:
+            self.DI_state = [int(val) for val in inputs_list]  ## turn bool list into int list
+            #print(f"DI_0-7: {self.DI_state}")
+            return self.DI_state
+        else:
+            print("adam6052: Unable to read coil values :(")
+            return "ERROR"
+
+    def get_coil_range(self, lower, upper):
+        #print("adam6052: Reading all Inputs")
+        range = (upper-lower)
+        inputs_list = self.adam6052.read_discrete_inputs (self.DO_list[lower], range+1)
+        if inputs_list:
+            self.DI_state = [int(val) for val in inputs_list]  ## turn bool list into int list
+            #print(f"DI_0-7: {self.DI_state}")
+            return self.DI_state
+        else:
+            print("adam6052: Unable to read coil values :(")
             return "ERROR"
