@@ -26,7 +26,7 @@ class adam6217ModBus:
         self._IP = adam_ip
         self.port = port
         self.AI_list = [0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07]
-        self.AI_state = [0,0,0,0,0,0,0,0]
+        #self.AI_state = [0,0,0,0,0,0,0,0]
         self.adam6217 = ModbusClient(host=self._IP, port=self.port, unit_id=1, auto_open=True)
 
     def get_all_inputs(self):
@@ -48,19 +48,21 @@ class adam6217ModBus:
 
 
 
-    def get_voltage_inputs(self):
-        #print("adam6217: Reading all Inputs")
-        inputs_list = self.adam6217.read_input_registers(0, 8)
+    def get_voltage_inputs(self, startAddr=0, endAddr=7):
+        num_inputs = (endAddr-startAddr)+1
+        #print(f"adam6217: Reading Inputs {startAddr} to {endAddr}. No. Inputs: {num_inputs}")
+        inputs_list = self.adam6217.read_input_registers(startAddr, num_inputs)
         if inputs_list:
-            #print(f"AI_0-7: {inputs_list}")
+            #print(f"AI_{startAddr}-{endAddr}: {inputs_list}")
             i = 0
+            voltage_list = []
             for value in inputs_list:
                 #print(f"AI_{i}:",end=" " )
                 voltage = self.calculate_voltage(value)
-                self.AI_state[i] = voltage
+                voltage_list.append(voltage)
                 i = i+1
-            print(f"AI_0-7: {self.AI_state} V")
-            return self.AI_state
+            #print(f"AI_0-7: {self.AI_state} V")
+            return voltage_list
         else:
             print("adam6217: Unable to read Analog inputs :(")
             return "ERROR"
@@ -68,9 +70,9 @@ class adam6217ModBus:
 
 
 
-    def get_current_inputs(self):     #4-20mA input
-        # print("adam6217: Reading all Inputs")
-        inputs_list = self.adam6217.read_input_registers(0, 8)
+    def get_current_inputs(self, startAddr=0, endAddr=7):     #4-20mA input
+        num_inputs = (endAddr - startAddr) + 1
+        inputs_list = self.adam6217.read_input_registers(startAddr, num_inputs)
         # self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
             print(f"AI_0-7: {inputs_list} DAC_val")

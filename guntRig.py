@@ -12,6 +12,7 @@ Demonstraits the function of all hardware IOs. No state machine
 ## Init
 #from pyModbusTCP.client import ModbusClient
 import time
+from os import wait3
 
 import adam6052ModBus as adam6052
 import adam6217ModBus as adam6217
@@ -37,7 +38,7 @@ V3 = adamDIO_A.DO_list[2]       # medium Capillary
 V4 = adamDIO_A.DO_list[3]       # large Capillary
 V5 = adamDIO_A.DO_list[4]       # Receiver Outlet
 V6 = adamDIO_A.DO_list[5]       # Receiver Inlet
-V7 = adamDIO_A.DO_list[6]       # Receiver Bypass
+V7 = adamDIO_A.DO_list[6]       # Receiver Bypass0
 unused = adamDIO.DO_list[7]     # Unused
 
 # DO - adam6052_B
@@ -55,16 +56,13 @@ TC3 = adamAI_C.AI_list[5]       # Condenser Outlet Temperature
 TC4 = adamAI_C.AI_list[6]       # Evaporator Inlet Temperature
 TC5 = adamAI_C.AI_list[7]       # Evaporator Outlet Temperature
 
+
 #Current AI
 flow_meter = adamAI_D.AI_list[0] # Flowmeter
 
 '''
 
 
-
-
-def test():
-    print("Test")
 
 '''
 Program operation:
@@ -84,6 +82,19 @@ ILLEGAL STATES:
  
 '''
 
+#TODO Define Unknowns:
+'''
+- Error handling
+- Exception Handling
+- status reporting
+- program exit?
+- logs - detail required - datapoints required- time periods
+- Blocking action given specific states
+- sending JSON commands into python program
+- sending JSON commands from python program
+
+'''
+
 
 class guntFridge:
     def __init__(self):
@@ -93,7 +104,7 @@ class guntFridge:
         self.adamDIO_B = adam6052.adam6052ModBus(ADAM_6052_B_IP, PORT)
         self.adamAI_C = adam6217.adam6217ModBus(ADAM_6217_A_IP, PORT)  # 0-10v in for temp & pressure sensors
         self.adamAI_D = adam6217.adam6217ModBus(ADAM_6217_B_IP, PORT)  # 4-20mA in for flow sensor
-        self.sensors = sensorCalc  ## library for sensor conversions
+        self.sensors = sensorCalc.sensorCalc()  ## library for sensor conversions
         # List IO channels
         self.V1 = 0  # Self Regulating
         self.V2 = 1  # Small Capillary
@@ -154,11 +165,34 @@ class guntFridge:
         else:
             print(f"Error Setting Fan B state")
 
+    def get_sensors(self):
+        print(f"Getting Sensors")
+
+    def get_pressure_sensors(self):
+        print("Getting Pressure Sensors")
+        pressure_voltages = self.adamAI_C.get_voltage_inputs(0, 2)
+        pressure_list = []
+        for voltage in pressure_voltages:
+            pressure_bar = self.sensors.voltage_to_pressure(voltage, 0,30,1,6)
+            pressure_list.append(pressure_bar)
+            #print(f"Pressure: {pressure_bar} bar")
+        print(f"Pressures: P1-3: {pressure_list} bar")
+        return pressure_list
 
 
 
+    def get_temp_sensors(self):
+        print("Getting Temp Sensors")
 
-#TODO CHECK RELAYS IN adamDIO_B NO GROUND WIRE
+    def get_flow_sensor(self):
+        print("Getting Flow Sensor")
+        flow_rate_Lh = self.sensors.current_to_flowmeter(self.adamAI_D.get_current_inputs()[0])
+        print(f"Flow Rate: {flow_rate_Lh} L/hour")
+        return flow_rate_Lh
+
+
+3wait3()
+#TODO: Implement JSON interface using user inputs for CLI
 
 
 def main():
@@ -177,21 +211,21 @@ def main():
     iteration = 0
     while(1):
         print(f"{iteration}:", end="\n")
-        gunt.get_all_valves()
+        #gunt.get_all_valves()
+        gunt.get_pressure_sensors()
         #adamAI_C.get_voltage_inputs()
         #could above lines be compressed into
-        #flow_rate_Lh = sense.current_to_flowmeter(adamAI_D.get_current_inputs()[0])
+        #
         time.sleep(2)
         iteration = iteration + 1
-        gunt.set_valve(5, True)    ## abstracted method setting gunt valve state
-        gunt.set_valve(6, True)
-        gunt.set_compressor(True)
-        gunt.set_fans(True)
+        #gunt.set_valve(5, True)    ## abstracted method setting gunt valve state
+        #gunt.set_valve(6, True)
+        #gunt.set_compressor(True)
+        #gunt.set_fans(True)
         time.sleep(5)
         if (iteration/2).is_integer():
-            gunt.set_compressor(False)
-            gunt.set_fans(True)
-            time.sleep(5)
+            continue
+
 
 
 

@@ -17,3 +17,13 @@ class sensorCalc:
         print(f"Convert Current: {current_mA} to flow-rate: {flowrate} L/h")
         print("ERROR/TODO: Calculated value does not precisely match gauge value") #TODO Make sure calculations are accurate
         return flowrate
+
+
+    def voltage_to_pressure(self, voltage, bar_min = 0,  bar_max = 30, Vmin=1, Vmax=6):
+        barRange = bar_max - bar_min
+        vRange = Vmax - Vmin
+        factor = barRange/vRange
+        #print(f"Voltage to Pressure Factor: {factor}")
+        pressure = round(((voltage-Vmin)*factor), 3)
+        #print(f"Calculating Voltage: {voltage} V = Pressure: {pressure} bar")
+        return pressure
