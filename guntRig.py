@@ -94,7 +94,7 @@ ILLEGAL STATES:
 - sending JSON commands from python program
 
 '''
-
+#TODO: Rename this aCon
 
 class guntFridge:
     def __init__(self):
@@ -191,7 +191,7 @@ class guntFridge:
         return flow_rate_Lh
 
 
-3wait3()
+
 #TODO: Implement JSON interface using user inputs for CLI
 
 
