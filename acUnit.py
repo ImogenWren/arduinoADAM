@@ -1,9 +1,9 @@
 '''
-guntRig - DEMO
+acUnit - DEMO
 
 Refrigeration experiment IO demo program.
 
-Demonstraits the function of all hardware IOs. No state machine
+Demonstrates the function of all hardware IOs.
 
 
 '''
@@ -12,7 +12,7 @@ Demonstraits the function of all hardware IOs. No state machine
 ## Init
 #from pyModbusTCP.client import ModbusClient
 import time
-from os import wait3
+
 
 import adam6052ModBus as adam6052
 import adam6217ModBus as adam6217
@@ -21,7 +21,7 @@ import adam6024ModBus as adam6024
 
 import sensorCalc
 
-# Ethernet Delarations
+# Ethernet Declarations
 ADAM_6052_A_IP = "192.168.1.111"
 ADAM_6052_B_IP = "192.168.1.116"
 ADAM_6217_A_IP = "192.168.1.112"
@@ -94,11 +94,11 @@ ILLEGAL STATES:
 - sending JSON commands from python program
 
 '''
-#TODO: Rename this aCon
 
-class guntFridge:
+
+class acUnit:
     def __init__(self):
-        print("Starting GUNT Refridgeration Rig - DEMO")
+        print("Starting AC Unit Refrigeration Rig - DEMO")
         # Setup IOs
         self.adamDIO_A = adam6052.adam6052ModBus(ADAM_6052_A_IP, PORT)
         self.adamDIO_B = adam6052.adam6052ModBus(ADAM_6052_B_IP, PORT)
@@ -183,6 +183,14 @@ class guntFridge:
 
     def get_temp_sensors(self):
         print("Getting Temp Sensors")
+        temp_voltages = self.adamAI_C.get_voltage_inputs(3, 7)
+        temp_list = []
+        for voltage in temp_voltages:
+            temp_degC = self.sensors.voltage_to_temperature(voltage, 0, 30, 1, 6)
+            temp_list.append(temp_degC)
+            # print(f"Pressure: {pressure_bar} bar")
+        print(f"Temperature: T1-5: {temp_list} bar")
+        return temp_list
 
     def get_flow_sensor(self):
         print("Getting Flow Sensor")
@@ -196,34 +204,39 @@ class guntFridge:
 
 
 def main():
-    print("Starting GUNT Refridgeration Rig - DEMO")
-    # Setup IO Devices & start GUNT library
-    gunt = guntFridge()
+    print("Starting AC Unit Refrigeration Rig - DEMO")
+    # Setup IO Devices & start  library
+    ac = acUnit()
     # Set up Initial State
-    gunt.adamDIO_A.set_all_coils([0,0,0,0,0,0,0,0])   # direct method setting specific controller coil states
-    gunt.adamDIO_B.set_all_coils([0,0,0,0,0,0,0,0])
-    gunt.adamDIO_A.get_all_coils()
-    gunt.adamDIO_B.get_all_coils()
-    gunt.set_compressor(False)
-    gunt.set_fans(False)
-    print("GUNT Init Complete - Starting Acquisition & Control loop")
+    ac.adamDIO_A.set_all_coils([0,0,0,0,0,0,0,0])   # direct method setting specific controller coil states
+    ac.adamDIO_B.set_all_coils([0,0,0,0,0,0,0,0])
+    ac.adamDIO_A.get_all_coils()
+    ac.adamDIO_B.get_all_coils()
+    ac.set_compressor(False)
+    ac.set_fans(False)
+    print("AC Unit Init Complete - Starting Acquisition & Control loop")
     time.sleep(2)
     iteration = 0
     while(1):
         print(f"{iteration}:", end="\n")
-        #gunt.get_all_valves()
-        gunt.get_pressure_sensors()
+        #ac.get_all_valves()
+        ac.get_pressure_sensors()
+        ac.get_temp_sensors()
         #adamAI_C.get_voltage_inputs()
         #could above lines be compressed into
-        #
+        #ac.set_compressor(True)
+        #ac.set_fans(True)
         time.sleep(2)
         iteration = iteration + 1
-        #gunt.set_valve(5, True)    ## abstracted method setting gunt valve state
-        #gunt.set_valve(6, True)
-        #gunt.set_compressor(True)
-        #gunt.set_fans(True)
+        #ac.set_valve(5, True)    ## abstracted method setting ac valve state
+        ##ac.set_valve(6, True)
+        #ac.set_compressor(True)
+        #ac.set_fans(True)
         time.sleep(5)
+        #ac.adamDIO_A.set_all_coils([1,1,1,1,1,1,1,1])
         if (iteration/2).is_integer():
+            ##ac.set_valve(5, False)  ## abstracted method setting ac valve state
+            ##ac.set_valve(6, False)
             continue
 
 

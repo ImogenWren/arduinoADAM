@@ -27,3 +27,14 @@ class sensorCalc:
         pressure = round(((voltage-Vmin)*factor), 3)
         #print(f"Calculating Voltage: {voltage} V = Pressure: {pressure} bar")
         return pressure
+
+
+#TODO fix this function here
+    def voltage_to_temp(self, voltage, degC_min=-50, degC_max=100, Vmin=0, Vmax=10):
+        tempRange = degC_max - degC_min
+        vRange = Vmax - Vmin
+        factor = barRange / vRange
+        # print(f"Voltage to Pressure Factor: {factor}")
+        pressure = round(((voltage - Vmin) * factor), 3)
+        # print(f"Calculating Voltage: {voltage} V = Pressure: {pressure} bar")
+        return pressure
