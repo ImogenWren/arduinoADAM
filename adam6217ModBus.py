@@ -32,16 +32,17 @@ class adam6217ModBus:
     def get_all_inputs(self):
         #print("adam6217: Reading all Inputs")
         inputs_list = self.adam6217.read_input_registers(0, 8)
+        AI_voltages = []
         if inputs_list:
             #print(f"AI_0-7: {inputs_list}")
             i = 0
             for value in inputs_list:
                 #print(f"AI_{i}:",end=" " )
                 voltage = self.calculate_voltage(value)
-                self.AI_state[i] = voltage
+                AI_voltages.append(voltage)  #TODO Check this is working here (changed from self.AI_state
                 i = i+1
-            print(f"AI_0-7: {self.AI_state}")
-            return self.AI_state
+            print(f"AI_0-7: {AI_voltages}")
+            return AI_voltages
         else:
             print("adam6217: Unable to read Analog inputs :(")
             return "ERROR"
@@ -73,17 +74,18 @@ class adam6217ModBus:
     def get_current_inputs(self, startAddr=0, endAddr=7):     #4-20mA input
         num_inputs = (endAddr - startAddr) + 1
         inputs_list = self.adam6217.read_input_registers(startAddr, num_inputs)
-        # self.DI_state = [int(val) for val in inputs_list]   ## turn bool list into int list
         if inputs_list:
-            print(f"AI_0-7: {inputs_list} DAC_val")
+            print(f"AI_{startAddr}-{endAddr}: {inputs_list} DAC_val")
             i = 0
+            current_list = []
             for value in inputs_list:
                 #print(f"AI_{i}:",end=" " )
                 current = self.calculate_current_0(value)
-                self.AI_state[i] = current
+                current_list.append(current)
+                #self.AI_state[i] = current
                 i = i + 1
-            print(f"AI_0-7: {self.AI_state} mA")
-            return self.AI_state
+            print(f"AI_{startAddr}-{endAddr}: {current_list} mA")
+            return current_list
         else:
             print("adam6217: Unable to read Analog inputs (4-20mA) :(")
             return "ERROR"

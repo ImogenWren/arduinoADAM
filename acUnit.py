@@ -59,7 +59,9 @@ TC5 = adamAI_C.AI_list[7]       # Evaporator Outlet Temperature
 
 #Current AI
 flow_meter = adamAI_D.AI_list[0] # Flowmeter
-
+power_meter = adamAI_D.AI_list[1] # Power Meter
+APS = adamAI_D.AI_list[2] # ambient pressure sensor
+ATS = adamAI_D.AI_list[3] # ambient temp sensor
 '''
 
 
@@ -92,6 +94,54 @@ ILLEGAL STATES:
 - Blocking action given specific states
 - sending JSON commands into python program
 - sending JSON commands from python program
+
+# Defining JSON Commands as python dictionary
+
+# SET COMMANDS (ideas)
+{"cmd":"set", "V1":"open"} 
+{"cmd":"set", "V5":"open","V6":"open"}
+{"cmd":"set","item":"V1","state":"open"}
+{"cmd":"V1", "value":"open"}
+
+# GET COMMANDS
+- Get commands for data return entire data packet for all values
+{"cmd":"get"} - get all data
+
+acUnit_state = {
+    "valves" : {
+        "V1" : 0,
+        "V2" : 0,
+        "V3" : 0,
+        "V4" : 0,
+        "V5" : 0,
+        "V6" : 0,
+        "V7" : 0           
+    },
+    "power-relays"  :  {
+        "W1" : 0,
+        "W2": 0,
+        "V_comp": 0
+    },
+    "sensors-pressure": {
+        "PS1" : 0,
+        "PS2" : 0,
+        "PS3" : 0
+    },
+    "sensors-temperature": {
+        "TC1" : 0, 
+        "TC2" : 0, 
+        "TC3" : 0, 
+        "TC4" : 0, 
+        "TC5" : 0
+    },
+    "sensors-other":{
+        "flow": 0,
+        "power":0,
+        "APS" : 0,
+        "ATS" : 0
+    }    
+}
+
 
 '''
 
@@ -186,17 +236,37 @@ class acUnit:
         temp_voltages = self.adamAI_C.get_voltage_inputs(3, 7)
         temp_list = []
         for voltage in temp_voltages:
-            temp_degC = self.sensors.voltage_to_temperature(voltage, 0, 30, 1, 6)
+            temp_degC = self.sensors.voltage_to_temp(voltage, 0, 30, 1, 6)
             temp_list.append(temp_degC)
             # print(f"Pressure: {pressure_bar} bar")
         print(f"Temperature: T1-5: {temp_list} bar")
         return temp_list
 
+
     def get_flow_sensor(self):
         print("Getting Flow Sensor")
-        flow_rate_Lh = self.sensors.current_to_flowmeter(self.adamAI_D.get_current_inputs()[0])
+        flow_mA = self.adamAI_D.get_current_inputs(0, 0)[0]
+        flow_rate_Lh = self.sensors.current_to_flowmeter(flow_mA)
         print(f"Flow Rate: {flow_rate_Lh} L/hour")
         return flow_rate_Lh
+
+
+    def get_power_meter(self):
+        print("Getting Power Meter Value")
+        power_mA = self.adamAI_D.get_current_inputs(1,1)[0]
+        print(f"Power Meter: {power_mA} mA")
+        power_W =  self.sensors.current_20mA_to_power(power_mA)
+        print(f"Power Consumption: {power_W} W")
+        return power_W
+
+
+    def get_ambient_sensors(self):
+        print("Getting Ambient Conditions Sensor")
+        ambi_pressure = self.sensors.current_to_pressure(self.adamAI_D.get_current_inputs(2, 2)[0])
+        ambi_temperature = self.sensors.current_to_temperature(self.adamAI_D.get_current_inputs(3, 3)[0])
+        ambient_sensors = [ambi_temperature,ambi_pressure]
+        print(f"Ambient Temp: {ambient_sensors[0]} degC, Ambient Pressure: {ambient_sensors[1]} mBar")
+        return ambient_sensors
 
 
 
@@ -219,15 +289,18 @@ def main():
     iteration = 0
     while(1):
         print(f"{iteration}:", end="\n")
+        # Functions to return data to UI
+        # tested
         #ac.get_all_valves()
-        ac.get_pressure_sensors()
-        ac.get_temp_sensors()
-        #adamAI_C.get_voltage_inputs()
-        #could above lines be compressed into
-        #ac.set_compressor(True)
-        #ac.set_fans(True)
+        #ac.get_pressure_sensors()
+        #ac.get_temp_sensors()
+        #ac.get_flow_sensor()
+        #ac.get_power_meter()
+        ac.get_ambient_sensors()
+
         time.sleep(2)
         iteration = iteration + 1
+        ## Functions for setting acUnit State
         #ac.set_valve(5, True)    ## abstracted method setting ac valve state
         ##ac.set_valve(6, True)
         #ac.set_compressor(True)
