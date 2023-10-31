@@ -103,9 +103,23 @@ ILLEGAL STATES:
 {"cmd":"set","item":"V1","state":"open"}
 {"cmd":"V1", "value":"open"}
 
+{"set":"V1", "state":"open"}
+
+# all these should work
+{"set:"V_comp","state":"on"}
+{"set:"V_comp","state":1}
+{"set:"V_comp","state":"true"}
+
+{"set:"V_comp","state":"off"}
+{"set:"V_comp","state":0}
+{"set:"V_comp","state:"false"}
+
+
 # GET COMMANDS
 - Get commands for data return entire data packet for all values
 {"cmd":"get"} - get all data
+{"get":"V1"}
+{"get":"all"}
 
 acUnit_state = {
     "valves" : {
