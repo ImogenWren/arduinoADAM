@@ -250,10 +250,10 @@ class acUnit:
         temp_voltages = self.adamAI_C.get_voltage_inputs(3, 7)
         temp_list = []
         for voltage in temp_voltages:
-            temp_degC = self.sensors.voltage_to_temp(voltage, 0, 30, 1, 6)
+            temp_degC = self.sensors.voltage_to_temp(voltage)
             temp_list.append(temp_degC)
             # print(f"Pressure: {pressure_bar} bar")
-        print(f"Temperature: T1-5: {temp_list} bar")
+        print(f"Temperature: T1-5: {temp_list} degC")
         return temp_list
 
 
@@ -307,19 +307,19 @@ def main():
         # tested
         #ac.get_all_valves()
         #ac.get_pressure_sensors()
-        #ac.get_temp_sensors()
+        ac.get_temp_sensors()
         #ac.get_flow_sensor()
         #ac.get_power_meter()
-        ac.get_ambient_sensors()
+        #ac.get_ambient_sensors()
 
-        time.sleep(2)
+        time.sleep(1)
         iteration = iteration + 1
         ## Functions for setting acUnit State
         #ac.set_valve(5, True)    ## abstracted method setting ac valve state
         ##ac.set_valve(6, True)
         #ac.set_compressor(True)
         #ac.set_fans(True)
-        time.sleep(5)
+        #time.sleep(5)
         #ac.adamDIO_A.set_all_coils([1,1,1,1,1,1,1,1])
         if (iteration/2).is_integer():
             ##ac.set_valve(5, False)  ## abstracted method setting ac valve state

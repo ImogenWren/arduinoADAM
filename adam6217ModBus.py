@@ -62,7 +62,7 @@ class adam6217ModBus:
                 voltage = self.calculate_voltage(value)
                 voltage_list.append(voltage)
                 i = i+1
-            #print(f"AI_0-7: {self.AI_state} V")
+            print(f"AI_0-7: {voltage_list} V")
             return voltage_list
         else:
             print("adam6217: Unable to read Analog inputs :(")

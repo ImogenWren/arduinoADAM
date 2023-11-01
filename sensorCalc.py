@@ -31,21 +31,23 @@ class sensorCalc:
 
 #TODO fix this function here
     def voltage_to_temp(self, voltage, degC_min=-50, degC_max=100, Vmin=0, Vmax=10):
+        #2.53 v = 25 degC
+        factor = 9.88
         tempRange = degC_max - degC_min
         vRange = Vmax - Vmin
-        factor = tempRange / vRange
+        #factor = tempRange / vRange
         # print(f"Voltage to Pressure Factor: {factor}")
-        pressure = round(((voltage - Vmin) * factor), 3)
+        temperature = round(((voltage) * factor), 3)
         # print(f"Calculating Voltage: {voltage} V = Pressure: {pressure} bar")
-        return pressure
+        return temperature
 
 
-    def current_20mA_to_power(self, current, P_min=0, P_max=300, I_min=0, I_max=20):
+    def current_20mA_to_power(self, current, P_min=0, P_max=1053, I_min=0, I_max=20):
         powerRange = P_max - P_min
         I_range = I_max - I_min
         factor = powerRange / I_range
         print(f"Current to Power Factor: {factor}")
-        power = round(((current-I_min)*factor),3)
+        power = round((((current-I_min)*factor)-2.05),1)
         print(f"Calculating Power: {current} mA = {power} W")
         return power
 
