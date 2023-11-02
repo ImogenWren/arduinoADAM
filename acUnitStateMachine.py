@@ -227,9 +227,27 @@ class acUnitStateMachine:
         temp_vals = self.hw.get_temp_sensors(test_mode=True)
         self.pack.load_temp_data(temp_vals)
         self.pack.dump_json(self.pack.data_dic)
-        # hw.get_flow_sensor()
-        # hw.get_power_meter()
-        # hw.get_ambient_sensors()
+        # self.hw.get_flow_sensor()
+        # self.hw.get_power_meter()
+        # self.hw.get_ambient_sensors()
+
+    '''
+    #3 hold state - check-init-conditions
+    - start timer
+    - sample sensors (1000mS)
+    check:
+    - flow == 0
+    - all valves shut
+    - fanA & fan B == off
+    - compressor == off
+    - dt/dT <= 0.1 degC/min   (sampled over at least 5 minutes)
+    wait: 5 minutes
+    '''
+
+    def state_check_init_conditions(self):
+        print("State: check-init-conditions")
+
+
 
 
 def main():
