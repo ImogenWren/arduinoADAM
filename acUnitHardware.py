@@ -160,7 +160,7 @@ acUnit_state = {
 '''
 
 
-class acUnit:
+class acUnitHardware:
     def __init__(self):
         print("Starting AC Unit Refrigeration Rig - DEMO")
         # Setup IOs
@@ -248,16 +248,19 @@ class acUnit:
 
 
 
-    def get_temp_sensors(self):
+    def get_temp_sensors(self, test_mode=False):
         print("Getting Temp Sensors")
-        temp_voltages = self.adamAI_C.get_voltage_inputs(3, 7)
-        temp_list = []
-        for voltage in temp_voltages:
-            temp_degC = self.sensors.voltage_to_temp(voltage)
-            temp_list.append(temp_degC)
-            # print(f"Pressure: {pressure_bar} bar")
-        print(f"Temperature: T1-5: {temp_list} degC")
-        return temp_list
+        if (test_mode):
+            return [0,0,0,0,66.6]
+        else:
+            temp_voltages = self.adamAI_C.get_voltage_inputs(3, 7)
+            temp_list = []
+            for voltage in temp_voltages:
+                temp_degC = self.sensors.voltage_to_temp(voltage)
+                temp_list.append(temp_degC)
+                # print(f"Pressure: {pressure_bar} bar")
+            print(f"Temperature: T1-5: {temp_list} degC")
+            return temp_list
 
 
     def get_flow_sensor(self):
@@ -294,7 +297,7 @@ class acUnit:
 def main():
     print("Starting AC Unit Refrigeration Rig - DEMO")
     # Setup IO Devices & start  library
-    ac = acUnit()
+    ac = acUnitHardware()
     # Set up Initial State
     ac.adamDIO_A.set_all_coils([0,0,0,0,0,0,0,0])   # direct method setting specific controller coil states
     ac.adamDIO_B.set_all_coils([0,0,0,0,0,0,0,0])

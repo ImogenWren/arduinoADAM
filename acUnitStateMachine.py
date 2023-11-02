@@ -163,7 +163,8 @@ condition is safe
 
 
 
-import acUnit
+import acUnitHardware
+import jsonPacker
 import time
 
 class acUnitStateMachine:
@@ -172,7 +173,8 @@ class acUnitStateMachine:
         self.current_state = 0
         self.last_state = 0
         self.next_state = 0
-        self.ac = acUnit.acUnit()
+        self.hw = acUnitHardware.acUnitHardware()
+        self.pack = jsonPacker.jsonPacker()
         print(f"init state = {self.current_state}")
 
     def run_state(self, newstate):
@@ -195,12 +197,12 @@ class acUnitStateMachine:
     '''
     def state_init(self):
         print("acUnit - State: init")
-        #self.ac.adamDIO_A.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  # direct method setting specific controller coil states
-        #self.ac.adamDIO_B.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])
-        #self.ac.adamDIO_A.get_all_coils()
-        #self.ac.adamDIO_B.get_all_coils()
-        #self.ac.set_compressor(False)
-        #self.ac.set_fans(False)
+        #self.hw.adamDIO_A.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  # direct method setting specific controller coil states
+        #self.hw.adamDIO_B.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])
+        #self.hw.adamDIO_A.get_all_coils()
+        #self.hw.adamDIO_B.get_all_coils()
+        #self.hw.set_compressor(False)
+        #self.hw.set_fans(False)
 
     '''
     #1 hold state - waiting-for-user
@@ -220,18 +222,21 @@ class acUnitStateMachine:
     '''
 
     def state_user_start(self):
-        valve_list = self.ac.get_all_valves(test_mode=True)
-        # ac.get_pressure_sensors()
-        ac.get_temp_sensors()
-        # ac.get_flow_sensor()
-        # ac.get_power_meter()
-        # ac.get_ambient_sensors()
+        #valve_list = self.hw.get_all_valves(test_mode=True)
+        # self.hw.get_pressure_sensors()
+        temp_vals = self.hw.get_temp_sensors(test_mode=True)
+        self.pack.load_temp_data(temp_vals)
+        self.pack.dump_json(self.pack.data_dic)
+        # hw.get_flow_sensor()
+        # hw.get_power_meter()
+        # hw.get_ambient_sensors()
 
 
 def main():
     sm = acUnitStateMachine()
     sm.state_init()
     sm.state_wait_for_user()
+    sm.state_user_start()
 
 
 if __name__ == "__main__":

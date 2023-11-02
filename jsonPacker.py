@@ -185,7 +185,7 @@ histories_list = [0.2, 20.3, 5.82, 4.12, 25.23]
 
 
 
-class jsonParser:
+class jsonPacker:
     def __init__(self):
         self.data_dic = data_dictionary
         self.json_template = json.dumps(self.data_dic, indent=2)
@@ -239,14 +239,14 @@ class jsonParser:
 
 
 def main():
-    jp = jsonParser()
-    jp.load_valve_data(valves_list)
-    jp.load_relay_data(relays_list)
-    jp.load_pressure_data(pressures_list)
-    jp.load_temp_data(temps_list)
-    jp.load_misc_data(miscs_list)
-    jp.load_history_data(histories_list, "TS3")
-    jp.dump_json(jp.data_dic)
+    pack = jsonPacker()
+    pack.load_valve_data(valves_list)
+    pack.load_relay_data(relays_list)
+    pack.load_pressure_data(pressures_list)
+    pack.load_temp_data(temps_list)
+    pack.load_misc_data(miscs_list)
+    pack.load_history_data(histories_list, "TS3")
+    pack.dump_json(pack.data_dic)
 
 
 
