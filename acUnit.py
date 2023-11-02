@@ -199,13 +199,16 @@ class acUnit:
         else:
             print(f"ERROR: Unknown Valve V{valveNumber} requested ")
 
-    def get_all_valves(self):
-        valveStates = self.adamDIO_A.get_coil_range(self.V1, self.V7)
-        valve = 1
-        for state in valveStates:
-            print(f"V{valve} = {state}")
-            valve = valve + 1
-        return valveStates
+    def get_all_valves(self, test_mode=False):
+        if test_mode == False:
+            valveStates = self.adamDIO_A.get_coil_range(self.V1, self.V7)
+            valve = 1
+            for state in valveStates:
+                print(f"V{valve} = {state}")
+                valve = valve + 1
+            return valveStates
+        else:
+            return [0,0,0,0,0,0,0,0]
 
     def set_compressor(self,state):
         self.adamDIO_B.set_coil(0, state)
@@ -266,9 +269,10 @@ class acUnit:
 
 
     def get_power_meter(self):
+        # getting offset of 2.6 W at zero, under scale by ~ 2 W at upper range
         print("Getting Power Meter Value")
         power_mA = self.adamAI_D.get_current_inputs(1,1)[0]
-        print(f"Power Meter: {power_mA} mA")
+        #print(f"Power Meter: {power_mA} mA")
         power_W =  self.sensors.current_20mA_to_power(power_mA)
         print(f"Power Consumption: {power_W} W")
         return power_W

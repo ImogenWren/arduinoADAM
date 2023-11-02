@@ -2,6 +2,7 @@
  acUnit State machine
 
  is this better defined as part of acUnit?
+ - No because acUnit should be called in here as a library
 
 
 '''
@@ -159,13 +160,19 @@ condition is safe
 
 '''
 
+
+
+
+import acUnit
 import time
+
 class acUnitStateMachine:
     def __init__(self):
         print("Starting AC Unit Refrigeration Rig - State Machine")
         self.current_state = 0
         self.last_state = 0
         self.next_state = 0
+        self.ac = acUnit.acUnit()
         print(f"init state = {self.current_state}")
 
     def run_state(self, newstate):
@@ -178,12 +185,55 @@ class acUnitStateMachine:
         self.next_state = self.current_state
         print(f"Next State: {self.next_state}")
 
+    '''
+    # 0 transition state - init
+    adamDIO_A: [0, 0, 0, 0, 0, 0, 0, 0]
+    adamDIO_B: [0, 0, 0, 0, 0, 0, 0, 0]
+    W1: off
+    W2: off
+    V_comp: off
+    '''
+    def state_init(self):
+        print("acUnit - State: init")
+        #self.ac.adamDIO_A.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  # direct method setting specific controller coil states
+        #self.ac.adamDIO_B.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])
+        #self.ac.adamDIO_A.get_all_coils()
+        #self.ac.adamDIO_B.get_all_coils()
+        #self.ac.set_compressor(False)
+        #self.ac.set_fans(False)
+
+    '''
+    #1 hold state - waiting-for-user
+        - wait for start command    
+    '''
+    def state_wait_for_user(self):
+        user = "no"
+        while (user != "yes"):
+            user = input("Start Experiment? Type \"yes\" to begin..")
+        print("Starting acUnit Experiment")
 
 
+    '''
+    # 2 transition state - user-start
+    - sample sensors
+    - log start conditions
+    '''
+
+    def state_user_start(self):
+        valve_list = self.ac.get_all_valves(test_mode=True)
+        # ac.get_pressure_sensors()
+        ac.get_temp_sensors()
+        # ac.get_flow_sensor()
+        # ac.get_power_meter()
+        # ac.get_ambient_sensors()
 
 
-acSM = acUnitStateMachine()
-time.sleep(5)
-acSM.run_state(1)
-time.sleep(5)
-acSM.run_state(3)
+def main():
+    sm = acUnitStateMachine()
+    sm.state_init()
+    sm.state_wait_for_user()
+
+
+if __name__ == "__main__":
+    main()
+    print("Program Quit")

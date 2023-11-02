@@ -62,7 +62,7 @@ class adam6217ModBus:
                 voltage = self.calculate_voltage(value)
                 voltage_list.append(voltage)
                 i = i+1
-            print(f"AI_0-7: {voltage_list} V")
+            #print(f"AI_0-7: {voltage_list} V")
             return voltage_list
         else:
             print("adam6217: Unable to read Analog inputs :(")
@@ -75,7 +75,7 @@ class adam6217ModBus:
         num_inputs = (endAddr - startAddr) + 1
         inputs_list = self.adam6217.read_input_registers(startAddr, num_inputs)
         if inputs_list:
-            print(f"AI_{startAddr}-{endAddr}: {inputs_list} DAC_val")
+            #print(f"AI_{startAddr}-{endAddr}: {inputs_list} DAC_val")
             i = 0
             current_list = []
             for value in inputs_list:
@@ -84,7 +84,7 @@ class adam6217ModBus:
                 current_list.append(current)
                 #self.AI_state[i] = current
                 i = i + 1
-            print(f"AI_{startAddr}-{endAddr}: {current_list} mA")
+            #print(f"AI_{startAddr}-{endAddr}: {current_list} mA")
             return current_list
         else:
             print("adam6217: Unable to read Analog inputs (4-20mA) :(")

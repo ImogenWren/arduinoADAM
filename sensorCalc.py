@@ -43,12 +43,14 @@ class sensorCalc:
 
 
     def current_20mA_to_power(self, current, P_min=0, P_max=1053, I_min=0, I_max=20):
+        # 3.123 mA = 205.6 W
         powerRange = P_max - P_min
         I_range = I_max - I_min
-        factor = powerRange / I_range
-        print(f"Current to Power Factor: {factor}")
-        power = round((((current-I_min)*factor)-2.05),1)
-        print(f"Calculating Power: {current} mA = {power} W")
+        #factor = powerRange / I_range
+        factor = 65.834
+        #print(f"Current to Power Factor: {factor}")
+        power = round((((current-I_min)*factor)),1)     #-2.05 offset?
+        #print(f"Calculating Power: {current} mA = {power} W")
         return power
 
     def current_to_pressure(self, current, bar_min = 0, bar_max=100, I_min=0, I_max=20):
