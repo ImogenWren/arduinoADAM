@@ -70,7 +70,8 @@ https://www.w3schools.com/python/python_json.asp
 """
 
 import json
-from typing import List, Any
+import acUnitGlobals as glbs
+#from typing import List, Any
 
 test_command = '{"set":"V1", "state":"open"}'
 
@@ -80,99 +81,7 @@ test_command = '{"set":"V1", "state":"open"}'
 #print(cmd["set"])
 
 
-data_dictionary = {
-    "valves" : {
-        "V1" : 0,
-        "V2" : 0,
-        "V3" : 0,
-        "V4" : 0,
-        "V5" : 0,
-        "V6" : 0,
-        "V7" : 0,
-        "V8" : 0
-    },
-    "power-relays"  :  {
-        "W1" : 0,
-        "W2" : 0,
-        "V_comp": 0
-    },
-    "sensors-pressure": {
-        "PS1" : 0,
-        "PS2" : 0,
-        "PS3" : 0
-    },
-    "sensors-temperature": {
-        "TS1" : 0,
-        "TS2" : 0,
-        "TS3" : 0,
-        "TS4" : 0,
-        "TS5" : 0
-    },
-    "sensors-misc":{
-        "flow": 0,
-        "power":0,
-        "APS" : 0,
-        "ATS" : 0
-    },
-    "sensors-history":{
-        "PS1":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        },
-        "PS2":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        },
-        "PS3":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        },
-        "TS1":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        },
-        "TS2":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        },
-        "TS3":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        },
-        "TS4":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        },
-        "TS5":{
-            "dTdt": 0,
-            "average": 0,
-            "least_mean_sqr": 0,
-            "min": 0,
-            "max": 0
-        }
-    }
-}
+
 
 #y = json.dumps(data_dictionary, indent=4)
 
@@ -187,8 +96,9 @@ histories_list = [0.2, 20.3, 5.82, 4.12, 25.23]
 
 class jsonPacker:
     def __init__(self):
-        self.data_dic = data_dictionary
-        self.json_template = json.dumps(self.data_dic, indent=2)
+        #self.data_dic = glbs.acUnit_dictionary   ## Decision time do we want to update the global variable or keep it local
+        #glbs.acUnit_dictionary
+        self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
         self.valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
         self.relay_list = ["W1","W2", "V_comp"]
         self.ps_list = ["PS1","PS2","PS3"]
@@ -197,8 +107,8 @@ class jsonPacker:
         self.history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
         #print(self.json_template)
 
-    def dump_json(self, dictionary):
-        self.json_template = json.dumps(self.data_dic, indent=2)
+    def dump_json(self):
+        self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
         print(self.json_template)
         return self.json_template
 
@@ -209,33 +119,35 @@ class jsonPacker:
     def load_valve_data(self, valve_state_list):
         new_zip = zip(self.valve_list, valve_state_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        self.data_dic["valves"].update(new_dic)
+        glbs.acUnit_dictionary["valves"].update(new_dic)
 
     def load_relay_data(self, relay_state_list):
         new_zip = zip(self.relay_list, relay_state_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        self.data_dic["power-relays"].update(new_dic)
+        glbs.acUnit_dictionary["power-relays"].update(new_dic)
 
 
     def load_pressure_data(self, pressure_list):
         new_zip = zip(self.ps_list, pressure_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        self.data_dic["sensors-pressure"].update(new_dic)
+        glbs.acUnit_dictionary["sensors-pressure"].update(new_dic)
 
     def load_temp_data(self, temp_list):
         new_zip = zip(self.ts_list, temp_list)   ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        self.data_dic["sensors-temperature"].update(new_dic)
+        glbs.acUnit_dictionary["sensors-temperature"].update(new_dic)
 
     def load_misc_data(self, misc_list):
         new_zip = zip(self.sense_misc_list, misc_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        self.data_dic["sensors-misc"].update(new_dic)
+        glbs.acUnit_dictionary["sensors-misc"].update(new_dic)
 
-    def load_history_data(self, history_list, sensor_name ):
+    def load_history_data(self, sensor_name, history_list, ):
         new_zip = zip(self.history_param_list, history_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        self.data_dic["sensors-history"][sensor_name].update(new_dic)
+        glbs.acUnit_dictionary["sensors-history"][sensor_name].update(new_dic)
+
+
 
 
 def main():

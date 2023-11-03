@@ -19,7 +19,9 @@ import adam6217ModBus as adam6217
 import adam6018ModBus as adam6018
 import adam6024ModBus as adam6024
 
-import sensorCalc
+import sensorObjects
+import acUnitGlobals as glbs
+import jsonPacker as pack
 
 # Ethernet Declarations
 ADAM_6052_A_IP = "192.168.1.111"
@@ -66,109 +68,19 @@ ATS = adamAI_D.AI_list[3] # ambient temp sensor
 
 
 
-'''
-Program operation:
-Init:
--Setup all IOs
-- Create Data Structures for sensors
-- Create Data Structures for valve state - UI should interrogate this program to report valve state
-#TODO Write function for adam 6052 to report current valve states
-Loop:
-- Sample all sensors and return as dictionary. (format below)
-- wait for JSON commands.
-    - Return data or run function based on JSON parsing
-
-ILLEGAL STATES:
-- Compressor ON, IF (V5 & V6) & (V1 or V2 or V3 or V4)  CLOSED
-- Compressor ON, IF (FanA & FanB) OFF
- 
-'''
-
-#TODO Define Unknowns:
-'''
-- Error handling
-- Exception Handling
-- status reporting
-- program exit?
-- logs - detail required - datapoints required- time periods
-- Blocking action given specific states
-- sending JSON commands into python program
-- sending JSON commands from python program
-
-# Defining JSON Commands as python dictionary
-
-# SET COMMANDS (ideas)
-{"cmd":"set", "V1":"open"} 
-{"cmd":"set", "V5":"open","V6":"open"}
-{"cmd":"set","item":"V1","state":"open"}
-{"cmd":"V1", "value":"open"}
-
-{"set":"V1", "state":"open"}
-
-# all these should work
-{"set:"V_comp","state":"on"}
-{"set:"V_comp","state":1}
-{"set:"V_comp","state":"true"}
-
-{"set:"V_comp","state":"off"}
-{"set:"V_comp","state":0}
-{"set:"V_comp","state:"false"}
 
 
-# GET COMMANDS
-- Get commands for data return entire data packet for all values
-{"cmd":"get"} - get all data
-{"get":"V1"}
-{"get":"all"}
-
-acUnit_state = {
-    "valves" : {
-        "V1" : 0,
-        "V2" : 0,
-        "V3" : 0,
-        "V4" : 0,
-        "V5" : 0,
-        "V6" : 0,
-        "V7" : 0           
-    },
-    "power-relays"  :  {
-        "W1" : 0,
-        "W2": 0,
-        "V_comp": 0
-    },
-    "sensors-pressure": {
-        "PS1" : 0,
-        "PS2" : 0,
-        "PS3" : 0
-    },
-    "sensors-temperature": {
-        "TC1" : 0, 
-        "TC2" : 0, 
-        "TC3" : 0, 
-        "TC4" : 0, 
-        "TC5" : 0
-    },
-    "sensors-other":{
-        "flow": 0,
-        "power":0,
-        "APS" : 0,
-        "ATS" : 0
-    }    
-}
-
-
-'''
 
 
 class acUnitHardware:
     def __init__(self):
-        print("Starting AC Unit Refrigeration Rig - DEMO")
+        print("Starting AC Unit Refrigeration Rig - Hardware Interface")
         # Setup IOs
         self.adamDIO_A = adam6052.adam6052ModBus(ADAM_6052_A_IP, PORT)
         self.adamDIO_B = adam6052.adam6052ModBus(ADAM_6052_B_IP, PORT)
         self.adamAI_C = adam6217.adam6217ModBus(ADAM_6217_A_IP, PORT)  # 0-10v in for temp & pressure sensors
         self.adamAI_D = adam6217.adam6217ModBus(ADAM_6217_B_IP, PORT)  # 4-20mA in for flow sensor
-        self.sensors = sensorCalc.sensorCalc()  ## library for sensor conversions
+        self.sensors = sensorObjects.sensorCalc()  ## library for sensor conversions
         # List IO channels
         self.V1 = 0  # Self Regulating
         self.V2 = 1  # Small Capillary
@@ -178,6 +90,26 @@ class acUnitHardware:
         self.V6 = 5  # Receiver Inlet
         self.V7 = 6  # Receiver Bypass
         self.unused = 7  # Unused
+
+
+## Feel like this function should be in a seperate file as it is not pure hardware IO, could be moved later
+    def get_all_data(self):
+        print(f"Getting all data & saving to global Dic")
+        valve_list = self.get_all_valves(glbs.simulate_hardware)
+        relay_list = self.get_power_relays(glbs.simulate_hardware)
+        pressure_list = self.get_pressure_sensors(glbs.simulate_hardware)
+        temps_list = self.get_temp_sensors(glbs.simulate_hardware)
+        misc_list = self.get_misc_sensors(glbs.simulate_hardware)
+        glbs.pack.load_valve_data(valve_list)
+        glbs.pack.load_relay_data(relay_list)
+        glbs.pack.load_pressure_data(pressure_list)
+        glbs.pack.load_temp_data(temps_list)
+        glbs.pack.load_misc_data(misc_list)
+        #TODO add function here to save all data into database with timestamp
+        #TODO or write to csv
+        #then (this should definatly go elsewhere
+        #TODO add functions to calculate history for each sensor
+        #TODO then add functions to write history data to global dictionary
 
 
 
@@ -208,7 +140,7 @@ class acUnitHardware:
                 valve = valve + 1
             return valveStates
         else:
-            return [0,0,0,0,0,0,0,0]
+            return [0,1,0,1,0,1,0,0]
 
     def set_compressor(self,state):
         self.adamDIO_B.set_coil(0, state)
@@ -232,26 +164,34 @@ class acUnitHardware:
         else:
             print(f"Error Setting Fan B state")
 
-    def get_sensors(self):
-        print(f"Getting Sensors")
 
-    def get_pressure_sensors(self):
-        print("Getting Pressure Sensors")
-        pressure_voltages = self.adamAI_C.get_voltage_inputs(0, 2)
-        pressure_list = []
-        for voltage in pressure_voltages:
-            pressure_bar = self.sensors.voltage_to_pressure(voltage, 0,30,1,6)
-            pressure_list.append(pressure_bar)
-            #print(f"Pressure: {pressure_bar} bar")
-        print(f"Pressures: P1-3: {pressure_list} bar")
-        return pressure_list
+    def get_power_relays(self, sim_hw=False):
+        if sim_hw == False:
+            relays_state = self.adamDIO_B.get_coil_range(0, 2)
+            return relays_state
+        else:
+            return [0, 1, 0]
 
 
 
-    def get_temp_sensors(self, test_mode=False):
-        print("Getting Temp Sensors")
-        if (test_mode):
-            return [0,0,0,0,66.6]
+    def get_pressure_sensors(self, sim_hw=False):
+        if sim_hw == False:
+            pressure_voltages = self.adamAI_C.get_voltage_inputs(0, 2)
+            pressure_list = []
+            for voltage in pressure_voltages:
+                pressure_bar = self.sensors.voltage_to_pressure(voltage, 0,30,1,6)
+                pressure_list.append(pressure_bar)
+                #print(f"Pressure: {pressure_bar} bar")
+            print(f"Pressures: P1-3: {pressure_list} bar")
+            return pressure_list
+        else:
+            return [23,56,123434]
+
+
+
+    def get_temp_sensors(self, sim_hw=False):
+        if (sim_hw):
+            return [0,42,0,0,66.6]
         else:
             temp_voltages = self.adamAI_C.get_voltage_inputs(3, 7)
             temp_list = []
@@ -262,6 +202,16 @@ class acUnitHardware:
             print(f"Temperature: T1-5: {temp_list} degC")
             return temp_list
 
+
+    def get_misc_sensors(self, sim_hw=False):   #TODO test this with hardware
+        misc_sensors = []
+        if (sim_hw == False):
+            misc_sensors.append(self.get_flow_sensor())
+            misc_sensors.append(self.get_power_meter())
+            misc_sensors.append(self.get_ambient_sensors())
+            return misc_sensors
+        else:
+            return [1,2,3,4]
 
     def get_flow_sensor(self):
         print("Getting Flow Sensor")
