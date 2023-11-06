@@ -65,6 +65,9 @@ json_commands = {
 }
 
 test_command = '{"cmd": "set", "V1": "open", "v2":"ON", "V3":"OPEN", "V_comp":"OFF", "w1":"true", "w2":"close"}'
+test_2 = '{"cmd": "change", "state":5}'
+test_3 = '{"cmd":"get"}'
+test_4 = '{"cmd":"change", "state": "manual"}'
 
 class jsonParser:
     def __init__(self):
