@@ -37,37 +37,103 @@ https://www.w3schools.com/python/python_json.asp
 
 import json
 from typing import List, Any
+import acUnitGlobals as glbs
 
-test_command = '{"set":"V1", "state":"open"}'
-
-# parse x:
-#cmd = json.loads(test_command)
-
-#print(cmd["set"])
+#test_command = '{"set":"V1", "state":"open"}'
 
 
-#y = json.dumps(data_dictionary, indent=4)
+json_commands = {
+    "set" : {
+        "V1" : 0,
+        "V2" : 0,
+        "V3" : 0,
+        "V4" : 0,
+        "V5" : 0,
+        "V6" : 0,
+        "V7" : 0,
+        "V8" : 0,
+        "W1" : 0,
+        "W2" : 0,
+        "V_comp" : 0,
+    },
+    "get" : {
+        "data" : 0,
+        "valves" : 0,
+        "sensors" : 0
+    },
+    "change" : 0
+}
 
-valves_list = [1,0,1,0,1,0,1,0]
-relays_list = [1,0,1]
-pressures_list = [10.23, 8.34, 6.25]
-temps_list = [20.24,4.34,8.22,24.8,53.67]
-miscs_list = [16.3, 200.1, 1024, 20.34]
-histories_list = [0.2, 20.3, 5.82, 4.12, 25.23]
-
-
+test_command = '{"cmd": "set", "V1": "open", "v2":"ON", "V3":"OPEN", "V_comp":"OFF", "w1":"true", "w2":"close"}'
 
 class jsonParser:
     def __init__(self):
-        self.data_dic = data_dictionary
+        self.data_dic = glbs.acUnit_dictionary
         self.json_template = json.dumps(self.data_dic, indent=2)
         self.valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
-        self.relay_list = ["W1","W2", "V_comp"]
+        self.relay_list = ["W1","W2", "V_COMP"]
+        self.outputs_list = self.valve_list + self.relay_list
         self.ps_list = ["PS1","PS2","PS3"]
         self.ts_list = ["TS1","TS2","TS3","TS4","TS5"]
         self.sense_misc_list = ["flow", "power", "APS", "ATS"]
         self.history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
         #print(self.json_template)
+
+    '''
+    JSON Command -> output
+    if command is "set" "item" "status:
+        return "set" "item" "status"    
+    if command is "get"
+        return "get"
+    if command is "change" "new-state"
+        return "new-state"
+
+    this will be input into the state machine controller to change/set the state
+
+    '''
+
+
+    def parse_json(self, json_string):
+        print(f"JSON String: {json_string}")
+        command_dic = json.loads(json_string)
+        ## function to make all values lowercase
+        command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
+        print(f" Command Dic: {command_dic}")
+        cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
+        print(f" cmd: {cmd}")
+        if (cmd == "set"):
+            print("Set Command Received")
+            set_outputs = []
+            for output in self.outputs_list:
+                print(f"checking output: {output}")
+                state = command_dic.get(output.casefold())
+                print(f"{output} State: {state}")
+                if state == None:
+                    print(f"No Value Found for {output} ")
+                else:
+                    state = state.lower()
+                if state == "open" or state == "on" or state == "true" or state == True:
+                    set_outputs.append(output)
+                    set_outputs.append(True)
+                elif state == "close" or state == "off" or state == "false" or state == False:
+                    set_outputs.append(output)
+                    set_outputs.append(False)
+                else:
+                    print(f"No Value found for set:item:state: {cmd}:{output}:{state}")
+            print(set_outputs)
+            return(set_outputs)
+        elif (cmd == "get"):
+            print("Get Command Received")
+            return "get"
+        elif (cmd == None):
+            print("cmd returned NoneType")
+        else:
+            print("Unable to Parse JSON cmd")
+
+
+
+
+
 
     def dump_json(self, dictionary):
         self.json_template = json.dumps(self.data_dic, indent=2)
@@ -78,47 +144,15 @@ class jsonParser:
 
 
 
-    def load_valve_data(self, valve_state_list):
-        new_zip = zip(self.valve_list, valve_state_list)  ## zips two lists together into an object of tuples
-        new_dic = dict(new_zip)
-        self.data_dic["valves"].update(new_dic)
 
-    def load_relay_data(self, relay_state_list):
-        new_zip = zip(self.relay_list, relay_state_list)  ## zips two lists together into an object of tuples
-        new_dic = dict(new_zip)
-        self.data_dic["power-relays"].update(new_dic)
-
-
-    def load_pressure_data(self, pressure_list):
-        new_zip = zip(self.ps_list, pressure_list)  ## zips two lists together into an object of tuples
-        new_dic = dict(new_zip)
-        self.data_dic["sensors-pressure"].update(new_dic)
-
-    def load_temp_data(self, temp_list):
-        new_zip = zip(self.ts_list, temp_list)   ## zips two lists together into an object of tuples
-        new_dic = dict(new_zip)
-        self.data_dic["sensors-temperature"].update(new_dic)
-
-    def load_misc_data(self, misc_list):
-        new_zip = zip(self.sense_misc_list, misc_list)  ## zips two lists together into an object of tuples
-        new_dic = dict(new_zip)
-        self.data_dic["sensors-misc"].update(new_dic)
-
-    def load_history_data(self, history_list, sensor_name ):
-        new_zip = zip(self.history_param_list, history_list)  ## zips two lists together into an object of tuples
-        new_dic = dict(new_zip)
-        self.data_dic["sensors-history"][sensor_name].update(new_dic)
 
 
 def main():
-    jp = jsonParser()
-    jp.load_valve_data(valves_list)
-    jp.load_relay_data(relays_list)
-    jp.load_pressure_data(pressures_list)
-    jp.load_temp_data(temps_list)
-    jp.load_misc_data(miscs_list)
-    jp.load_history_data(histories_list, "TS3")
-    jp.dump_json(jp.data_dic)
+    parse = jsonParser()
+    parse.parse_json(test_command)
+
+
+
 
 
 

@@ -71,19 +71,7 @@ https://www.w3schools.com/python/python_json.asp
 
 import json
 import acUnitGlobals as glbs
-#from typing import List, Any
 
-test_command = '{"set":"V1", "state":"open"}'
-
-# parse x:
-#cmd = json.loads(test_command)
-
-#print(cmd["set"])
-
-
-
-
-#y = json.dumps(data_dictionary, indent=4)
 
 valves_list = [1,0,1,0,1,0,1,0]
 relays_list = [1,0,1]
@@ -97,6 +85,7 @@ histories_list = [0.2, 20.3, 5.82, 4.12, 25.23]
 class jsonPacker:
     def __init__(self):
         #self.data_dic = glbs.acUnit_dictionary   ## Decision time do we want to update the global variable or keep it local
+        #NOTE: CURRENTLY USING GLOBAL VARIABLE
         #glbs.acUnit_dictionary
         self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
         self.valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
@@ -158,7 +147,7 @@ def main():
     pack.load_temp_data(temps_list)
     pack.load_misc_data(miscs_list)
     pack.load_history_data(histories_list, "TS3")
-    pack.dump_json(pack.data_dic)
+    pack.dump_json(pack.acUnit_dictionary)
 
 
 
