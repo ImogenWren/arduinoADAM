@@ -5,7 +5,12 @@ acUnitMain
 import asyncio
 import acUnitGlobals as glbs
 import acUnitHardware
+import acUnitStateMachine
+sm = acUnitStateMachine.acUnitStateMachine()
 import sensorObjects as so
+import jsonParse
+parse = jsonParse.jsonParser()
+
 hw = acUnitHardware.acUnitHardware()
 PS1 = so.temperatureSensor()     ## method for datalogging and analysis is generic at the moment
 PS2 = so.temperatureSensor()
@@ -21,7 +26,7 @@ power = so.temperatureSensor()
 PS_array = [PS1, PS2, PS3]
 TS_array = [TS1, TS2, TS3, TS4, TS5]
 
-iteration = 0
+
 async def gather_data(iteration=0):
     # Sample the hardware IOs: Valves, Power Relays, Pressure Sensors
     valve_list = hw.get_all_valves(glbs.simulate_hardware)
@@ -59,13 +64,29 @@ async def gather_data(iteration=0):
         i = i+1
     glbs.pack.load_history_data("flow", flow.calculate_history())
     glbs.pack.load_history_data("power", power.calculate_history())
+    ## Pack error messages
+    glbs.pack.load_error_data()
     ## Dump data into JSON format
-    glbs.pack.dump_json()
-    print(iteration)
+    #glbs.pack.dump_json()
+    #print(iteration)
     iteration = iteration+1
     # TODO write to csv
     # TODO check functions to calculate history for each sensor
     await asyncio.sleep(1)
+
+async def usr_commands(iteration=0):
+    command = parse.user_input_json()
+    print(command)
+    print(iteration)
+    iteration = iteration + 1
+    await asyncio.sleep(1)
+    return command
+
+async def state_machine(state_message=0):
+    ## Define states in state machine object, then do selection here?
+    sm.run_state(state_message)
+    await asyncio.sleep(1)
+
 
 
 #using asyncio each "task" should be defined as an async option.
@@ -76,10 +97,13 @@ task: listen for JSON messages and parse commands
 task: run-state-machine: set hardware IO and system state in response to commands
 """
 
+
 def main():
     i = 0
     while(1):
         asyncio.run(gather_data(i))
+        command = asyncio.run(usr_commands(i))
+        asyncio.run(state_machine(command))
         i = i+1
 
 

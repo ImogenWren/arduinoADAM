@@ -19,7 +19,7 @@ BUFFER_SIZE = 300
 
 class temperatureSensor:
     def __init__(self):
-        print(f'Temperature Sensor Library Deployed')
+        #print(f'Temperature Sensor Library Deployed')
         self.current_degC = 0
         self.sensor_history = []
         self.sensor_timestamp = []
@@ -77,13 +77,18 @@ class temperatureSensor:
                 current_min = item
         return [current_min, current_max]
 
-
+#TODO ask Siji about which dt/dt she wants
     def calculate_dx_dy(self):
-        dx = np.diff(self.sensor_history)
-        dy = np.diff(self.sensor_timestamp)
-        d = dy/dx
-        return 1
+        try:
+            dx = np.diff(self.sensor_history)
+            dy = np.diff(self.sensor_timestamp)
+            #d = dy/dx
+            return 1
+        except:
+            error = ("Error: calculating dx/dy")
+            return error
 
+#TODO speak to Time & Siji
     def calculate_lms(self):
         #pinv = np.linalg.pinv(zip(self.sensor_history,self.sensor_timestamp))
         #alpha = pinv.dot(self.sensor_timestamp)

@@ -94,6 +94,7 @@ class jsonPacker:
         self.ts_list = ["TS1","TS2","TS3","TS4","TS5"]
         self.sense_misc_list = ["flow", "power", "APS", "ATS"]
         self.history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
+        self.error_list = ["state", "code", "message"]
         #print(self.json_template)
 
     def dump_json(self):
@@ -135,6 +136,12 @@ class jsonPacker:
         new_zip = zip(self.history_param_list, history_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["sensors-history"][sensor_name].update(new_dic)
+
+    def load_error_data(self, error_code=0, error_message="no-error"):
+        error_list = [glbs.acUnitState, error_code, error_message]
+        new_zip = zip(self.error_list, error_list)
+        new_dic = dict(new_zip)
+        glbs.acUnit_dictionary["error"].update(new_dic)
 
 
 

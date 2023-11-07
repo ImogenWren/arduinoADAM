@@ -69,6 +69,19 @@ test_2 = '{"cmd": "change", "state":5}'
 test_3 = '{"cmd":"get"}'
 test_4 = '{"cmd":"change", "state": "manual"}'
 
+'''
+JSON Command -> output
+if command is "set" "item" "status:
+    return "set" "item" "status"    
+if command is "get"
+    return "get"
+if command is "change" "new-state"
+    return "new-state"
+
+this will be input into the state machine controller to change/set the state
+
+'''
+
 class jsonParser:
     def __init__(self):
         self.data_dic = glbs.acUnit_dictionary
@@ -82,56 +95,65 @@ class jsonParser:
         self.history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
         #print(self.json_template)
 
-    '''
-    JSON Command -> output
-    if command is "set" "item" "status:
-        return "set" "item" "status"    
-    if command is "get"
-        return "get"
-    if command is "change" "new-state"
-        return "new-state"
 
-    this will be input into the state machine controller to change/set the state
-
-    '''
 
 
     def parse_json(self, json_string):
         print(f"JSON String: {json_string}")
-        command_dic = json.loads(json_string)
+        json_string = json_string.replace("\n", " ").replace("\r", " ")
+        try:
+            command_dic = json.loads(json_string)
+        except:
+            error = ("Error: Unknown JSON entry", 5)
+            return error
         ## function to make all values lowercase
         command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
-        print(f" Command Dic: {command_dic}")
+        #print(f" Command Dic: {command_dic}")
         cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
-        print(f" cmd: {cmd}")
+        #print(f" cmd: {cmd}")
         if (cmd == "set"):
             print("Set Command Received")
             set_outputs = []
             for output in self.outputs_list:
-                print(f"checking output: {output}")
+                #print(f"checking output: {output}")
+                # This will only look for items with defined names, if other names are used no error return but also no unexpected function
                 state = command_dic.get(output.casefold())
-                print(f"{output} State: {state}")
+                #print(f"{output} State: {state}")
                 if state == None:
-                    print(f"No Value Found for {output} ")
+                    #print(f"{state} Value Found for {output} ")
+                    continue
                 else:
                     state = state.lower()
-                if state == "open" or state == "on" or state == "true" or state == True:
+                if state == "open" or state=="opened" or state == "on" or state == "true" or state=="high" or state == True:
                     set_outputs.append(output)
                     set_outputs.append(True)
-                elif state == "close" or state == "off" or state == "false" or state == False:
+                elif state == "close" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False:
                     set_outputs.append(output)
                     set_outputs.append(False)
                 else:
-                    print(f"No Value found for set:item:state: {cmd}:{output}:{state}")
-            print(set_outputs)
+                    error = (f"Error: No Value found for: {cmd}:{output}:{state}", 4)
+                    #print(error)
+                    return error
+            #print(set_outputs)
             return(set_outputs)
         elif (cmd == "get"):
             print("Get Command Received")
             return "get"
         elif (cmd == None):
-            print("cmd returned NoneType")
+            error = ("Error: cmd returned NoneType", 2)
+            #print(error)
+            return (error)
         else:
-            print("Unable to Parse JSON cmd")
+            error = ("Error: Unable to Parse JSON cmd", 3)
+            #print(error)
+            return (error)
+
+    def user_input_json(self):
+        user_input = input('\nPlease Input JSON command. Format: {"cmd":"set","V1":"open"}\n')
+        response = self.parse_json(user_input)
+        #print(response)
+        return response
+
 
 
 
@@ -152,7 +174,8 @@ class jsonParser:
 
 def main():
     parse = jsonParser()
-    parse.parse_json(test_command)
+    #parse.parse_json(test_command)
+    parse.user_input_json()
 
 
 

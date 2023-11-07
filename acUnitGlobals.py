@@ -7,6 +7,8 @@ import jsonPacker
 
 simulate_hardware = True
 
+acUnitState = "init"
+
 acUnit_dictionary = {
     "valves" : {
         "V1" : 0,
@@ -112,6 +114,11 @@ acUnit_dictionary = {
             "min": 0,
             "max": 0
         }
+    },
+    "error":{
+        "state": " ",
+        "code":0,
+        "message":" "
     }
 }
 

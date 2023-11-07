@@ -42,6 +42,7 @@ wait: 5 minutes
 - allow user to access:
 W1: on
 W2: on
+#TODO Allow students to move on before turning on both fans? 
 
 #5 state - start-experiment-valves
 - allow user to access:
@@ -174,20 +175,37 @@ class acUnitStateMachine:
         self.current_state = 0
         self.last_state = 0
         self.next_state = 0
-        self.hw = acUnitHardware.acUnitHardware()
+        #self.hw = acUnitHardware.acUnitHardware()
         self.initial_conditions = {}
         #self.pack = jsonPacker.jsonPacker()  ## try moving this to globals
         print(f"init state = {self.current_state}")
 
-    def run_state(self, newstate):
-        print(f"\nCurrent State: {self.current_state}")
-        print(f"changing state to: {newstate}")
-        self.last_state = self.current_state
-        print(f"Last State: {self.last_state}")
-        self.current_state = newstate
-        print(f"Current State: {self.current_state}")
-        self.next_state = self.current_state
-        print(f"Next State: {self.next_state}")
+    '''
+    This function should run the basic state function
+    '''
+
+    def run_state(self, state_message=0):
+        if state_message != 0:
+            print(f"\nCurrent State: {self.current_state}")
+            print(f"New State: {state_message}")
+            #TODO JSON Parser here or just get commands from JSON parser
+
+
+
+
+
+
+
+
+
+
+    '''
+    ADVANCED STATE MACHINE
+    >>>TOO MUCH DONT DO IT<<<
+    
+    '''
+
+
 
     '''
     # 0 transition state - init
