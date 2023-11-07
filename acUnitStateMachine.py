@@ -168,6 +168,7 @@ import acUnitHardware
 #import jsonPacker
 import acUnitGlobals as glbs
 import time
+hw = glbs.acHardware
 
 class acUnitStateMachine:
     def __init__(self):
@@ -180,9 +181,6 @@ class acUnitStateMachine:
         #self.pack = jsonPacker.jsonPacker()  ## try moving this to globals
         print(f"init state = {self.current_state}")
 
-    '''
-    This function should run the basic state function
-    '''
 
     def run_state(self, state_message=0):
         if state_message != 0:
@@ -190,8 +188,33 @@ class acUnitStateMachine:
             print(f"New State: {state_message}")
             #TODO JSON Parser here or just get commands from JSON parser
 
+    def state_waiting(self):
+        glbs.acUnitState = "waiting"
+        return 0
 
+    def state_close_expansion_valves(self, current_state=[0,0,0,0,0,0,0,0]):
+        glbs.acUnitState = "close-expansion-valves"
+        hw.adamDIO_A.set_all_coils([0,0,0,0])   ## TODO dont know if this will work with just 4 datapoints will have to test else:
+        #cs = current_state
+        #hw.adamDIO_A.set_all_coils([0,0,0,0,cs[4],cs[5],cs[6],cs[7]])
+        return 0
 
+    def state_open_expansion_valve(self, valve_name):
+        print("TODO AAAHH") #TODO
+
+    def select_expansion_valve(self, valve_name):
+        glbs.acUnitState = "select-expansion-valve"
+        valve_state = hw.get_all_valves(glbs.simulate_hardware)
+        print(valve_state[0:4])
+        print(valve_name)
+        if (1 in valve_state[0:4]):
+            error = ("Error Expansion Valve Already Selected", 9)
+            print(error)
+            return error
+        else:
+            error = self.state_open_expansion_valve(valve_name)
+            print(error)
+            return error
 
 
 

@@ -137,8 +137,8 @@ class jsonPacker:
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["sensors-history"][sensor_name].update(new_dic)
 
-    def load_error_data(self, error_code=0, error_message="no-error"):
-        error_list = [glbs.acUnitState, error_code, error_message]
+    def load_error_data(self, error=("no-error", 0)):
+        error_list = [glbs.acUnitState, error[1], error[0]]
         new_zip = zip(self.error_list, error_list)
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["error"].update(new_dic)

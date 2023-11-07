@@ -11,7 +11,7 @@ import sensorObjects as so
 import jsonParse
 parse = jsonParse.jsonParser()
 
-hw = acUnitHardware.acUnitHardware()
+hw = glbs.acHardware
 PS1 = so.temperatureSensor()     ## method for datalogging and analysis is generic at the moment
 PS2 = so.temperatureSensor()
 PS3 = so.temperatureSensor()
@@ -69,8 +69,8 @@ async def gather_data(iteration=0):
     ## Dump data into JSON format
     #glbs.pack.dump_json()
     #print(iteration)
-    iteration = iteration+1
-    # TODO write to csv
+    iteration += 1
+    # TODO write to csv (do as part of add new datapoint)
     # TODO check functions to calculate history for each sensor
     await asyncio.sleep(1)
 
@@ -78,13 +78,27 @@ async def usr_commands(iteration=0):
     command = parse.user_input_json()
     print(command)
     print(iteration)
-    iteration = iteration + 1
+    iteration += 1
     await asyncio.sleep(1)
     return command
 
+
+expansion_valve_list = ["V1", "V2", "V3", "V4"]
 async def state_machine(state_message=0):
     ## Define states in state machine object, then do selection here?
-    sm.run_state(state_message)
+    #sm.run_state(state_message)
+    if state_message != 0:
+        print(state_message)
+        if (state_message == "get"):
+            glbs.pack.dump_json()
+            #sm.state_waiting() Not sure this does anything
+            return 0
+        elif (state_message[0] in expansion_valve_list):  ## if the valve requested is an expansion valve
+            print(f"Opening Expansion Valve {state_message[0]}")
+            error = sm.select_expansion_valve(state_message[0])
+            return error
+    else:
+        sm.state_waiting()
     await asyncio.sleep(1)
 
 
@@ -101,9 +115,12 @@ task: run-state-machine: set hardware IO and system state in response to command
 def main():
     i = 0
     while(1):
-        asyncio.run(gather_data(i))
+        status = asyncio.run(gather_data(i))
         command = asyncio.run(usr_commands(i))
-        asyncio.run(state_machine(command))
+        error = asyncio.run(state_machine(command))  ##
+        if (error):
+            glbs.pack.load_error_data(error)
+            glbs.pack.dump_json()
         i = i+1
 
 

@@ -140,7 +140,7 @@ class acUnitHardware:
                 valve = valve + 1
             return valveStates
         else:
-            return [0,1,0,1,0,1,0,0]
+            return glbs.test_valve_status
 
     def set_compressor(self,state):
         self.adamDIO_B.set_coil(0, state)

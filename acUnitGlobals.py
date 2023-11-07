@@ -4,8 +4,12 @@
 '''
 import jsonPacker
 
+import acUnitHardware
+acHardware = acUnitHardware.acUnitHardware()
 
 simulate_hardware = True
+
+test_valve_status = [0,0,0,0,0,0,0,0]
 
 acUnitState = "init"
 
