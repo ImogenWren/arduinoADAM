@@ -7,29 +7,60 @@ import time
 #print(round(time.time()))
 
 
-class stateMachine:
-    def __init__(self):
-        print("Testing State Machine Structure")
-        self.current_state = "state-two"
-        self.state_list = [self.state_init(), self.state_two()]
-        self.state_name = ["init", "state-two"]
+class State(object):
+    call = 0 # shared state variable
+    def next_state(self, cls):
+        print('-> %s' % (cls.__name__,)," ")
+        self.__class__ = cls
 
-    def run_state_machine(self):
-        state_index = self.state_name.index(self.current_state)
-        print(f"State Index for \"{self.current_state}\" is: {state_index}")
-        error = self.state_list[state_index]
-        return error
-
-    def state_init(self):
-        print("Initial State")
-        return 0
+    def show_state(self, i):
+        print('%2d:%2d:%s' % (self.call,i,self.__class__.__name__))
 
 
-    def state_two(self):
-        print("State Two")
-        return 0
+
+class init_state(State):
+    __call = 0 # state variable
+    def __call__(self,ok):
+        # track useage - boilerplate
+        self.show_state(self.__call)
+        self.call += 1
+        self.__call += 1
+        #state functions
+
+        #transition
+        if ok:
+            self.next_state(wait_state)
+
+class wait_state(State):
+    __call = 0
+    def __call__(self, ok):
+        self.show_state(self.__call)
+        self.call +=1
+        self.__call +=1
+        #transition
+        if ok:
+            self.next_state(do_state)
+        else:
+            self.next_state(init_state)
 
 
-sm = stateMachine()
+class do_state(State):
+    __call = 0
+    def __call__(self, ok):
+        self.show_state(self.__call)
+        self.call +=1
+        self.__call +=1
+        #transition
+        if ok:
+            self.next_state(init_state)
 
-print(sm.run_state_machine())
+
+
+
+
+if __name__ == '__main__':
+   sm = init_state()
+   for v in [1,1,1,0,0,0,1,1,0,1,1,0,0,1,0,0,1,0,0]:
+      sm(v)
+   print ('---------')
+   print( vars(sm))
