@@ -86,13 +86,15 @@ class jsonParser:
     def __init__(self):
         self.data_dic = glbs.acUnit_dictionary
         self.json_template = json.dumps(self.data_dic, indent=2)
-        self.valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
-        self.relay_list = ["W1","W2", "V_COMP"]
+        self.valve_list = glbs.valve_list
+        self.relay_list = glbs.relay_list
         self.outputs_list = self.valve_list + self.relay_list
-        self.ps_list = ["PS1","PS2","PS3"]
-        self.ts_list = ["TS1","TS2","TS3","TS4","TS5"]
-        self.sense_misc_list = ["flow", "power", "APS", "ATS"]
-        self.history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
+        self.ps_list = glbs.ps_list
+        self.ts_list = glbs.ts_list
+        self.sense_misc_list = glbs.sense_misc_list
+        self.history_param_list = glbs.history_param_list
+        self.error_list = glbs.error_list
+
         #print(self.json_template)
 
 

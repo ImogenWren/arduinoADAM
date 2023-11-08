@@ -3,15 +3,30 @@
 
 '''
 import jsonPacker
-
 import acUnitHardware
+
+
+# Creating Instances of Global Methods here to ensure that only 1 object of each. Can be renamed in local files
 acHardware = acUnitHardware.acUnitHardware()
+
 
 simulate_hardware = True
 
 test_valve_status = [0,0,0,0,0,0,0,0]
 
 acUnitState = "init"
+
+valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
+relay_list = ["W1","W2", "V_comp"]
+ps_list = ["PS1","PS2","PS3"]
+ts_list = ["TS1","TS2","TS3","TS4","TS5"]
+sense_misc_list = ["flow", "power", "APS", "ATS"]
+history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
+error_list = ["state", "code", "message"]
+
+pack = jsonPacker.jsonPacker()
+
+
 
 acUnit_dictionary = {
     "valves" : {
@@ -126,4 +141,3 @@ acUnit_dictionary = {
     }
 }
 
-pack = jsonPacker.jsonPacker()

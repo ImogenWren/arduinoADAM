@@ -164,11 +164,11 @@ condition is safe
 
 
 
-import acUnitHardware
+
 #import jsonPacker
 import acUnitGlobals as glbs
 import time
-hw = glbs.acHardware
+
 
 class acUnitStateMachine:
     def __init__(self):
@@ -178,15 +178,28 @@ class acUnitStateMachine:
         self.next_state = 0
         #self.hw = acUnitHardware.acUnitHardware()
         self.initial_conditions = {}
+        self.state_names = ["init", "waiting"]
+        self.state_functions = [self.state_waiting()]
         #self.pack = jsonPacker.jsonPacker()  ## try moving this to globals
         print(f"init state = {self.current_state}")
+
 
 
     def run_state(self, state_message=0):
         if state_message != 0:
             print(f"\nCurrent State: {self.current_state}")
             print(f"New State: {state_message}")
-            #TODO JSON Parser here or just get commands from JSON parser
+
+
+    def state_init(self):
+        print("Initialising State Machine")
+        #hw.adamDIO_A.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  # direct method setting specific controller coil states
+        #hw.adamDIO_B.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])
+        #ac.adamDIO_A.get_all_coils()
+        #ac.adamDIO_B.get_all_coils()
+        #ac.set_compressor(False)
+        #ac.set_fans(False)
+        print("AC Unit Init Complete - Starting Acquisition & Control loop")
 
     def state_waiting(self):
         glbs.acUnitState = "waiting"
@@ -200,9 +213,12 @@ class acUnitStateMachine:
         return 0
 
     def state_open_expansion_valve(self, valve_name):
-        print("TODO AAAHH") #TODO
+        print("makethiswork")
+
+
 
     def select_expansion_valve(self, valve_name):
+        ## Check that expansion valve is not already open
         glbs.acUnitState = "select-expansion-valve"
         valve_state = hw.get_all_valves(glbs.simulate_hardware)
         print(valve_state[0:4])

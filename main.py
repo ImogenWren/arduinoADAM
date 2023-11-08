@@ -4,14 +4,19 @@ acUnitMain
 '''
 import asyncio
 import acUnitGlobals as glbs
-import acUnitHardware
 import acUnitStateMachine
-sm = acUnitStateMachine.acUnitStateMachine()
+
 import sensorObjects as so
 import jsonParse
+
 parse = jsonParse.jsonParser()
 
+# Renaming global variables to reduce number of things.with.references.to.other.things
 hw = glbs.acHardware
+# State machine must be defined here to avoid circular references
+sm = acUnitStateMachine.acUnitStateMachine()
+
+
 PS1 = so.temperatureSensor()     ## method for datalogging and analysis is generic at the moment
 PS2 = so.temperatureSensor()
 PS3 = so.temperatureSensor()
@@ -29,6 +34,7 @@ TS_array = [TS1, TS2, TS3, TS4, TS5]
 
 async def gather_data(iteration=0):
     # Sample the hardware IOs: Valves, Power Relays, Pressure Sensors
+    #TODO get timestamp when sampling data
     valve_list = hw.get_all_valves(glbs.simulate_hardware)
     relay_list = hw.get_power_relays(glbs.simulate_hardware)
     pressure_list = hw.get_pressure_sensors(glbs.simulate_hardware)
@@ -70,7 +76,7 @@ async def gather_data(iteration=0):
     #glbs.pack.dump_json()
     #print(iteration)
     iteration += 1
-    # TODO write to csv (do as part of add new datapoint)
+    # TODO write to csv (do as part of add new datapoint) - EDIT: just use JSON message and tap in with seperate python program to store record
     # TODO check functions to calculate history for each sensor
     await asyncio.sleep(1)
 
@@ -82,23 +88,33 @@ async def usr_commands(iteration=0):
     await asyncio.sleep(1)
     return command
 
-
+#TODO Move this to JSON parser
 expansion_valve_list = ["V1", "V2", "V3", "V4"]
+
+##TODO Define all state names in a list
+##TODO write function for each state
+##TODO state machine should just run state based on listed name
+
 async def state_machine(state_message=0):
     ## Define states in state machine object, then do selection here?
     #sm.run_state(state_message)
+    ## All this logic should be in JSON parser
     if state_message != 0:
         print(state_message)
         if (state_message == "get"):
             glbs.pack.dump_json()
+            ##TODO function to return JSON?
             #sm.state_waiting() Not sure this does anything
             return 0
         elif (state_message[0] in expansion_valve_list):  ## if the valve requested is an expansion valve
-            print(f"Opening Expansion Valve {state_message[0]}")
+            print(f"Selecting Expansion Valve {state_message[0]}")
             error = sm.select_expansion_valve(state_message[0])
             return error
+        elif (state_message[0] in glbs.valve_list):
+            print(f"O")
     else:
         sm.state_waiting()
+    #TODO should this function be doing all of the JSON responses?
     await asyncio.sleep(1)
 
 
@@ -107,7 +123,7 @@ async def state_machine(state_message=0):
 # tasks detailed below
 """
 task: gather-data: save into current state dictionary, update 5 mins of samples to buffers, update csv with timestamp, calculate sensor history
-task: listen for JSON messages and parse commands
+task: listen for JSON messages and parse commands -> do all sorting here
 task: run-state-machine: set hardware IO and system state in response to commands
 """
 
