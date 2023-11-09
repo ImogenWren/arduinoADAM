@@ -20,8 +20,10 @@ import adam6018ModBus as adam6018
 import adam6024ModBus as adam6024
 
 import sensorObjects
-import acUnitGlobals as glbs
-import jsonPacker as pack
+# This file should not import globals as hw is defined in globals
+#import acUnitGlobals as glbs
+test_valve_status = [0,1,0,0,1,1,0,0]    ## Just used if hardware is not available remove after testing
+#import jsonPacker as pack
 
 # Ethernet Declarations
 ADAM_6052_A_IP = "192.168.1.111"
@@ -95,16 +97,17 @@ class acUnitHardware:
 ## Feel like this function should be in a seperate file as it is not pure hardware IO, could be moved later
     def get_all_data(self):
         print(f"Getting all data & saving to global Dic")
-        valve_list = self.get_all_valves(glbs.simulate_hardware)
-        relay_list = self.get_power_relays(glbs.simulate_hardware)
-        pressure_list = self.get_pressure_sensors(glbs.simulate_hardware)
-        temps_list = self.get_temp_sensors(glbs.simulate_hardware)
-        misc_list = self.get_misc_sensors(glbs.simulate_hardware)
-        glbs.pack.load_valve_data(valve_list)
-        glbs.pack.load_relay_data(relay_list)
-        glbs.pack.load_pressure_data(pressure_list)
-        glbs.pack.load_temp_data(temps_list)
-        glbs.pack.load_misc_data(misc_list)
+        print("This Function has been devolved to main if you see this message something is wrong")
+        #valve_list = self.get_all_valves(glbs.simulate_hardware)
+        #relay_list = self.get_power_relays(glbs.simulate_hardware)
+        #pressure_list = self.get_pressure_sensors(glbs.simulate_hardware)
+        #temps_list = self.get_temp_sensors(glbs.simulate_hardware)
+        #misc_list = self.get_misc_sensors(glbs.simulate_hardware)
+        #glbs.pack.load_valve_data(valve_list)
+        #glbs.pack.load_relay_data(relay_list)
+        #glbs.pack.load_pressure_data(pressure_list)
+        #glbs.pack.load_temp_data(temps_list)
+        #glbs.pack.load_misc_data(misc_list)
         #TODO add function here to save all data into database with timestamp
         #TODO or write to csv
         #then (this should definatly go elsewhere
@@ -124,6 +127,8 @@ class acUnitHardware:
         else:
             print(f"ERROR: Unknown Valve V{valveNumber} requested ")
 
+
+
     def get_valve_state(self, valveNumber):
         if valveNumber >= 1 and valveNumber <= 7:
             valveState = self.adamDIO_A.get_coil_state(valveNumber - 1)
@@ -140,7 +145,7 @@ class acUnitHardware:
                 valve = valve + 1
             return valveStates
         else:
-            return glbs.test_valve_status
+            return test_valve_status
 
     def set_compressor(self,state):
         self.adamDIO_B.set_coil(0, state)
@@ -177,30 +182,32 @@ class acUnitHardware:
     def get_pressure_sensors(self, sim_hw=False):
         if sim_hw == False:
             pressure_voltages = self.adamAI_C.get_voltage_inputs(0, 2)
+            sample_timestamp = time.time()
             pressure_list = []
             for voltage in pressure_voltages:
                 pressure_bar = self.sensors.voltage_to_pressure(voltage, 0,30,1,6)
                 pressure_list.append(pressure_bar)
                 #print(f"Pressure: {pressure_bar} bar")
             print(f"Pressures: P1-3: {pressure_list} bar")
-            return pressure_list
+            return (pressure_list, sample_timestamp)
         else:
-            return [23,56,123434]
+            return ([23,56,123434], time.time())
 
 
 
     def get_temp_sensors(self, sim_hw=False):
         if (sim_hw):
-            return [0,42,0,0,66.6]
+            return([0,42,0,0,66.6], time.time())
         else:
             temp_voltages = self.adamAI_C.get_voltage_inputs(3, 7)
+            sample_timestamp = time.time()
             temp_list = []
             for voltage in temp_voltages:
                 temp_degC = self.sensors.voltage_to_temp(voltage)
                 temp_list.append(temp_degC)
                 # print(f"Pressure: {pressure_bar} bar")
             print(f"Temperature: T1-5: {temp_list} degC")
-            return temp_list
+            return (temp_list, sample_timestamp)
 
 
     def get_misc_sensors(self, sim_hw=False):   #TODO test this with hardware
@@ -209,9 +216,10 @@ class acUnitHardware:
             misc_sensors.append(self.get_flow_sensor())
             misc_sensors.append(self.get_power_meter())
             misc_sensors.append(self.get_ambient_sensors())
-            return misc_sensors
+            sample_timestamp = time.time()
+            return (misc_sensors, sample_timestamp)
         else:
-            return [1,2,3,4]
+            return ([1,2,3,4],time.time())
 
     def get_flow_sensor(self):
         print("Getting Flow Sensor")
@@ -249,13 +257,13 @@ def main():
     # Setup IO Devices & start  library
     ac = acUnitHardware()
     # Set up Initial State
-    ac.adamDIO_A.set_all_coils([0,0,0,0,0,0,0,0])   # direct method setting specific controller coil states
-    ac.adamDIO_B.set_all_coils([0,0,0,0,0,0,0,0])
-    ac.adamDIO_A.get_all_coils()
-    ac.adamDIO_B.get_all_coils()
-    ac.set_compressor(False)
-    ac.set_fans(False)
-    print("AC Unit Init Complete - Starting Acquisition & Control loop")
+    #ac.adamDIO_A.set_all_coils([0,0,0,0,0,0,0,0])   # direct method setting specific controller coil states
+    #ac.adamDIO_B.set_all_coils([0,0,0,0,0,0,0,0])
+    #ac.adamDIO_A.get_all_coils()
+    #ac.adamDIO_B.get_all_coils()
+    #ac.set_compressor(False)
+    #ac.set_fans(False)
+    #print("AC Unit Init Complete - Starting Acquisition & Control loop")
     time.sleep(2)
     iteration = 0
     while(1):
@@ -263,8 +271,9 @@ def main():
         # Functions to return data to UI
         # tested
         #ac.get_all_valves()
-        #ac.get_pressure_sensors()
-        ac.get_temp_sensors()
+        sensor_return = ac.get_pressure_sensors(True)
+        print(sensor_return[1])
+        #ac.get_temp_sensors()
         #ac.get_flow_sensor()
         #ac.get_power_meter()
         #ac.get_ambient_sensors()

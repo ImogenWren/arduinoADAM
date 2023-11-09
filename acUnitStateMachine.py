@@ -167,6 +167,7 @@ condition is safe
 
 #import jsonPacker
 import acUnitGlobals as glbs
+hw = glbs.acHardware
 import time
 
 
@@ -261,7 +262,7 @@ class acUnitStateMachine:
         #self.hw.set_compressor(False)
         #self.hw.set_fans(False)
         time.sleep(2) # allow system to stabilise
-        self.hw.get_all_data()  # this saves all data into the global dictionary
+        hw.get_all_data()  # this saves all data into the global dictionary
         #TODO use data in init dictionary for self testing
 
     '''

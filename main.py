@@ -39,27 +39,28 @@ async def gather_data(iteration=0):
     relay_list = hw.get_power_relays(glbs.simulate_hardware)
     pressure_list = hw.get_pressure_sensors(glbs.simulate_hardware)
     # add pressure sensor datapoints to sensor history
-    PS1.add_new_datapoint(pressure_list[0])
-    PS2.add_new_datapoint(pressure_list[1])
-    PS3.add_new_datapoint(pressure_list[2])
+    PS1.add_new_datapoint(pressure_list[0][0],pressure_list[1])
+    PS2.add_new_datapoint(pressure_list[0][1],pressure_list[1])
+    PS3.add_new_datapoint(pressure_list[0][2],pressure_list[1])
     # Sample Hardware IOs: Temperature Sensors
     temps_list = hw.get_temp_sensors(glbs.simulate_hardware)
     i = 0
     # Add temperature datapoints to sensor history
-    for temp in temps_list:
-        TS_array[i].add_new_datapoint(temp)
+    for temp in temps_list[0]:
+        print(temp)
+        TS_array[i].add_new_datapoint(temp,temps_list[1])
         i = i+1
     # Sample Hardware IOs: Misc Sensors
     misc_list = hw.get_misc_sensors(glbs.simulate_hardware)
     # Add Flow Rate and Power Consumption datapoints to sensor history
-    flow.add_new_datapoint(misc_list[0])
-    power.add_new_datapoint(misc_list[1])
+    flow.add_new_datapoint(misc_list[0][0], misc_list[1])
+    power.add_new_datapoint(misc_list[0][1], misc_list[1])
     # Pack all recorded current datapoints into global dictionary (database)
     glbs.pack.load_valve_data(valve_list)
     glbs.pack.load_relay_data(relay_list)
-    glbs.pack.load_pressure_data(pressure_list)
-    glbs.pack.load_temp_data(temps_list)
-    glbs.pack.load_misc_data(misc_list)
+    glbs.pack.load_pressure_data(pressure_list[0])
+    glbs.pack.load_temp_data(temps_list[0])
+    glbs.pack.load_misc_data(misc_list[0])
     # Calculate sensor history variables & pack into global dictionary
     glbs.pack.load_history_data("PS1", PS1.calculate_history())
     glbs.pack.load_history_data("PS2", PS2.calculate_history())
@@ -80,7 +81,7 @@ async def gather_data(iteration=0):
     # TODO check functions to calculate history for each sensor
     await asyncio.sleep(1)
 
-async def usr_commands(iteration=0):
+async def json_interface(iteration=0):
     command = parse.user_input_json()
     print(command)
     print(iteration)
@@ -114,7 +115,7 @@ async def state_machine(state_message=0):
             print(f"O")
     else:
         sm.state_waiting()
-    #TODO should this function be doing all of the JSON responses?
+    #TODO should this function be doing all of the JSON responses? (NO)
     await asyncio.sleep(1)
 
 
@@ -132,7 +133,7 @@ def main():
     i = 0
     while(1):
         status = asyncio.run(gather_data(i))
-        command = asyncio.run(usr_commands(i))
+        command = asyncio.run(json_interface(i))
         error = asyncio.run(state_machine(command))  ##
         if (error):
             glbs.pack.load_error_data(error)

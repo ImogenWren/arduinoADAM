@@ -40,23 +40,23 @@ class temperatureSensor:
         output = [dx_dy,average,lms, min_max[0], min_max[1]]
         return output
 
-    def add_new_datapoint(self, new_datapoint):
+    def add_new_datapoint(self, new_datapoint, timestamp):
         buffer_length = len(self.sensor_history)
-        elapsed_time = round(time.time()-self.init_time)
+        #elapsed_time = round(time.time()-self.init_time)
         if buffer_length < BUFFER_SIZE:
             self.sensor_history.append(new_datapoint)
-            self.sensor_timestamp.append(elapsed_time)
+            self.sensor_timestamp.append(timestamp)
         elif buffer_length == BUFFER_SIZE:
             self.sensor_history.pop(0)
             self.sensor_timestamp.pop(0)
             self.sensor_history.append(new_datapoint)
-            self.sensor_timestamp.append(elapsed_time)
+            self.sensor_timestamp.append(timestamp)
         elif buffer_length > BUFFER_SIZE:
             overshoot = buffer_length - BUFFER_SIZE
             del self.sensor_history[0:overshoot+1]
             del self.sensor_timestamp[0:overshoot+1]
             self.sensor_history.append(new_datapoint)
-            self.sensor_timestamp.append(elapsed_time)
+            self.sensor_timestamp.append(timestamp)
 
     def calculate_average(self):
         buffer_length = len(self.sensor_history)
