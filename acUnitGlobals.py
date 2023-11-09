@@ -10,7 +10,7 @@ import acUnitHardware
 acUnitState = "init"
 
 valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
-relay_list = ["W1","W2", "V_comp"]
+relay_list = ["W1","W2", "V_comp", "fans", "comp"]
 outputs_list = valve_list + relay_list
 ps_list = ["PS1","PS2","PS3"]
 ts_list = ["TS1","TS2","TS3","TS4","TS5"]

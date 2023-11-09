@@ -4,6 +4,11 @@ acUnitMain
 
 understanding asyncio
 https://medium.com/dev-bits/a-minimalistic-guide-for-understanding-asyncio-in-python-52c436c244ea
+Understanding Threads
+https://stackoverflow.com/questions/71969640/how-to-print-countdown-timer-and-accept-user-input-at-the-same-time-python/71971926#71971926
+
+
+
 '''
 import asyncio
 from threading import Thread
@@ -148,15 +153,16 @@ async def run_loop():
 
 def main():
     i = 0
-    t1 = Thread(target=gather_data)
-    t2 = Thread(target=state_machine)
-    t3 = Thread(target=json_interface)
+    try:
+        t1 = Thread(target=gather_data)
+        t2 = Thread(target=state_machine)
+        t3 = Thread(target=json_interface)
 
-    t1.start()
-    t2.start()
-    t3.start()
+        t1.start()
+        t2.start()
+        t3.start()
 
-    t3.join()
+        t3.join()
     #hile(1):
         #syncio.run(run_loop())
       #asyncio.run(state_machine())
@@ -164,7 +170,9 @@ def main():
         #asyncio.run(json_interface(i))
         #loop = asyncio.get_event_loop()
 
-    i = i+1
+        i = i+1
+    except:
+        print("Program Halted or Error")
 
 
 

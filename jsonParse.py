@@ -102,7 +102,7 @@ class jsonParser:
 
     def parse_json(self, json_string):
         if (json_string):
-            print(f"JSON String: {json_string}")
+            #print(f"JSON String: {json_string}")
             json_string = json_string.replace("\n", " ").replace("\r", " ")
             try:
                 command_dic = json.loads(json_string)
@@ -117,6 +117,7 @@ class jsonParser:
             if (cmd == "set"):
                 print("Set Command Received")
                 set_outputs = []
+                #TODO Dont like this way of doing it should refactor
                 for output in self.outputs_list:
                     #print(f"checking output: {output}")
                     # This will only look for items with defined names, if other names are used no error return but also no unexpected function
@@ -127,10 +128,10 @@ class jsonParser:
                         continue
                     else:
                         state = state.lower()
-                    if state == "open" or state=="opened" or state == "on" or state == "true" or state=="high" or state == True:
+                    if state == "open" or state=="opened" or state == "on" or state == "true" or state=="high" or state == True or state == "start":
                         set_outputs.append(output)
                         set_outputs.append(True)
-                    elif state == "close" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False:
+                    elif state == "close" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False or state == "stop":
                         set_outputs.append(output)
                         set_outputs.append(False)
                     else:

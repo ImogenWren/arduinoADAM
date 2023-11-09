@@ -22,6 +22,7 @@ class stateMachine(object):
     call = 0 # shared state variable
     last_state = "init"
 
+
     def next_state(self, cls):
         self.last_state = self.__class__.__name__
         if (self.__class__.__name__ != cls.__name__):
@@ -109,14 +110,13 @@ class check_command(stateMachine):
         self.call +=1
         self.__call +=1
         command = glbs.command_queue[0]
-        print(command)
-        print(glbs.command_queue)
+        print(f"Command Queue: {command}")
         glbs.command_queue = []
         while command:
             if command[0] in glbs.valve_list:
                 print(f"SIMULATED {command[0]} is {command[1]} ")
                 #hw.set_valve_name(command[0], command[1])
-            elif command[0] in glbs.relay_list[0:1] or command[0] == "fans":
+            elif command[0] in glbs.relay_list[0:2] or command[0] == "fans":
                 print(f"SIMULATED FANS are {command[1]}")
                 #hw.set_fans(command[1])
             elif command[0] == glbs.relay_list[2] or command[0] == "comp":
@@ -124,11 +124,10 @@ class check_command(stateMachine):
                 #hw.set_compressor(command[1])
             else:
                 print("unknown command")
-            
-        # Need to deal with entire queue here?
+            del command[0:2]
+            #print(f"Last command queue: {command}")  ## Just checks command queue is empty
         #transition
         self.next_state(wait_state)
-
 
 
 
