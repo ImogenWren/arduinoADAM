@@ -136,8 +136,8 @@ class jsonPacker:
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["sensors-history"][sensor_name].update(new_dic)
 
-    def load_error_data(self, error=("no-error", 0)):
-        error_list = [glbs.acUnitState, error[1], error[0]]
+    def load_error_data(self):
+        error_list = [glbs.acUnitState, glbs.error_tuple[0], glbs.error_tuple[1]]
         new_zip = zip(self.error_list, error_list)
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["error"].update(new_dic)
@@ -153,7 +153,7 @@ def main():
     pack.load_temp_data(temps_list)
     pack.load_misc_data(miscs_list)
     pack.load_history_data(histories_list, "TS3")
-    pack.dump_json(pack.acUnit_dictionary)
+    pack.dump_json(glbs.acUnit_dictionary)
 
 
 

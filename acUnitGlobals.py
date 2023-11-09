@@ -5,27 +5,41 @@
 import jsonPacker
 import acUnitHardware
 
-
-# Creating Instances of Global Methods here to ensure that only 1 object of each. Can be renamed in local files
-acHardware = acUnitHardware.acUnitHardware()
-
-
-simulate_hardware = True
-
-test_valve_status = [0,0,0,0,0,0,0,0]
+#Wrap all this inside a class?
 
 acUnitState = "init"
 
 valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
 relay_list = ["W1","W2", "V_comp"]
+outputs_list = valve_list + relay_list
 ps_list = ["PS1","PS2","PS3"]
 ts_list = ["TS1","TS2","TS3","TS4","TS5"]
 sense_misc_list = ["flow", "power", "APS", "ATS"]
 history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
 error_list = ["state", "code", "message"]
 
-pack = jsonPacker.jsonPacker()
+# Creating Instances of Global Methods here to ensure that only 1 object of each. Can be renamed in local files
+acHardware = acUnitHardware.acUnitHardware()
+jsonPack = jsonPacker.jsonPacker()
 
+simulate_hardware = True
+
+test_valve_status = [0,0,0,0,0,0,0,0]
+
+command_received = False
+command_queue = []   ## Command queue should be list of tuples format ("item", state)
+command_state = ("item", " ")
+
+def update_command(new_command_list):
+    command_queue.append(new_command_list)
+    command_received = True
+
+error_flag = False
+error_tuple = (0, "no-error")
+
+def update_error(error_code, error_message):
+    error_tuple = (error_code, error_message)
+    return error_tuple
 
 
 acUnit_dictionary = {

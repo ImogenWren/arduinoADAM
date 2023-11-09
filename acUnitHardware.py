@@ -12,7 +12,7 @@ Demonstrates the function of all hardware IOs.
 ## Init
 #from pyModbusTCP.client import ModbusClient
 import time
-
+import acUnitGlobals as glbs
 
 import adam6052ModBus as adam6052
 import adam6217ModBus as adam6217
@@ -127,6 +127,15 @@ class acUnitHardware:
         else:
             print(f"ERROR: Unknown Valve V{valveNumber} requested ")
 
+    def set_valve_name(self, valveName, state):
+        valve_index = glbs.valve_list.index(valveName)
+        print(f"Valve Index {valve_index}")
+        self.adamDIO_A.set_coil(valve_index, state)
+        valveState = self.adamDIO_A.get_coil_state(valve_index)
+        if (valveState[0] == state):
+            print(f"Valve V{valve_index} set to {state}")
+        else:
+            print(f"Error checking valve V{valve_index} state")
 
 
     def get_valve_state(self, valveNumber):
@@ -246,8 +255,6 @@ class acUnitHardware:
         ambient_sensors = [ambi_temperature,ambi_pressure]
         print(f"Ambient Temp: {ambient_sensors[0]} degC, Ambient Pressure: {ambient_sensors[1]} mBar")
         return ambient_sensors
-
-
 
 #TODO: Implement JSON interface using user inputs for CLI
 

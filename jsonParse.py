@@ -40,7 +40,7 @@ from typing import List, Any
 import acUnitGlobals as glbs
 
 #test_command = '{"set":"V1", "state":"open"}'
-
+import asyncio
 
 json_commands = {
     "set" : {
@@ -101,54 +101,57 @@ class jsonParser:
 
 
     def parse_json(self, json_string):
-        print(f"JSON String: {json_string}")
-        json_string = json_string.replace("\n", " ").replace("\r", " ")
-        try:
-            command_dic = json.loads(json_string)
-        except:
-            error = ("Error: Unknown JSON entry", 5)
-            return error
-        ## function to make all values lowercase
-        command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
-        #print(f" Command Dic: {command_dic}")
-        cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
-        #print(f" cmd: {cmd}")
-        if (cmd == "set"):
-            print("Set Command Received")
-            set_outputs = []
-            for output in self.outputs_list:
-                #print(f"checking output: {output}")
-                # This will only look for items with defined names, if other names are used no error return but also no unexpected function
-                state = command_dic.get(output.casefold())
-                #print(f"{output} State: {state}")
-                if state == None:
-                    #print(f"{state} Value Found for {output} ")
-                    continue
-                else:
-                    state = state.lower()
-                if state == "open" or state=="opened" or state == "on" or state == "true" or state=="high" or state == True:
-                    set_outputs.append(output)
-                    set_outputs.append(True)
-                elif state == "close" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False:
-                    set_outputs.append(output)
-                    set_outputs.append(False)
-                else:
-                    error = (f"Error: No Value found for: {cmd}:{output}:{state}", 4)
-                    #print(error)
-                    return error
-            #print(set_outputs)
-            return(set_outputs)
-        elif (cmd == "get"):
-            print("Get Command Received")
-            return "get"
-        elif (cmd == None):
-            error = ("Error: cmd returned NoneType", 2)
-            #print(error)
-            return (error)
+        if (json_string):
+            print(f"JSON String: {json_string}")
+            json_string = json_string.replace("\n", " ").replace("\r", " ")
+            try:
+                command_dic = json.loads(json_string)
+            except:
+                error = ("Error: Unknown JSON entry", 5)
+                return error
+            ## function to make all values lowercase
+            command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
+            #print(f" Command Dic: {command_dic}")
+            cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
+            #print(f" cmd: {cmd}")
+            if (cmd == "set"):
+                print("Set Command Received")
+                set_outputs = []
+                for output in self.outputs_list:
+                    #print(f"checking output: {output}")
+                    # This will only look for items with defined names, if other names are used no error return but also no unexpected function
+                    state = command_dic.get(output.casefold())
+                    #print(f"{output} State: {state}")
+                    if state == None:
+                        #print(f"{state} Value Found for {output} ")
+                        continue
+                    else:
+                        state = state.lower()
+                    if state == "open" or state=="opened" or state == "on" or state == "true" or state=="high" or state == True:
+                        set_outputs.append(output)
+                        set_outputs.append(True)
+                    elif state == "close" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False:
+                        set_outputs.append(output)
+                        set_outputs.append(False)
+                    else:
+                        error = (f"Error: No Value found for: {cmd}:{output}:{state}", 4)
+                        #print(error)
+                        return error
+                #print(set_outputs)
+                return(set_outputs)
+            elif (cmd == "get"):
+                print("Get Command Received")
+                return "get"
+            elif (cmd == None):
+                error = ("Error: cmd returned NoneType", 2)
+                #print(error)
+                return (error)
+            else:
+                error = ("Error: Unable to Parse JSON cmd", 3)
+                #print(error)
+                return (error)
         else:
-            error = ("Error: Unable to Parse JSON cmd", 3)
-            #print(error)
-            return (error)
+            return 0
 
     def user_input_json(self):
         user_input = input('\nPlease Input JSON command. Format: {"cmd":"set","V1":"open"}\n')
