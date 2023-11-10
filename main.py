@@ -50,7 +50,9 @@ def gather_data(iteration=0):
     # Sample the hardware IOs: Valves, Power Relays, Pressure Sensors
     #TODO get timestamp when sampling data
     start_time = time.time()
+    time_list = []
     while thread_running:
+        loop_start_time = time.time()
         valve_list = hw.get_all_valves(glbs.simulate_hardware)
         relay_list = hw.get_power_relays(glbs.simulate_hardware)
         pressure_list = hw.get_pressure_sensors(glbs.simulate_hardware)
@@ -93,14 +95,24 @@ def gather_data(iteration=0):
         ##pack.dump_json()
         #print(iteration)
         iteration += 1
-        # TODO write to csv (do as part of add new datapoint) - EDIT: just use JSON message and tap in with seperate python program to store record
-        # TODO check functions to calculate history for each sensor
         #await asyncio.sleep(1)
-        time.sleep(1)
+        time.sleep(0.9899)
+        #+-benchmark_process(loop_start_time)
+
+time_list = []
+def benchmark_process(process_start_time):
+    time_taken = time.time() - process_start_time
+    time_list.append(time_taken)
+    average_loop_time = sum(time_list) / len(time_list)
+    if len(time_list) >= 300:
+        del time_list[0:len(time_list) - 300]
+    #print(f"Loop Time {time_taken}")
+    print(f"Average Loop Time: {average_loop_time}")
 
 #async def json_interface(iteration=0):
 def json_interface(iteration=0):
-    while(1):
+    global thread_running
+    while(thread_running):
         command = parse.user_input_json()
         print(command)
         #glbs.update_command(command)
@@ -122,13 +134,16 @@ expansion_valve_list = ["V1", "V2", "V3", "V4"]
 sm = acUnitStateMachine.init_state()
 
 def state_machine():
-    while (1):
+    global thread_running
+    while (thread_running):
         sm()
         #await asyncio.sleep(1)
         #ield from asyncio.sleep(n)
 
 def check_globals():
-    print(f"command_received: {glbs.command_received}")
+    while (thread_running):
+        print(f"command_received: {glbs.command_received}")
+        time.sleep(10)
     #wait asyncio.sleep(1)
 
 
@@ -145,14 +160,15 @@ task: run-state-machine: set hardware IO and system state in response to command
 # Create a function to schedule co-routines on the event loop
 # then print results and stop the loop
 #NOT SURE ABOUT THAT ONE CHEIF
-async def run_loop():
-    await asyncio.gather(state_machine(), gather_data(), json_interface(), check_globals())
+#async def run_loop():
+#    await asyncio.gather(state_machine(), gather_data(), json_interface(), check_globals())
 
 
 
 
 def main():
     i = 0
+    global thread_running
     try:
         t1 = Thread(target=gather_data)
         t2 = Thread(target=state_machine)
@@ -162,7 +178,11 @@ def main():
         t2.start()
         t3.start()
 
+        t1.join()
+        t2.join()
         t3.join()
+
+
     #hile(1):
         #syncio.run(run_loop())
       #asyncio.run(state_machine())
@@ -172,6 +192,7 @@ def main():
 
         i = i+1
     except:
+        thread_running = False
         print("Program Halted or Error")
 
 

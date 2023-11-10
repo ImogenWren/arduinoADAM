@@ -155,11 +155,13 @@ class jsonParser:
             return 0
 
     def user_input_json(self):
-        user_input = input('\nPlease Input JSON command. Format: {"cmd":"set","V1":"open"}\n')
-        response = self.parse_json(user_input)
-        #print(response)
-        return response
-
+        try:
+            user_input = input('\nPlease Input JSON command. Format: {"cmd":"set","V1":"open"}\n')
+            response = self.parse_json(user_input)
+            #print(response)
+            return response
+        except:
+            print("user-input cancelled")
 
 
 
