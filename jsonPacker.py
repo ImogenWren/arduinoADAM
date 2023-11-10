@@ -101,7 +101,15 @@ class jsonPacker:
         print(self.json_template)
         return self.json_template
 
+    def print_json(self, dic):
+        json_print = json.dumps(dic, indent=2)
+        print(json_print)
+        return json_print
 
+
+    def unpack_json(self, json_byteobject):
+        data_dic = json.loads(json_byteobject)
+        return data_dic
 
 
 
