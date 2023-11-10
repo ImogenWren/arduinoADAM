@@ -113,15 +113,14 @@ def benchmark_process(process_start_time):
 def json_interface(iteration=0):
     global thread_running
     while(thread_running):
-        #command = parse.user_input_json()
-        command = 0
+        command = parse.user_input_json()
         print(command)
         #glbs.update_command(command)
         glbs.command_received = True
         glbs.command_queue.append(command)
-        #print(iteration)
+        print(iteration)
         iteration += 1
-        #time.sleep(1)
+        time.sleep(1)
     #await asyncio.sleep(1)
 
 
@@ -171,13 +170,9 @@ def main():
     i = 0
     global thread_running
     try:
-        t1 = Thread(target=state_machine)
-        t2 = Thread(target=gather_data)
+        t1 = Thread(target=gather_data)
+        t2 = Thread(target=state_machine)
         t3 = Thread(target=json_interface)
-
-        t2.daemon = True
-        t3.daemon = True
-
 
         t1.start()
         t2.start()
@@ -186,10 +181,6 @@ def main():
         t1.join()
         t2.join()
         t3.join()
-
-        #while t1.isAlive():
-        #    do.you.subthread.thing()
-        #gracefully.close.the.thread()
 
 
     #hile(1):
@@ -202,9 +193,6 @@ def main():
         i = i+1
     except:
         thread_running = False
-        t1.join()
-        t2.join()
-        t3.join()
         print("Program Halted or Error")
 
 
