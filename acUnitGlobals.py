@@ -22,7 +22,7 @@ error_list = ["state", "code", "message"]
 acHardware = acUnitHardware.acUnitHardware()
 jsonPack = jsonPacker.jsonPacker()
 
-simulate_hardware = True
+simulate_hardware = False
 
 test_valve_status = [0,0,0,0,0,0,0,0]
 
@@ -35,7 +35,7 @@ def update_command(new_command_list):
     command_received = True
 
 error_flag = False
-error_tuple = (0, "no-error")
+error_tuple = (True, 0, "no-error")
 
 def update_error(error_code, error_message):
     error_tuple = (error_code, error_message)
@@ -148,7 +148,8 @@ acUnit_dictionary = {
             "max": 0
         }
     },
-    "error":{
+    "status":{
+        "ok": "True",
         "state": " ",
         "code":0,
         "message":" "

@@ -144,11 +144,12 @@ class jsonPacker:
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["sensors-history"][sensor_name].update(new_dic)
 
-    def load_error_data(self):
-        error_list = [glbs.acUnitState, glbs.error_tuple[0], glbs.error_tuple[1]]
-        new_zip = zip(self.error_list, error_list)
+    def load_status_data(self):
+        status_ok = True
+        error_list = [glbs.error_tuple[0], glbs.acUnitState, glbs.error_tuple[1], glbs.error_tuple[2]]
+        new_zip = zip(self.error_list, error_list)  ##???
         new_dic = dict(new_zip)
-        glbs.acUnit_dictionary["error"].update(new_dic)
+        glbs.acUnit_dictionary["status"].update(new_dic)
 
 
 

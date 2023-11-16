@@ -131,7 +131,7 @@ class jsonParser:
                     if state == "open" or state=="opened" or state == "on" or state == "true" or state=="high" or state == True or state == "start":
                         set_outputs.append(output)
                         set_outputs.append(True)
-                    elif state == "close" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False or state == "stop":
+                    elif state == "close" or state=="shut" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False or state == "stop":
                         set_outputs.append(output)
                         set_outputs.append(False)
                     else:

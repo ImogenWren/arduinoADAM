@@ -48,9 +48,7 @@ TS_array = [TS1, TS2, TS3, TS4, TS5]
 def gather_data(iteration=0):
     global thread_running
     # Sample the hardware IOs: Valves, Power Relays, Pressure Sensors
-    #TODO get timestamp when sampling data
     start_time = time.time()
-    time_list = []
     while thread_running:
         loop_start_time = time.time()
         valve_list = hw.get_all_valves(glbs.simulate_hardware)
@@ -90,14 +88,19 @@ def gather_data(iteration=0):
         pack.load_history_data("flow", flow.calculate_history())
         pack.load_history_data("power", power.calculate_history())
         ## Pack error messages
-        pack.load_error_data()
+        #pack.load_status_data #TODO DUBUG THIS AFTER CHANGE
         ## Dump data into JSON format
-        ##pack.dump_json()
-        #print(iteration)
+        #pack.dump_json()
+        #
         iteration += 1
         #await asyncio.sleep(1)
         time.sleep(0.9899)
-        #+-benchmark_process(loop_start_time)
+        #benchmark_process(loop_start_time)
+
+        pack.dump_json()
+        #print(iteration)
+        return iteration
+
 
 time_list = []
 def benchmark_process(process_start_time):
@@ -113,10 +116,10 @@ def benchmark_process(process_start_time):
 def json_interface(iteration=0):
     global thread_running
     while(thread_running):
-        #command = parse.user_input_json()
-        command = 0
+        command = parse.user_input_json()
+        #command = 0
         print(command)
-        #glbs.update_command(command)
+        glbs.update_command(command)
         glbs.command_received = True
         glbs.command_queue.append(command)
         #print(iteration)

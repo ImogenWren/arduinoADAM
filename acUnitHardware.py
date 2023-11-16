@@ -121,7 +121,8 @@ class acUnitHardware:
             self.adamDIO_A.set_coil(valveNumber-1, state)
             valveState = self.adamDIO_A.get_coil_state(valveNumber-1)
             if (valveState[0] == state):
-                print(f"Valve V{valveNumber} set to {state}")
+                #print(f"Valve V{valveNumber} set to {state}")
+                print()
             else:
                 print(f"Error checking valve V{valveNumber} state")
         else:
@@ -129,13 +130,13 @@ class acUnitHardware:
 
     def set_valve_name(self, valveName, state):
         valve_index = glbs.valve_list.index(valveName)
-        print(f"Valve Index {valve_index}")
+        #print(f"Valve Index {valve_index}")
         self.adamDIO_A.set_coil(valve_index, state)
         valveState = self.adamDIO_A.get_coil_state(valve_index)
         if (valveState[0] == state):
-            print(f"Valve V{valve_index} set to {state}")
+            print(f"Valve V{valve_index+1} set to {state}")
         else:
-            print(f"Error checking valve V{valve_index} state")
+            print(f"Error checking valve V{valve_index+1} state")
 
 
     def get_valve_state(self, valveNumber):
@@ -150,25 +151,25 @@ class acUnitHardware:
             valveStates = self.adamDIO_A.get_coil_range(self.V1, self.V7)
             valve = 1
             for state in valveStates:
-                print(f"V{valve} = {state}")
+                #print(f"V{valve} = {state}")
                 valve = valve + 1
             return valveStates
         else:
             return test_valve_status
 
     def set_compressor(self,state):
-        self.adamDIO_B.set_coil(0, state)
-        compressorState = self.adamDIO_B.get_coil_state(0)
+        self.adamDIO_B.set_coil(2, state)
+        compressorState = self.adamDIO_B.get_coil_state(2)
         if (compressorState[0] == state):
             print(f"Compressor set to {state}")
         else:
             print(f"Error Compressor state")
 
     def set_fans(self,state):
+        self.adamDIO_B.set_coil(0, state)
         self.adamDIO_B.set_coil(1, state)
-        self.adamDIO_B.set_coil(2, state)
-        fanA_state = self.adamDIO_B.get_coil_state(1)
-        fanB_state = self.adamDIO_B.get_coil_state(2)
+        fanA_state = self.adamDIO_B.get_coil_state(0)
+        fanB_state = self.adamDIO_B.get_coil_state(1)
         if (fanA_state[0] == state):
             print(f"Fan A set to {state}")
         else:
@@ -197,7 +198,7 @@ class acUnitHardware:
                 pressure_bar = self.sensors.voltage_to_pressure(voltage, 0,30,1,6)
                 pressure_list.append(pressure_bar)
                 #print(f"Pressure: {pressure_bar} bar")
-            print(f"Pressures: P1-3: {pressure_list} bar")
+            #print(f"Pressures: P1-3: {pressure_list} bar")
             return (pressure_list, sample_timestamp)
         else:
             return ([23,56,123434], time.time())
@@ -215,7 +216,7 @@ class acUnitHardware:
                 temp_degC = self.sensors.voltage_to_temp(voltage)
                 temp_list.append(temp_degC)
                 # print(f"Pressure: {pressure_bar} bar")
-            print(f"Temperature: T1-5: {temp_list} degC")
+            #print(f"Temperature: T1-5: {temp_list} degC")
             return (temp_list, sample_timestamp)
 
 
@@ -231,29 +232,29 @@ class acUnitHardware:
             return ([1,2,3,4],time.time())
 
     def get_flow_sensor(self):
-        print("Getting Flow Sensor")
+        #print("Getting Flow Sensor")
         flow_mA = self.adamAI_D.get_current_inputs(0, 0)[0]
         flow_rate_Lh = self.sensors.current_to_flowmeter(flow_mA)
-        print(f"Flow Rate: {flow_rate_Lh} L/hour")
+        #print(f"Flow Rate: {flow_rate_Lh} L/hour")
         return flow_rate_Lh
 
 
     def get_power_meter(self):
         # getting offset of 2.6 W at zero, under scale by ~ 2 W at upper range
-        print("Getting Power Meter Value")
+        #print("Getting Power Meter Value")
         power_mA = self.adamAI_D.get_current_inputs(1,1)[0]
         #print(f"Power Meter: {power_mA} mA")
         power_W =  self.sensors.current_20mA_to_power(power_mA)
-        print(f"Power Consumption: {power_W} W")
+        #print(f"Power Consumption: {power_W} W")
         return power_W
 
 
     def get_ambient_sensors(self):
-        print("Getting Ambient Conditions Sensor")
+        #print("Getting Ambient Conditions Sensor")
         ambi_pressure = self.sensors.current_to_pressure(self.adamAI_D.get_current_inputs(2, 2)[0])
         ambi_temperature = self.sensors.current_to_temperature(self.adamAI_D.get_current_inputs(3, 3)[0])
         ambient_sensors = [ambi_temperature,ambi_pressure]
-        print(f"Ambient Temp: {ambient_sensors[0]} degC, Ambient Pressure: {ambient_sensors[1]} mBar")
+        #print(f"Ambient Temp: {ambient_sensors[0]} degC, Ambient Pressure: {ambient_sensors[1]} mBar")
         return ambient_sensors
 
 #TODO: Implement JSON interface using user inputs for CLI
@@ -264,12 +265,12 @@ def main():
     # Setup IO Devices & start  library
     ac = acUnitHardware()
     # Set up Initial State
-    #ac.adamDIO_A.set_all_coils([0,0,0,0,0,0,0,0])   # direct method setting specific controller coil states
-    #ac.adamDIO_B.set_all_coils([0,0,0,0,0,0,0,0])
-    #ac.adamDIO_A.get_all_coils()
-    #ac.adamDIO_B.get_all_coils()
-    #ac.set_compressor(False)
-    #ac.set_fans(False)
+    ac.adamDIO_A.set_all_coils([0,0,0,0,0,0,0,0])   # direct method setting specific controller coil states
+    ac.adamDIO_B.set_all_coils([0,0,0,0,0,0,0,0])
+    ac.adamDIO_A.get_all_coils()
+    ac.adamDIO_B.get_all_coils()
+    ac.set_compressor(False)
+    ac.set_fans(False)
     #print("AC Unit Init Complete - Starting Acquisition & Control loop")
     time.sleep(2)
     iteration = 0
@@ -278,7 +279,7 @@ def main():
         # Functions to return data to UI
         # tested
         #ac.get_all_valves()
-        sensor_return = ac.get_pressure_sensors(True)
+        sensor_return = ac.get_pressure_sensors()
         print(sensor_return[1])
         #ac.get_temp_sensors()
         #ac.get_flow_sensor()

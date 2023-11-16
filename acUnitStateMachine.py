@@ -114,14 +114,14 @@ class check_command(stateMachine):
         glbs.command_queue = []
         while command:
             if command[0] in glbs.valve_list:
-                print(f"SIMULATED {command[0]} is {command[1]} ")
-                #hw.set_valve_name(command[0], command[1])
+                #print(f"SIMULATED {command[0]} is {command[1]} ")
+                hw.set_valve_name(command[0], command[1])
             elif command[0] in glbs.relay_list[0:2] or command[0] == "fans":
-                print(f"SIMULATED FANS are {command[1]}")
-                #hw.set_fans(command[1])
+                #print(f"SIMULATED FANS are {command[1]}")
+                hw.set_fans(command[1])
             elif command[0] == glbs.relay_list[2] or command[0] == "comp":
-                print(f"SIMULATED COMPRESSOR is {command[1]}")
-                #hw.set_compressor(command[1])
+                #print(f"SIMULATED COMPRESSOR is {command[1]}")
+                hw.set_compressor(command[1])
             else:
                 print("unknown command")
             del command[0:2]
