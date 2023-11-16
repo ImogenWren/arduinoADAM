@@ -17,7 +17,7 @@ pack = glbs.jsonPack
 HOST = "127.0.0.1"
 PORT = 65432
 
-TEST_COMMAND = '{:"cmd":"set", "V1":"open"}'
+TEST_COMMAND = '{"cmd":"set", "V1":"open"}'
 
 
 
