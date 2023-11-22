@@ -81,7 +81,7 @@ miscs_list = [16.3, 200.1, 1024, 20.34]
 histories_list = [0.2, 20.3, 5.82, 4.12, 25.23]
 
 
-
+#TODO FIX ALL THIS SHIT THAT WAS WORKING BUT SOMEONE CHANGED IT
 class jsonPacker:
     def __init__(self):
         #self.data_dic = glbs.acUnit_dictionary   ## Decision time do we want to update the global variable or keep it local
@@ -89,11 +89,12 @@ class jsonPacker:
         #glbs.acUnit_dictionary
         #self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
         self.valve_list = glbs.valve_list
-        self.relay_list = glbs.relay_list
+        self.relay_list = glbs.relay_data_list
         self.ps_list = glbs.ps_list
         self.ts_list = glbs.ts_list
         self.sense_misc_list = glbs.sense_misc_list
-        self.history_param_list = glbs.history_param_list
+        #self.history_param_list = glbs.history_param_list
+        self.sensor_param_list = glbs.sensor_param_list
         self.error_list = glbs.error_list
 
     def dump_json(self):
@@ -121,13 +122,21 @@ class jsonPacker:
     def load_relay_data(self, relay_state_list):
         new_zip = zip(self.relay_list, relay_state_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        glbs.acUnit_dictionary["power-relays"].update(new_dic)
+        glbs.acUnit_dictionary["power_relays"].update(new_dic)
 
-
-    def load_pressure_data(self, pressure_list):
-        new_zip = zip(self.ps_list, pressure_list)  ## zips two lists together into an object of tuples
+    def load_sensor_data(self, sensor_name, sensor_data):
+        new_zip = zip(self.sensor_param_list, sensor_data)
         new_dic = dict(new_zip)
-        glbs.acUnit_dictionary["sensors-pressure"].update(new_dic)
+        glbs.acUnit_dictionary["sensors"][sensor_name].update
+
+## This one works now but is kind of depreciated
+    def load_pressure_data(self, pressure_list):
+        #new_zip = zip(self.ps_list, pressure_list)  ## zips two lists together into an object of tuples
+        #new_dic = dict(new_zip)
+        i = 0
+        for sensor in self.ps_list:
+            glbs.acUnit_dictionary["sensors"]["pressure"][sensor]["val"]=(pressure_list[i])
+            i +=1      
 
     def load_temp_data(self, temp_list):
         new_zip = zip(self.ts_list, temp_list)   ## zips two lists together into an object of tuples
@@ -147,7 +156,7 @@ class jsonPacker:
     def load_status_data(self):
         status_ok = True
         error_list = [glbs.error_tuple[0], glbs.acUnitState, glbs.error_tuple[1], glbs.error_tuple[2]]
-        new_zip = zip(self.error_list, error_list)  ##???
+        new_zip = zip(self.error_list, error_list)  # zips name together with value
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["status"].update(new_dic)
 
@@ -156,13 +165,14 @@ class jsonPacker:
 
 def main():
     pack = jsonPacker()
-    pack.load_valve_data(valves_list)
-    pack.load_relay_data(relays_list)
+    #pack.load_valve_data(valves_list)
+    #pack.load_relay_data(relays_list)
     pack.load_pressure_data(pressures_list)
-    pack.load_temp_data(temps_list)
-    pack.load_misc_data(miscs_list)
-    pack.load_history_data(histories_list, "TS3")
-    pack.dump_json(glbs.acUnit_dictionary)
+    #pack.load_temp_data(temps_list)
+    #pack.load_misc_data(miscs_list)
+    #pack.load_history_data(histories_list, "TS3")
+    #pack.load_status_data()
+    pack.dump_json()   ##glbs.acUnit_dictionary
 
 
 

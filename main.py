@@ -55,7 +55,7 @@ def gather_data(iteration=0):
         relay_list = hw.get_power_relays(glbs.simulate_hardware)
         pressure_list = hw.get_pressure_sensors(glbs.simulate_hardware)
         # add pressure sensor datapoints to sensor history
-        PS1.add_new_datapoint(pressure_list[0][0],pressure_list[1])
+        PS1.add_new_datapoint(pressure_list[0][0],pressure_list[1])   ##2nd value in returned list is timestamp
         PS2.add_new_datapoint(pressure_list[0][1],pressure_list[1])
         PS3.add_new_datapoint(pressure_list[0][2],pressure_list[1])
         # Sample Hardware IOs: Temperature Sensors
@@ -174,21 +174,21 @@ def main():
     i = 0
     global thread_running
     try:
-        t1 = Thread(target=state_machine)
+        #t1 = Thread(target=state_machine)
         t2 = Thread(target=gather_data)
-        t3 = Thread(target=json_interface)
+        #t3 = Thread(target=json_interface)
 
-        t2.daemon = True
-        t3.daemon = True
+        #t2.daemon = True
+        #t3.daemon = True
 
 
-        t1.start()
+        #t1.start()
         t2.start()
-        t3.start()
+        #t3.start()
 
-        t1.join()
+        #t1.join()
         t2.join()
-        t3.join()
+        #t3.join()
 
         #while t1.isAlive():
         #    do.you.subthread.thing()
