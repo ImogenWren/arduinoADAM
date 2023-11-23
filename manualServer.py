@@ -46,7 +46,8 @@ while(exceptions < 10):
                                 print("JSON format Not Recognised")
                                 break
                         except:
-                            print("User Input Escaped - Restarting")
+                            print("User Input Escaped - Closing Server")
+                            stop = True
                             break
                         #print(iteration)
                         json_command = json_input.encode("UTF-8")
