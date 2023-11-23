@@ -204,7 +204,7 @@ def main():
     except:
         thread_running = False
         #t1.join()
-        t2.join()
+        #t2.join()
         #t3.join()
         print("Program Halted or Error")
 
