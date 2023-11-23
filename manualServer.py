@@ -12,6 +12,7 @@ https://realpython.com/python-sockets/
 
 import socket
 import time
+import json
 import acUnitGlobals as glbs
 pack = glbs.jsonPack
 
@@ -39,14 +40,13 @@ while(exceptions < 10):
                         print(f"Connected by {addr}")
                         try:
                             json_input = input(f"Please Enter JSON command in format: {TEST_COMMAND}\n\n")
-                            if (json_input.lower() == "stop"):
-                                print("Stop Command - closing server")
-                                exceptions = 11
-                                stop = True;
-                                continue
-                        except :
-                            print("User Input Escaped - closing")
-                            exceptions = 11
+                            try:
+                                json_obj = json.loads(json_input)
+                            except TypeError:
+                                print("JSON format Not Recognised")
+                                break
+                        except:
+                            print("User Input Escaped - Restarting")
                             break
                         #print(iteration)
                         json_command = json_input.encode("UTF-8")
