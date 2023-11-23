@@ -38,19 +38,22 @@ while(exceptions < 10):
                     iteration = 0
                     while(conn):
                         print(f"Connected by {addr}")
+                        json_valid = False
                         try:
                             json_input = input(f"Please Enter JSON command in format: {TEST_COMMAND}\n\n")
+                            json_valid = True
                             try:
                                 json_obj = json.loads(json_input)
                             except ValueError:
                                 print("JSON format Not Recognised")
+                                json_valid = False
                                 break
                         except:
                             print("User Input Escaped - Closing Server")
                             stop = True
                             break
                         #print(iteration)
-                        if stop != True:
+                        if stop != True and json_valid == True:
                             json_command = json_input.encode("UTF-8")
                             conn.sendall(json_command)
                             data = conn.recv(2048)
@@ -60,13 +63,15 @@ while(exceptions < 10):
                                 print("Command Successfully Sent")
                             else:
                                 print(f"Error Returned Code: {data}")
-                        #data_dic = pack.unpack_json(data)
-                        #json_print = pack.dump_json()
-                        #print(data_dic)
                             if not data:
                                 print("No Data Rx - break")
                                 break
-                            iteration += 1
+                        #data_dic = pack.unpack_json(data)
+                        #json_print = pack.dump_json()
+                        #print(data_dic)
+                        else:
+                            print("else")
+                        iteration += 1
                         if (stop):
                             break
                         #time.sleep(1)
