@@ -84,16 +84,18 @@ this will be input into the state machine controller to change/set the state
 
 class jsonParser:
     def __init__(self):
-        self.data_dic = glbs.acUnit_dictionary
-        self.json_template = json.dumps(self.data_dic, indent=2)
+        #self.data_dic = glbs.acUnit_dictionary
+        #self.json_template = json.dumps(self.data_dic, indent=2)
         self.valve_list = glbs.valve_list
-        self.relay_list = glbs.relay_list
-        self.outputs_list = self.valve_list + self.relay_list
+        self.relay_list = glbs.relay_data_list
+        self.outputs_list = glbs.outputs_list
         self.ps_list = glbs.ps_list
         self.ts_list = glbs.ts_list
         self.sense_misc_list = glbs.sense_misc_list
-        self.history_param_list = glbs.history_param_list
-        self.error_list = glbs.error_list
+        self.history_param_list = glbs.sensor_param_list
+        self.error_list = glbs.status_list
+        self.true_words = ["open", "opened","on",  "true", "high","start"]    ## list all words that could mean true
+        self.false_words = ["close" ,"shut" ,"closed" ,"off" ,"false" ,"low" ,"stop"]
 
         #print(self.json_template)
 
@@ -102,22 +104,27 @@ class jsonParser:
 
     def parse_json(self, json_string):
         if (json_string):
-            #print(f"JSON String: {json_string}")
-            json_string = json_string.replace("\n", " ").replace("\r", " ")
+            print(f"JSON String: {json_string}")
+            #json_string = json_string.replace("\n", " ").replace("\r", " ")
             try:
                 command_dic = json.loads(json_string)
-            except:
-                error = ("Error: Unknown JSON entry", 5)
-                return error
+            except ValueError:
+                glbs.update_error_status(1, "Error: ValueError Unknown JSON string")
+                print("Error: ValueError Unknown JSON string")
+                return 1
             ## function to make all values lowercase
-            command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
-            #print(f" Command Dic: {command_dic}")
-            cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
+            try:
+                command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
+                #print(f" Command Dic: {command_dic}")
+                cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
+            except:
+                print(f"Error Extracting cmd from JSON")
+                glbs.update_error_status(1, "Error: ValueError Unknown JSON string")
+                return 1
             #print(f" cmd: {cmd}")
             if (cmd == "set"):
                 print("Set Command Received")
-                set_outputs = []
-                #TODO Dont like this way of doing it should refactor
+                #set_outputs = []
                 for output in self.outputs_list:
                     #print(f"checking output: {output}")
                     # This will only look for items with defined names, if other names are used no error return but also no unexpected function
@@ -128,31 +135,27 @@ class jsonParser:
                         continue
                     else:
                         state = state.lower()
-                    if state == "open" or state=="opened" or state == "on" or state == "true" or state=="high" or state == True or state == "start":
-                        set_outputs.append(output)
-                        set_outputs.append(True)
-                    elif state == "close" or state=="shut" or state=="closed" or state == "off" or state == "false" or state=="low" or state == False or state == "stop":
-                        set_outputs.append(output)
-                        set_outputs.append(False)
+                    if state in [x.lower() for x in self.true_words] or state == True:
+                        glbs.set_outputs_queue.append(output)
+                        glbs.set_outputs_queue.append(True)
+                    elif state in [x.lower() for x in self.false_words] or state == False:
+                        glbs.set_outputs_queue.append(output)
+                        glbs.set_outputs_queue.append(False)
                     else:
-                        error = (f"Error: No Value found for: {cmd}:{output}:{state}", 4)
-                        #print(error)
-                        return error
-                #print(set_outputs)
-                return(set_outputs)
+                        glbs.update_error_status(2, f"Error: No Value found for: {cmd}:{output}:{state}")
+                        return 2
+                return(0)
             elif (cmd == "get"):
                 print("Get Command Received")
-                return "get"
+                return 3
             elif (cmd == None):
-                error = ("Error: cmd returned NoneType", 2)
-                #print(error)
-                return (error)
+                glbs.update_error_status(4, "Error: cmd returned NoneType")
+                return 4
             else:
-                error = ("Error: Unable to Parse JSON cmd", 3)
-                #print(error)
-                return (error)
+                glbs.update_error_status(5, "Error: Unable to Parse JSON cmd")
+                return 5
         else:
-            return 0
+            return 6
 
     def user_input_json(self):
         try:

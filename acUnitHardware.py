@@ -13,11 +13,10 @@ Demonstrates the function of all hardware IOs.
 #from pyModbusTCP.client import ModbusClient
 import time
 import acUnitGlobals as glbs
-
+import sys
+sys.path.append("adam-drivers")
 import adam6052ModBus as adam6052
 import adam6217ModBus as adam6217
-import adam6018ModBus as adam6018
-import adam6024ModBus as adam6024
 
 import sensorObjects
 # This file should not import globals as hw is defined in globals

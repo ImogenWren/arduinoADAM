@@ -29,40 +29,6 @@ Library to parse JSON messages and output state as a string?
 {"get":"V1"}
 {"get":"all"}
 
-acUnit_state = {
-    "valves" : {
-        "V1" : 0,
-        "V2" : 0,
-        "V3" : 0,
-        "V4" : 0,
-        "V5" : 0,
-        "V6" : 0,
-        "V7" : 0
-    },
-    "power-relays"  :  {
-        "W1" : 0,
-        "W2": 0,
-        "V_comp": 0
-    },
-    "sensors-pressure": {
-        "PS1" : 0,
-        "PS2" : 0,
-        "PS3" : 0
-    },
-    "sensors-temperature": {
-        "TS1" : 0,
-        "TS2" : 0,
-        "TS3" : 0,
-        "TS4" : 0,
-        "TS5" : 0
-    },
-    "sensors-other":{
-        "flow": 0,
-        "power":0,
-        "APS" : 0,
-        "ATS" : 0
-    }
-}
 
 
 https://www.w3schools.com/python/python_json.asp
@@ -89,12 +55,13 @@ class jsonPacker:
         #glbs.acUnit_dictionary
         #self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
         self.valve_list = glbs.valve_list
-        self.relay_list = glbs.relay_list
+        self.relay_list = glbs.relay_data_list
         self.ps_list = glbs.ps_list
         self.ts_list = glbs.ts_list
-        self.sense_misc_list = glbs.sense_misc_list
-        self.history_param_list = glbs.history_param_list
-        self.error_list = glbs.error_list
+        self.ms_list = glbs.sense_misc_list
+        #self.history_param_list = glbs.history_param_list
+        self.sensor_param_list = glbs.sensor_param_list
+        self.status_list = glbs.status_list
 
     def dump_json(self):
         self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
@@ -121,13 +88,32 @@ class jsonPacker:
     def load_relay_data(self, relay_state_list):
         new_zip = zip(self.relay_list, relay_state_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
-        glbs.acUnit_dictionary["power-relays"].update(new_dic)
+        glbs.acUnit_dictionary["power_relays"].update(new_dic)
 
-
-    def load_pressure_data(self, pressure_list):
-        new_zip = zip(self.ps_list, pressure_list)  ## zips two lists together into an object of tuples
+    # This method should load all data including history for named sensor #TODO INCOMPLETE
+    def load_sensor_data(self, sensor_name, sensor_data):
+        new_zip = zip(self.sensor_param_list, sensor_data)
         new_dic = dict(new_zip)
-        glbs.acUnit_dictionary["sensors-pressure"].update(new_dic)
+        if sensor_name.lower() in [x.lower() for x in self.ps_list]:
+            glbs.acUnit_dictionary["sensors"]["pressure"][sensor_name].update(new_dic)
+        elif sensor_name.lower() in [x.lower() for x in self.ts_list]:
+            glbs.acUnit_dictionary["sensors"]["temperature"][sensor_name].update(new_dic)
+        elif sensor_name.lower() in [x.lower() for x in  self.ms_list]:
+            glbs.acUnit_dictionary["sensors"]["misc"][sensor_name].update(new_dic)
+        else:
+            print("Error: No valid dictionary found for named sensor")
+            glbs.update_error_status(1, f'({sensor_name}) load_sensor_data failed')
+
+
+
+## This one works now but is kind of depreciated
+    def load_pressure_data(self, pressure_list):
+        #new_zip = zip(self.ps_list, pressure_list)  ## zips two lists together into an object of tuples
+        #new_dic = dict(new_zip)
+        i = 0
+        for sensor in self.ps_list:
+            glbs.acUnit_dictionary["sensors"]["pressure"][sensor]["val"]=(pressure_list[i]) ## no error checking generic method is better, this left in for backwards compatibility
+            i +=1      
 
     def load_temp_data(self, temp_list):
         new_zip = zip(self.ts_list, temp_list)   ## zips two lists together into an object of tuples
@@ -135,19 +121,21 @@ class jsonPacker:
         glbs.acUnit_dictionary["sensors-temperature"].update(new_dic)
 
     def load_misc_data(self, misc_list):
-        new_zip = zip(self.sense_misc_list, misc_list)  ## zips two lists together into an object of tuples
+        new_zip = zip(self.ms_list, misc_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["sensors-misc"].update(new_dic)
 
+
+## This is now totally depreciated, sensorObject calculate history changed to return current value as well as historical values
+    ## USE LOAD SENSOR DATA
     def load_history_data(self, sensor_name, history_list, ):
-        new_zip = zip(self.history_param_list, history_list)  ## zips two lists together into an object of tuples
+        new_zip = zip(self.sensor_param_list, history_list)  ## zips two lists together into an object of tuples
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["sensors-history"][sensor_name].update(new_dic)
 
     def load_status_data(self):
-        status_ok = True
-        error_list = [glbs.error_tuple[0], glbs.acUnitState, glbs.error_tuple[1], glbs.error_tuple[2]]
-        new_zip = zip(self.error_list, error_list)  ##???
+        error_list = [glbs.error_status[0], glbs.acUnitState, glbs.error_status[1], glbs.error_status[2]]
+        new_zip = zip(self.status_list, error_list)  # zips name together with value
         new_dic = dict(new_zip)
         glbs.acUnit_dictionary["status"].update(new_dic)
 
@@ -156,13 +144,14 @@ class jsonPacker:
 
 def main():
     pack = jsonPacker()
-    pack.load_valve_data(valves_list)
-    pack.load_relay_data(relays_list)
+    #pack.load_valve_data(valves_list)
+    #pack.load_relay_data(relays_list)
     pack.load_pressure_data(pressures_list)
-    pack.load_temp_data(temps_list)
-    pack.load_misc_data(miscs_list)
-    pack.load_history_data(histories_list, "TS3")
-    pack.dump_json(glbs.acUnit_dictionary)
+    #pack.load_temp_data(temps_list)
+    #pack.load_misc_data(miscs_list)
+    #pack.load_history_data(histories_list, "TS3")
+    #pack.load_status_data()
+    pack.dump_json()   ##glbs.acUnit_dictionary
 
 
 
