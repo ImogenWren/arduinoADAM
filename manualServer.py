@@ -38,7 +38,10 @@ while(exceptions < 10):
                         print(f"Connected by {addr}")
                         try:
                             json_input = input(f"Please Enter JSON command in format: {TEST_COMMAND}\n\n")
-                        except:
+                            if (json_input.lower() == "stop"):
+                                exceptions = 11
+                                break
+                        except :
                             print("User Input Escaped - Restarting")
                             break
                         #print(iteration)

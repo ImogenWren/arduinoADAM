@@ -108,13 +108,19 @@ class jsonParser:
             #json_string = json_string.replace("\n", " ").replace("\r", " ")
             try:
                 command_dic = json.loads(json_string)
-            except:
-                glbs.update_error_status(1, "Error: Unknown JSON entry")
+            except ValueError:
+                glbs.update_error_status(1, "Error: ValueError Unknown JSON string")
+                print("Error: ValueError Unknown JSON string")
                 return 1
             ## function to make all values lowercase
-            command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
-            #print(f" Command Dic: {command_dic}")
-            cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
+            try:
+                command_dic = {key.lower(): val.lower() for key, val in command_dic.items()} ## Using dict comprehension (memory intensive?)
+                #print(f" Command Dic: {command_dic}")
+                cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
+            except:
+                print(f"Error Extracting cmd from JSON")
+                glbs.update_error_status(1, "Error: ValueError Unknown JSON string")
+                return 1
             #print(f" cmd: {cmd}")
             if (cmd == "set"):
                 print("Set Command Received")
