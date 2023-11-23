@@ -42,7 +42,7 @@ while(exceptions < 10):
                             json_input = input(f"Please Enter JSON command in format: {TEST_COMMAND}\n\n")
                             try:
                                 json_obj = json.loads(json_input)
-                            except TypeError:
+                            except ValueError:
                                 print("JSON format Not Recognised")
                                 break
                         except:
