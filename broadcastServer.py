@@ -15,13 +15,16 @@ import time
 import acUnitGlobals as glbs
 pack = glbs.jsonPack
 
-HOST = "127.0.0.1"
+#HOST = "127.0.0.1"
+TESTHOST = "10.42.0.1"
+HOST = TESTHOST
 PORT = 65432
 
 TEST_COMMAND = '{"cmd":"set", "V1":"open"}'
 
+exceptions = 0
 
-while(1):
+while(exceptions < 5):
     try:
         print(f"Starting Broadcast Server:\nListening on {HOST}:{PORT}")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -46,5 +49,6 @@ while(1):
                         time.sleep(1)
     except:
         print("Exception Handled, restarting")
+        exceptions += 1
 
 
