@@ -31,7 +31,7 @@ while(exceptions < 10):
         print(f"Starting acUnit Manual Test Server:\nListening on {HOST}:{PORT}")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
-            while (1):
+            while (stop == False):
                 s.listen()
                 conn, addr = s.accept()
                 with conn:
