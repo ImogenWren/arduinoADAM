@@ -4,6 +4,7 @@
 '''
 
 import jsonPacker
+import jsonParser
 import acUnitHardware
 
 #Wrap all this inside a class?
@@ -23,7 +24,10 @@ status_list = ["ok" , "state", "code", "message"]
 
 # Creating Instances of Global Methods here to ensure that only 1 object of each. Can be renamed in local files
 acHardware = acUnitHardware.acUnitHardware()
+jsonParse = jsonParser.jsonParser()
 jsonPack = jsonPacker.jsonPacker()
+
+
 
 simulate_hardware = True
 
@@ -32,6 +36,8 @@ test_valve_status = [0,0,0,0,0,0,0,0]
 command_received = False
 command_queue = []   ## Command queue should be list of tuples format ("item", state)
 command_state = ("item", "")
+
+set_outputs_queue = []  ##  queue is processed by state machine untill empty
 
 def update_command(new_command_list):
     command_queue.append(new_command_list)
