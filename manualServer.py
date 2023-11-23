@@ -48,7 +48,7 @@ while(exceptions < 10):
                         except:
                             print("User Input Escaped - Closing Server")
                             stop = True
-                            continue
+                            break
                         #print(iteration)
                         if stop != True:
                             json_command = json_input.encode("UTF-8")
