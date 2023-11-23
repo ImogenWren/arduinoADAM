@@ -17,8 +17,8 @@ ps_list = ["PS1","PS2","PS3"]
 ts_list = ["TS1","TS2","TS3","TS4","TS5"]
 sense_misc_list = ["flow", "power", "APS", "ATS"]
 #history_param_list = ["dTdt", "average", "least_mean_sqr", "min", "max"]
-sensor_param_list = ["val", "min", "max", "avg","dxdt", "lms" ]
-error_list = ["ok" , "state", "code", "message"]
+sensor_param_list = ["val", "min", "max","avg","dxdt", "lms" ]
+status_list = ["ok" , "state", "code", "message"]
 
 # Creating Instances of Global Methods here to ensure that only 1 object of each. Can be renamed in local files
 acHardware = acUnitHardware.acUnitHardware()
@@ -30,14 +30,32 @@ test_valve_status = [0,0,0,0,0,0,0,0]
 
 command_received = False
 command_queue = []   ## Command queue should be list of tuples format ("item", state)
-command_state = ("item", " ")
+command_state = ("item", "")
 
 def update_command(new_command_list):
     command_queue.append(new_command_list)
     command_received = True
 
-error_flag = False
-error_tuple = (True, 0, "no-error")
+#error_flag = False
+#error_tuple = (True, 0, "no-error")
+
+error_status = [True, 0, ""]
+last_error = 0
+def update_error_status(error_code=0, error_message= " "):
+    global last_error
+    if error_code != last_error:
+        error_status[0] = False
+        error_status[1] += error_code
+        error_status[2] += (error_message + ", ")
+        last_error =  error_code
+
+
+'''
+  "ok": "True",
+        "state": " ",
+        "code":0,
+        "message":" "
+'''
 
 def update_error(error_code, error_message):
     error_tuple = (error_code, error_message)

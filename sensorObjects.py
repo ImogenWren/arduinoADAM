@@ -20,28 +20,30 @@ BUFFER_SIZE = 300
 class temperatureSensor:
     def __init__(self):
         #print(f'Temperature Sensor Library Deployed')
-        self.current_degC = 0
+        self.current_val = 0
         self.sensor_history = []
         self.sensor_timestamp = []
         self.init_time = round(time.time())
 
     '''
-        "dTdt": 0,
-        "average": 0,
-        "least_mean_sqr": 0,
-        "min": 0,
-        "max": 0
+                "val": 0,
+                "min": 0,
+                "max": 0,
+                "avg": 0,
+                "dxdt": 0,
+                "lms": 0
     '''
     def calculate_history(self):
         average = self.calculate_average()
         min_max = self.calculate_min_max()
         dx_dy = self.calculate_dx_dy()
         lms = self.calculate_lms()
-        output = [dx_dy,average,lms, min_max[0], min_max[1]]
+        output = [self.current_val, min_max[0],min_max[1],average,dx_dy,lms]
         return output
 
     def add_new_datapoint(self, new_datapoint, timestamp):
         buffer_length = len(self.sensor_history)
+        self.current_val = new_datapoint
         #elapsed_time = round(time.time()-self.init_time)
         if buffer_length < BUFFER_SIZE:
             self.sensor_history.append(new_datapoint)
