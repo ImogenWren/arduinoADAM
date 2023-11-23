@@ -48,24 +48,25 @@ while(exceptions < 10):
                         except:
                             print("User Input Escaped - Closing Server")
                             stop = True
-                            break
+                            continue
                         #print(iteration)
-                        json_command = json_input.encode("UTF-8")
-                        conn.sendall(json_command)
-                        data = conn.recv(2048)
-                        reply = int(data.decode())
-                        print(f"Returned Value: {reply}")
-                        if (reply == 0):
-                            print("Command Successfully Sent")
-                        else:
-                            print(f"Error Returned Code: {data}")
+                        if stop != True:
+                            json_command = json_input.encode("UTF-8")
+                            conn.sendall(json_command)
+                            data = conn.recv(2048)
+                            reply = int(data.decode())
+                            print(f"Returned Value: {reply}")
+                            if (reply == 0):
+                                print("Command Successfully Sent")
+                            else:
+                                print(f"Error Returned Code: {data}")
                         #data_dic = pack.unpack_json(data)
                         #json_print = pack.dump_json()
                         #print(data_dic)
-                        if not data:
-                            print("No Data Rx - break")
-                            break
-                        iteration += 1
+                            if not data:
+                                print("No Data Rx - break")
+                                break
+                            iteration += 1
                         if (stop):
                             break
                         #time.sleep(1)
