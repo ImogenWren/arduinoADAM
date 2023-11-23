@@ -46,11 +46,9 @@ while(exceptions < 10):
                             except ValueError:
                                 print("JSON format Not Recognised")
                                 json_valid = False
-                                break
                         except:
                             print("User Input Escaped - Closing Server")
                             stop = True
-                            break
                         #print(iteration)
                         print(f"JSON Valid? {json_valid}")
                         if stop == False and json_valid == True:
@@ -72,6 +70,7 @@ while(exceptions < 10):
                         #print(data_dic)
                         else:
                             print("else")
+                            break
                         iteration += 1
                         if (stop):
                             break
