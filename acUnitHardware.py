@@ -16,8 +16,6 @@ import acUnitGlobals as glbs
 
 import adam6052ModBus as adam6052
 import adam6217ModBus as adam6217
-import adam6018ModBus as adam6018
-import adam6024ModBus as adam6024
 
 import sensorObjects
 # This file should not import globals as hw is defined in globals
