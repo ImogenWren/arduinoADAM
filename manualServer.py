@@ -25,6 +25,7 @@ TEST_COMMAND = '{"cmd":"set", "V1":"open"}'
 exceptions = 0
 
 while(exceptions < 10):
+    stop = False
     try:
         print(f"Starting acUnit Manual Test Server:\nListening on {HOST}:{PORT}")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -39,10 +40,13 @@ while(exceptions < 10):
                         try:
                             json_input = input(f"Please Enter JSON command in format: {TEST_COMMAND}\n\n")
                             if (json_input.lower() == "stop"):
+                                print("Stop Command - closing server")
                                 exceptions = 11
-                                break
+                                stop = True;
+                                continue
                         except :
-                            print("User Input Escaped - Restarting")
+                            print("User Input Escaped - closing")
+                            exceptions = 11
                             break
                         #print(iteration)
                         json_command = json_input.encode("UTF-8")
@@ -61,6 +65,8 @@ while(exceptions < 10):
                             print("No Data Rx - break")
                             break
                         iteration += 1
+                        if (stop):
+                            break
                         #time.sleep(1)
     except KeyboardInterrupt:
         print("Caught keyboard interrupt, exiting")

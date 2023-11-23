@@ -88,7 +88,7 @@ class jsonParser:
         #self.json_template = json.dumps(self.data_dic, indent=2)
         self.valve_list = glbs.valve_list
         self.relay_list = glbs.relay_data_list
-        self.outputs_list = self.valve_list + self.relay_list
+        self.outputs_list = glbs.outputs_list
         self.ps_list = glbs.ps_list
         self.ts_list = glbs.ts_list
         self.sense_misc_list = glbs.sense_misc_list
