@@ -53,7 +53,9 @@ while(exceptions < 10):
                             stop = True
                             break
                         #print(iteration)
-                        if stop != True and json_valid == True:
+                        print(f"JSON Valid? {json_valid}")
+                        if stop == False and json_valid == True:
+                            print("Sending a command you cant stop me")
                             json_command = json_input.encode("UTF-8")
                             conn.sendall(json_command)
                             data = conn.recv(2048)
