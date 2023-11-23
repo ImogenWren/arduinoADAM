@@ -70,7 +70,6 @@ while(exceptions < 10):
                         #print(data_dic)
                         else:
                             print("else")
-                            break
                         iteration += 1
                         if (stop):
                             break
