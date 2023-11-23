@@ -23,6 +23,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             print("Sending JSON message")
             #json_message = pack.dump_json()
             #s.sendall(json_message.encode("UTF-8"))
+            init_time = time.time()
         data = s.recv(1024)
         print(f"Received {data!r}")
         #time.sleep(5)
