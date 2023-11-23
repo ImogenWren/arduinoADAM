@@ -50,5 +50,6 @@ while(exceptions < 5):
     except:
         print("Exception Handled, restarting")
         exceptions += 1
+print("Program Quit")
 
 
