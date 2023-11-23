@@ -38,10 +38,9 @@ while(exceptions < 10):
                     iteration = 0
                     while(conn):
                         print(f"Connected by {addr}")
-                        json_valid = False
+                        json_valid = True
                         try:
-                            json_input = input(f"Please Enter JSON command in format: {TEST_COMMAND}\n\n")
-                            json_valid = True
+                            json_input = input(f"\nPlease Enter JSON command in format: {TEST_COMMAND}\n\n")
                             try:
                                 json_obj = json.loads(json_input)
                             except ValueError:
