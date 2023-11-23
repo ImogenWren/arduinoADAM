@@ -25,7 +25,7 @@ TEST_COMMAND = '{"cmd":"set", "V1":"open"}'
 
 exceptions = 0
 
-while(exceptions < 10):
+while(exceptions < 2):
     stop = False
     try:
         print(f"Starting acUnit Manual Test Server:\nListening on {HOST}:{PORT}")
