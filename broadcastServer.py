@@ -44,7 +44,8 @@ while(exceptions < 5):
                         json_print = pack.dump_json()
                         #print(data_dic)
                         if not data:
-                            break
+                            print("No Data Rx")
+                            #break
                         iteration += 1
                         time.sleep(1)
     except:
