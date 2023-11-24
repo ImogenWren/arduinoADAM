@@ -201,5 +201,5 @@ def generic_exception_handler(ex):
     print(message)
     print(" ")
     print(traceback.format_exc())
-    pdb.post_mortem()
+    #pdb.post_mortem()
     print("Program Error")

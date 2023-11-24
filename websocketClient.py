@@ -36,7 +36,7 @@ def websocketClient():
                         if not error:
                             print("JSON Message Parsed - Queue Updated")
                             print(f"output queue: {glbs.set_outputs_queue}")
-                            glbs.command_received = True
+                            #glbs.command_received = True  ## this is done during the parsing
                             success_code = "0"
                             s.sendall(success_code.encode("UTF-8"))
                         else:

@@ -97,21 +97,21 @@ class wait_state(stateMachine):
         #transition
         if glbs.command_received:
             glbs.command_received = False
-            self.next_state(check_command)
+            self.next_state(check_cmd_que)
         else:
             self.next_state(wait_state)
 
 
 
-class check_command(stateMachine):
+class check_cmd_que(stateMachine):
     __call = 0
     def __call__(self):
         self.show_state(self.__call)
         self.call +=1
         self.__call +=1
         try:
-            command = glbs.command_queue[0]
-            print(f"Command Queue: {command}")
+            print(f"Command Queue: {glbs.command_queue}")
+            command = glbs.command_queue[0]              ##I think this line was expecting a list of tuples and instead just has list
         except:
             print("Command Queue Empty but shouldnt be")
             glbs.update_error_status(5, "Command queue empty but shouldnt be")

@@ -138,9 +138,11 @@ class jsonParser:
                     if state in [x.lower() for x in self.true_words] or state == True:
                         glbs.set_outputs_queue.append(output)
                         glbs.set_outputs_queue.append(True)
+                        glbs.command_received = True
                     elif state in [x.lower() for x in self.false_words] or state == False:
                         glbs.set_outputs_queue.append(output)
                         glbs.set_outputs_queue.append(False)
+                        glbs.command_received = True
                     else:
                         glbs.update_error_status(2, f"Error: No Value found for: {cmd}:{output}:{state}")
                         return 2
