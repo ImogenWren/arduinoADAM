@@ -1,4 +1,11 @@
 INFO:root:Logging Module Started
 INFO:root:State Machine: init_state
 INFO:root:State Machine: wait_state
-INFO:root:websocketClient: Connected to Server: <socket.socket fd=156, family=2, type=1, proto=0, laddr=('10.42.0.5', 46685), raddr=('10.42.0.1', 65432)>
+INFO:root:websocketClient: Connected to Server: <socket.socket fd=712, family=2, type=1, proto=0, laddr=('10.42.0.5', 46780), raddr=('10.42.0.1', 65432)>
+INFO:root:websocketClient: Connected to Server: <socket.socket fd=712, family=2, type=1, proto=0, laddr=('10.42.0.5', 46782), raddr=('10.42.0.1', 65432)>
+INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
+INFO:root:State Machine: check_cmd_que
+INFO:root:State Machine: wait_state
+INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
+INFO:root:State Machine: check_cmd_que
+INFO:root:State Machine: wait_state

@@ -120,16 +120,19 @@ class check_cmd_que(stateMachine):
             raise
         while command:
             if command[0] in glbs.valve_list:
+                glbs.logging.info(f"StateMachine: {command[0]} is set to {command[1]}")
                 if simulate_hardware:
                     print(f"StateMachine: Simulate: {command[0]} is {command[1]}")
                 else:
                     hw.set_valve_name(command[0], command[1])
             elif command[0] in glbs.fan_names:
+                glbs.logging.info(f"StateMachine: {command[0]} is set to {command[1]}")
                 if simulate_hardware:
                     print(f"StateMachine: Simulate: fans are {command[1]}")
                 else:
                     hw.set_fans(command[1])
             elif command[0] == glbs.compressor_names:
+                glbs.logging.info(f"StateMachine: {command[0]} is set to {command[1]}")
                 if simulate_hardware:
                     print(f"StateMachine: Simulate: compressor is {command[1]}")
                 else:

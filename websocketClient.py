@@ -51,7 +51,7 @@ def websocketClient():
                             error = str(error)
                             s.sendall(error.encode("UTF-8"))  ## error must always be int here?
                 except ConnectionError:
-                    print(f"Caught Connection Error, number since last connect: {connectrion_error}")
+                    print(f"Caught Connection Error, number since last connect: {connection_error}")
                     if connection_error > 1:  ## prevent this being written to log over and over
                         print("logging exception as first instance")
                         glbs.logging.exception(f"websocketClient: Caught Connection Error, restarting")
