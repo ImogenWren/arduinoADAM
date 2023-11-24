@@ -120,13 +120,13 @@ class check_cmd_que(stateMachine):
             raise
         while command:
             if command[0] in glbs.valve_list:
-                print(f"SIMULATED {command[0]} is {command[1]} ")
+                #print(f"SIMULATED {command[0]} is {command[1]} ")
                 hw.set_valve_name(command[0], command[1])
             elif command[0] in glbs.fan_names:
-                print(f"SIMULATED FANS are {command[1]}")
+                #print(f"SIMULATED FANS are {command[1]}")
                 hw.set_fans(command[1])
             elif command[0] == glbs.compressor_names:
-                print(f"SIMULATED COMPRESSOR is {command[1]}")
+                #print(f"SIMULATED COMPRESSOR is {command[1]}")
                 hw.set_compressor(command[1])
             else:
                 print("unknown command in command Queue")

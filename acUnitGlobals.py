@@ -31,7 +31,7 @@ jsonPack = jsonPacker.jsonPacker()
 
 
 
-simulate_hardware = True
+simulate_hardware = False
 
 test_valve_status = [0,0,0,0,0,0,0,0]
 
