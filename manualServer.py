@@ -74,6 +74,9 @@ while(exceptions < 2):
                         if (stop):
                             break
                         #time.sleep(1)
+    except ConnectionResetError:
+        print("Caught Connection Reset Error: Likely Cause Client Drop Connection")
+        print("Restarting")
     except KeyboardInterrupt:
         print("Caught keyboard interrupt, exiting")
         break

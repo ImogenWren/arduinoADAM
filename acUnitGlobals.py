@@ -35,11 +35,12 @@ simulate_hardware = True
 
 test_valve_status = [0,0,0,0,0,0,0,0]
 
-command_received = False
-command_queue = []   ## Command queue should be list of tuples format ("item", state)
-command_state = ("item", "")
+#
+#command_queue = []   ## Command queue should be list of tuples format ("item", state)
+#command_state = ("item", "")
 
-set_outputs_queue = []  ##  queue is processed by state machine untill empty
+command_received = False
+command_queue = []  ##  queue is processed by state machine untill empty
 
 def update_command(new_command_list):
     command_queue.append(new_command_list)
