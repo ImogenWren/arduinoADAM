@@ -1,0 +1,4 @@
+INFO:root:Logging Module Started
+INFO:root:State Machine: init_state
+INFO:root:State Machine: wait_state
+INFO:root:websocketClient: Connected to Server: <socket.socket fd=156, family=2, type=1, proto=0, laddr=('10.42.0.5', 46685), raddr=('10.42.0.1', 65432)>

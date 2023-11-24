@@ -31,28 +31,41 @@ jsonPack = jsonPacker.jsonPacker()
 
 
 
-simulate_hardware = False
-
-test_valve_status = [0,0,0,0,0,0,0,0]
-
-#
-#command_queue = []   ## Command queue should be list of tuples format ("item", state)
-#command_state = ("item", "")
-
+simulate_hardware = True
 command_received = False
 command_queue = []  ##  queue is processed by state machine untill empty
 
-def update_command(new_command_list):
-    command_queue.append(new_command_list)
-    command_received = True
 
-#error_flag = False
-#error_tuple = (True, 0, "no-error")
+test_valve_status = [0,0,0,0,0,0,0,0]
+
+
+import logging
+
+'''
+Logging - Explanation
+Logging Levels:
+DEBUG: Detailed - use when debugging problems
+INFO: Confirmation things are working
+WARNING: Indication something unexpected happened
+ERROR: More serious problem, software has been unable to perform some function
+CRITICAL: Serious error indicating software may be unable to continue running
+
+default is WARNING, everything below this level is logged
+'''
+def init_logging():
+    logging.basicConfig(filename='acunit.log', filemode='w', encoding='utf-8', level=logging.DEBUG)
+    logging.info("Logging Module Started")
+
+
+
+
+
 
 error_status = [True, 0, ""]
 last_error = 0
 def update_error_status(error_code=0, error_message= " "):
     global last_error
+    logging.error(f"Error:{error_code}: {error_message}")
     if error_code != last_error:
         error_status[0] = False
         error_status[1] += error_code
@@ -196,11 +209,12 @@ acUnit_dictionary = {
     }
 }
 
-def generic_exception_handler(ex):
+def generic_exception_handler(ex, location="null "):
     template = "An exception of type {0} occured. Arguments: \n{1!r}"
     message = template.format(type(ex).__name__, ex.args)
     print(message)
     print(" ")
     print(traceback.format_exc())
+    logging.exception(f"{location} Generic Exception Handler Triggered: {ex}")
     #pdb.post_mortem()
     print("Program Error")

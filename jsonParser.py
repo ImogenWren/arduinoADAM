@@ -123,8 +123,7 @@ class jsonParser:
                 return 1
             #print(f" cmd: {cmd}")
             if (cmd == "set"):
-                print("Set Command Received")
-                #set_outputs = []
+                #print("Set Command Received")
                 for output in self.outputs_list:
                     #print(f"checking output: {output}")
                     # This will only look for items with defined names, if other names are used no error return but also no unexpected function

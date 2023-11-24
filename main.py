@@ -12,6 +12,7 @@ https://stackoverflow.com/questions/71969640/how-to-print-countdown-timer-and-ac
 
 '''
 import asyncio
+import logging
 from threading import Thread
 thread_running = True
 
@@ -96,8 +97,10 @@ def gather_data(iteration=0):
         #pack.dump_json()
         iteration += 1
         #await asyncio.sleep(1)
+        av_loop = round(benchmark_process(loop_start_time),2)
+        #logging.info(f"Samples Taken, Iteration: {iteration} Average Loop Time:{av_loop}")
         time.sleep(0.9899)
-        #benchmark_process(loop_start_time)
+
         #print(iteration)
         #return iteration
 
@@ -110,7 +113,8 @@ def benchmark_process(process_start_time):
     if len(time_list) >= 300:
         del time_list[0:len(time_list) - 300]
     #print(f"Loop Time {time_taken}")
-    print(f"Average Loop Time: {average_loop_time}")
+    #print(f"Average Loop Time: {average_loop_time}")
+    return average_loop_time
 
 #async def json_interface(iteration=0):
 def local_json_interface(iteration=0):
@@ -119,7 +123,7 @@ def local_json_interface(iteration=0):
         command = parse.user_input_json()
         #command = 0
         print(command)
-        glbs.update_command(command)
+        #glbs.update_command(command)  ## depreciated
         glbs.command_received = True
         glbs.command_queue.append(command)
         #print(iteration)
@@ -180,6 +184,7 @@ task: run-state-machine: set hardware IO and system state in response to command
 def main():
     i = 0
     global thread_running
+    glbs.init_logging()
     try:
         t1 = Thread(target=state_machine)
         t2 = Thread(target=gather_data)
@@ -218,7 +223,7 @@ def main():
         t2.join()
         t3.join()
     except Exception as ex:  ## generic exception handler
-        glbs.generic_exception_handler(ex)
+        glbs.generic_exception_handler(ex, "main")
         thread_running = False
         #template = "An exception of type {0} occured. Arguments: \n{1!r}"
         #message = template.format(type(ex).__name__, ex.args)

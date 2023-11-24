@@ -16,7 +16,7 @@ import acUnitGlobals as glbs
 hw = glbs.acHardware
 
 
-simulate_hardware = True
+simulate_hardware = glbs.simulate_hardware
 
 class stateMachine(object):
     call = 0 # shared state variable
@@ -37,6 +37,7 @@ class stateMachine(object):
         #print(f"Last State: {self.last_state}, Current State: {glbs.acUnitState}")
         if (self.last_state != self.__class__.__name__):
             print('%2d:%2d:      %s' % (self.call,i,self.__class__.__name__))
+            glbs.logging.info(f"State Machine: {self.__class__.__name__}")
 
 
 
@@ -49,15 +50,15 @@ class init_state(stateMachine):
         self.__call += 1
         #state functions
         error = 0
-        if not simulate_hardware:
+        if simulate_hardware:
+            print("StateMachine: Simulate: Init Hardware")
+        else:
             error += hw.adamDIO_A.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  # direct method setting specific controller coil states
             error += hw.adamDIO_B.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  ## All direct hardware calls return 0 if success would like to add errors but leaving for later
             error += hw.adamDIO_A.get_all_coils()
             error += hw.adamDIO_B.get_all_coils()
             error += hw.set_compressor(False)
             error += hw.set_fans(False)
-        else:
-            print("Simulate: Init Hardware")
         #transition
         if error == 0:
             self.next_state(wait_state)
@@ -93,7 +94,6 @@ class wait_state(stateMachine):
         self.show_state(self.__call)
         self.call +=1
         self.__call +=1
-
         #transition
         if glbs.command_received:
             glbs.command_received = False
@@ -115,22 +115,28 @@ class check_cmd_que(stateMachine):
             command = glbs.command_queue
             glbs.command_queue = []  # wipe global command queue
         except:
-            print("Command Queue Empty but shouldnt be")
-            glbs.update_error_status(5, "Command queue empty but shouldnt be")
+            print("StateMachine: Command Queue Empty but shouldnt be")
+            glbs.update_error_status(5, "StateMachine: command queue empty but shouldnt be")  ## Update error also writes to log
             raise
         while command:
             if command[0] in glbs.valve_list:
-                #print(f"SIMULATED {command[0]} is {command[1]} ")
-                hw.set_valve_name(command[0], command[1])
+                if simulate_hardware:
+                    print(f"StateMachine: Simulate: {command[0]} is {command[1]}")
+                else:
+                    hw.set_valve_name(command[0], command[1])
             elif command[0] in glbs.fan_names:
-                #print(f"SIMULATED FANS are {command[1]}")
-                hw.set_fans(command[1])
+                if simulate_hardware:
+                    print(f"StateMachine: Simulate: fans are {command[1]}")
+                else:
+                    hw.set_fans(command[1])
             elif command[0] == glbs.compressor_names:
-                #print(f"SIMULATED COMPRESSOR is {command[1]}")
-                hw.set_compressor(command[1])
+                if simulate_hardware:
+                    print(f"StateMachine: Simulate: compressor is {command[1]}")
+                else:
+                    hw.set_compressor(command[1])
             else:
-                print("unknown command in command Queue")
-                glbs.update_error_status(5, "Unknown Command In Queue")
+                print("StateMachine: unknown command in command Queue")
+                glbs.update_error_status(5, "StateMachine: Unknown Command In Queue")
             del command[0:2]
             #print(f"Last command queue: {command}")  ## Just checks command queue is empty
         #transition
