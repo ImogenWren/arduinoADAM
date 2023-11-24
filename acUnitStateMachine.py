@@ -119,6 +119,8 @@ class check_cmd_que(stateMachine):
             glbs.update_error_status(5, "StateMachine: command queue empty but shouldnt be")  ## Update error also writes to log
             raise
         while command:
+            print(f"StateMachine: Command[0]:{command[0]}, Command[1]:{command[1]}")
+            glbs.logging.info(f"StateMachine: Command[0]:{command[0]}, Command[1]:{command[1]}")
             if command[0] in glbs.valve_list:
                 glbs.logging.info(f"StateMachine: {command[0]} is set to {command[1]}")
                 if simulate_hardware:
@@ -131,7 +133,7 @@ class check_cmd_que(stateMachine):
                     print(f"StateMachine: Simulate: fans are {command[1]}")
                 else:
                     hw.set_fans(command[1])
-            elif command[0] == glbs.compressor_names:
+            elif command[0] in glbs.compressor_names:
                 glbs.logging.info(f"StateMachine: {command[0]} is set to {command[1]}")
                 if simulate_hardware:
                     print(f"StateMachine: Simulate: compressor is {command[1]}")

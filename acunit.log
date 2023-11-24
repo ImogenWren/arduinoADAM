@@ -1,11 +1,11 @@
 INFO:root:Logging Module Started
 INFO:root:State Machine: init_state
 INFO:root:State Machine: wait_state
-INFO:root:websocketClient: Connected to Server: <socket.socket fd=712, family=2, type=1, proto=0, laddr=('10.42.0.5', 46780), raddr=('10.42.0.1', 65432)>
-INFO:root:websocketClient: Connected to Server: <socket.socket fd=712, family=2, type=1, proto=0, laddr=('10.42.0.5', 46782), raddr=('10.42.0.1', 65432)>
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
+INFO:root:websocketClient: Connected to Server: <socket.socket fd=780, family=2, type=1, proto=0, laddr=('10.42.0.5', 47190), raddr=('10.42.0.1', 65432)>
+INFO:root:websocketClient: Connected to Server: <socket.socket fd=396, family=2, type=1, proto=0, laddr=('10.42.0.5', 47191), raddr=('10.42.0.1', 65432)>
+INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set","comp":"on"}'
 INFO:root:State Machine: check_cmd_que
+INFO:root:StateMachine: Command[0]:comp, Command[1]:True
+INFO:root:StateMachine: comp is set to True
 INFO:root:State Machine: wait_state
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:State Machine: wait_state
+INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set","fans":"on"}'
