@@ -102,7 +102,6 @@ class jsonParser:
         if (json_string):
             print(f"jsonParse: JSON String: {json_string}")
             #TODO WHY PROGRAM HANGS NEAR HERE WHEN SENDING COMMAND {"cmd":"set","fans":"on"}
-            print("This ")
             #json_string = json_string.replace("\n", " ").replace("\r", " ")
             try:
                 command_dic = json.loads(json_string)
@@ -122,9 +121,19 @@ class jsonParser:
             #print(f" cmd: {cmd}")
             if (cmd == "set"):
                 #print("Set Command Received")
+                #TODO RETURN KEYS THEN CHECK AGAINST OUTPUT LISTS - DONE
+                key_list = list(command_dic.keys())
+                if any(x in key_list for x in self.outputs_list):
+                    print("jsonParse: key exists")
+                else:
+                    print("jsonParse: KEY DOES NOT EXIST")
+                    glbs.update_error_status(3, f"jsonParse: keys:{key_list} do not exist. Unable to parse json Message")
+                #TODO Do not like the function of below - iterates through all named inputs and checks if any value in the command dictionary matches it
+                #clunky
                 for output in self.outputs_list:
                     #print(f"checking output: {output}")
                     # This will only look for items with defined names, if other names are used no error return but also no unexpected function
+                    #TODO THIS NEED TO RETURN ERROR IF NAME NOT MATCHED
                     state = command_dic.get(output.casefold())
                     #print(f"{output} State: {state}")
                     if state == None:
