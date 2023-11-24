@@ -77,9 +77,16 @@ while(exceptions < 2):
     except KeyboardInterrupt:
         print("Caught keyboard interrupt, exiting")
         break
-    except:
+    except Exception as ex:  ## generic exception handler
+        glbs.generic_exception_handler(ex)
         print("Exception Handled, restarting")
         exceptions += 1
 print("Program Quit")
+
+
+
+
+
+
 
 

@@ -36,6 +36,7 @@ def websocketClient():
                         if not error:
                             print("JSON Message Parsed - Queue Updated")
                             print(f"output queue: {glbs.set_outputs_queue}")
+                            glbs.command_received = True
                             success_code = "0"
                             s.sendall(success_code.encode("UTF-8"))
                         else:
@@ -46,6 +47,9 @@ def websocketClient():
                     print("Caught Connection Error, restarting")
     except KeyboardInterrupt:
         print("Caught keyboard interrupt, exiting")
+    except Exception as ex:
+        glbs.generic_exception_handler(ex)
+        raise
 
         #time.sleep(5)
 

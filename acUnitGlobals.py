@@ -2,7 +2,8 @@
  acUnit Global variable and type definitions
 
 '''
-
+import traceback   ## for debugging
+import pdb         ## most mortum analysis
 import jsonPacker
 import jsonParser
 import acUnitHardware
@@ -13,8 +14,9 @@ acUnitState = "init"
 
 valve_list = ["V1","V2","V3","V4","V5","V6","V7","V8"]
 relay_data_list = ["W1","W2","comp"]
-relay_alt_names = ["W1","W2", "fans", "comp"]
-outputs_list = valve_list + relay_alt_names
+fan_names = ["W1","W2", "fans", "fan"]
+compressor_names = ["comp", "compressor", "pump"]
+outputs_list = valve_list + relay_data_list
 ps_list = ["PS1","PS2","PS3"]
 ts_list = ["TS1","TS2","TS3","TS4","TS5"]
 sense_misc_list = ["flow", "power", "APS", "ATS"]
@@ -56,7 +58,6 @@ def update_error_status(error_code=0, error_message= " "):
         error_status[2] += (error_message + ", ")
         last_error =  error_code
 
-
 '''
   "ok": "True",
         "state": " ",
@@ -64,9 +65,6 @@ def update_error_status(error_code=0, error_message= " "):
         "message":" "
 '''
 
-def update_error(error_code, error_message):
-    error_tuple = (error_code, error_message)
-    return error_tuple
 
 
 acUnit_dictionary = {
@@ -197,3 +195,11 @@ acUnit_dictionary = {
     }
 }
 
+def generic_exception_handler(ex):
+    template = "An exception of type {0} occured. Arguments: \n{1!r}"
+    message = template.format(type(ex).__name__, ex.args)
+    print(message)
+    print(" ")
+    print(traceback.format_exc())
+    pdb.post_mortem()
+    print("Program Error")

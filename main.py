@@ -14,8 +14,7 @@ import asyncio
 from threading import Thread
 thread_running = True
 
-import traceback   ## for debugging
-import pdb
+
 
 import acUnitGlobals as glbs
 import acUnitStateMachine
@@ -23,6 +22,7 @@ import time
 
 import sensorObjects as so
 
+import websocketClient as wsc
 
 parse = glbs.jsonParse
 
@@ -93,13 +93,10 @@ def gather_data(iteration=0):
         pack.load_status_data()
         ## Dump data into JSON format
         #pack.dump_json()
-        #
         iteration += 1
         #await asyncio.sleep(1)
         time.sleep(0.9899)
         #benchmark_process(loop_start_time)
-
-        #pack.dump_json()
         #print(iteration)
         #return iteration
 
@@ -129,7 +126,10 @@ def local_json_interface(iteration=0):
         #time.sleep(1)
     #await asyncio.sleep(1)
 
-
+def websocket_json_interface():
+    global thread_running
+    while(thread_running):
+        wsc.websocketClient()
 
 
 
@@ -180,21 +180,22 @@ def main():
     i = 0
     global thread_running
     try:
-        #t1 = Thread(target=state_machine)
+        t1 = Thread(target=state_machine)
         t2 = Thread(target=gather_data)
+        t3 = Thread(target=websocket_json_interface)
         #t3 = Thread(target=json_interface)
 
-        #t2.daemon = True
-        #t3.daemon = True
+        t2.daemon = True
+        t3.daemon = True
 
 
-        #t1.start()
+        t1.start()
         t2.start()
-        #t3.start()
+        t3.start()
 
         #t1.join()
-        #t2.join()
-        #t3.join()
+        t2.join()
+        t3.join()
 
         #while t1.isAlive():
         #    do.you.subthread.thing()
@@ -211,18 +212,21 @@ def main():
         i = i+1
     except SystemExit or KeyboardInterrupt:
         print("User Terminated Program")
-    except Exception as ex:  ## generic exception handler
-        template = "An exception of type {0} occured. Arguments: \n{1!r}"
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
         thread_running = False
-        print(" ")
-        #t1.join()
-        #t2.join()
-        #t3.join()
-        print(traceback.format_exc())
-        pdb.post_mortem()
-        print("Program Error")
+        t1.join()
+        t2.join()
+        t3.join()
+    except Exception as ex:  ## generic exception handler
+        glbs.generic_exception_handler(ex)
+        thread_running = False
+        #template = "An exception of type {0} occured. Arguments: \n{1!r}"
+        #message = template.format(type(ex).__name__, ex.args)
+        #print(message)
+        #thread_running = False
+        #print(" ")
+        #print(traceback.format_exc())
+        #pdb.post_mortem()
+        #print("Program Error")
         raise
 
 
