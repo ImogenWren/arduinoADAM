@@ -3,6 +3,13 @@
 
  Current Testing Instructions:
 
+ ## Prerequisits
+`Python3`
+External modules used:
+`pyModbusTCP`
+`numpy`
+I believe this was all that was nessissary to install to run the software on RPi Ubuntu
+
 ## Setup
  1. Ensure that `manualServer.py` HOST variable is set to loopback address `127.0.0.1` OR address of server host.
  2. Ensure that `websocketClient.py` HOST variable is set to same address as server
