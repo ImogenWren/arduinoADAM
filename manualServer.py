@@ -52,7 +52,7 @@ while(exceptions < 2):
                         #print(iteration)
                         print(f"JSON Valid? {json_valid}")
                         if stop == False and json_valid == True:
-                            print("Sending a command you cant stop me")
+                            #print("Sending a command you cant stop me")
                             json_command = json_input.encode("UTF-8")
                             conn.sendall(json_command)
                             data = conn.recv(2048)
@@ -74,12 +74,22 @@ while(exceptions < 2):
                         if (stop):
                             break
                         #time.sleep(1)
+    except ConnectionResetError:
+        print("Caught Connection Reset Error: Likely Cause Client Drop Connection")
+        print("Restarting")
     except KeyboardInterrupt:
         print("Caught keyboard interrupt, exiting")
         break
-    except:
+    except Exception as ex:  ## generic exception handler
+        glbs.generic_exception_handler(ex)
         print("Exception Handled, restarting")
         exceptions += 1
 print("Program Quit")
+
+
+
+
+
+
 
 

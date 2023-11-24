@@ -23,11 +23,6 @@ Library to parse JSON messages and output state as a string?
 {"set:"V_comp","state:"false"}
 
 
-# GET COMMANDS
-- Get commands for data return entire data packet for all values
-{"cmd":"get"} - get all data
-{"get":"V1"}
-{"get":"all"}
 
 
 
@@ -36,12 +31,12 @@ https://www.w3schools.com/python/python_json.asp
 """
 
 import json
-from typing import List, Any
 import acUnitGlobals as glbs
 
-#test_command = '{"set":"V1", "state":"open"}'
-import asyncio
 
+
+
+## Proposed command set
 json_commands = {
     "set" : {
         "V1" : 0,
@@ -54,7 +49,8 @@ json_commands = {
         "V8" : 0,
         "W1" : 0,
         "W2" : 0,
-        "V_comp" : 0,
+        "comp" : 0,
+        "fans" : 0
     },
     "get" : {
         "data" : 0,
@@ -64,7 +60,7 @@ json_commands = {
     "change" : 0
 }
 
-test_command = '{"cmd": "set", "V1": "open", "v2":"ON", "V3":"OPEN", "V_comp":"OFF", "w1":"true", "w2":"close"}'
+test_command = '{"cmd": "set", "V1": "open", "v2":"ON", "V3":"OPEN", "comp":"OFF", "w1":"true", "w2":"close"}'
 test_2 = '{"cmd": "change", "state":5}'
 test_3 = '{"cmd":"get"}'
 test_4 = '{"cmd":"change", "state": "manual"}'
@@ -104,13 +100,14 @@ class jsonParser:
 
     def parse_json(self, json_string):
         if (json_string):
-            print(f"JSON String: {json_string}")
+            print(f"jsonParse: JSON String: {json_string}")
+            #TODO WHY PROGRAM HANGS NEAR HERE WHEN SENDING COMMAND {"cmd":"set","fans":"on"}
             #json_string = json_string.replace("\n", " ").replace("\r", " ")
             try:
                 command_dic = json.loads(json_string)
             except ValueError:
-                glbs.update_error_status(1, "Error: ValueError Unknown JSON string")
-                print("Error: ValueError Unknown JSON string")
+                glbs.update_error_status(1, "jsonParse: Error: ValueError Unknown JSON string")
+                print("jsonParse: Error: ValueError Unknown JSON string")
                 return 1
             ## function to make all values lowercase
             try:
@@ -118,16 +115,25 @@ class jsonParser:
                 #print(f" Command Dic: {command_dic}")
                 cmd = command_dic.get("cmd")   ## NOTE better method for extracting from dictionary
             except:
-                print(f"Error Extracting cmd from JSON")
-                glbs.update_error_status(1, "Error: ValueError Unknown JSON string")
+                print(f"jsonParse: Error Extracting cmd from JSON")
+                glbs.update_error_status(1, "jsonParse: Error: ValueError Unknown JSON string")
                 return 1
             #print(f" cmd: {cmd}")
             if (cmd == "set"):
-                print("Set Command Received")
-                #set_outputs = []
+                #print("Set Command Received")
+                #TODO RETURN KEYS THEN CHECK AGAINST OUTPUT LISTS - DONE
+                key_list = list(command_dic.keys())
+                if any(x in key_list for x in self.outputs_list):
+                    print("jsonParse: key exists")
+                else:
+                    print("jsonParse: KEY DOES NOT EXIST")
+                    glbs.update_error_status(3, f"jsonParse: keys:{key_list} do not exist. Unable to parse json Message")
+                #TODO Do not like the function of below - iterates through all named inputs and checks if any value in the command dictionary matches it
+                #clunky
                 for output in self.outputs_list:
                     #print(f"checking output: {output}")
                     # This will only look for items with defined names, if other names are used no error return but also no unexpected function
+                    #TODO THIS NEED TO RETURN ERROR IF NAME NOT MATCHED
                     state = command_dic.get(output.casefold())
                     #print(f"{output} State: {state}")
                     if state == None:
@@ -136,23 +142,25 @@ class jsonParser:
                     else:
                         state = state.lower()
                     if state in [x.lower() for x in self.true_words] or state == True:
-                        glbs.set_outputs_queue.append(output)
-                        glbs.set_outputs_queue.append(True)
+                        glbs.command_queue.append(output)
+                        glbs.command_queue.append(True)
+                        glbs.command_received = True
                     elif state in [x.lower() for x in self.false_words] or state == False:
-                        glbs.set_outputs_queue.append(output)
-                        glbs.set_outputs_queue.append(False)
+                        glbs.command_queue.append(output)
+                        glbs.command_queue.append(False)
+                        glbs.command_received = True
                     else:
-                        glbs.update_error_status(2, f"Error: No Value found for: {cmd}:{output}:{state}")
+                        glbs.update_error_status(2, f"jsonParse: Error: No Value found for: {cmd}:{output}:{state}")
                         return 2
                 return(0)
             elif (cmd == "get"):
-                print("Get Command Received")
+                print("jsonParse: Get Command Received")
                 return 3
             elif (cmd == None):
-                glbs.update_error_status(4, "Error: cmd returned NoneType")
+                glbs.update_error_status(4, "jsonParse: Error: cmd returned NoneType")
                 return 4
             else:
-                glbs.update_error_status(5, "Error: Unable to Parse JSON cmd")
+                glbs.update_error_status(5, "jsonParse: Error: Unable to Parse JSON cmd")
                 return 5
         else:
             return 6
@@ -172,7 +180,7 @@ class jsonParser:
 
 
     def dump_json(self, dictionary):
-        self.json_template = json.dumps(self.data_dic, indent=2)
+        self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
         print(self.json_template)
         return self.json_template
 
