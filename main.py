@@ -13,14 +13,18 @@ https://stackoverflow.com/questions/71969640/how-to-print-countdown-timer-and-ac
 import asyncio
 from threading import Thread
 thread_running = True
+
+import traceback   ## for debugging
+import pdb
+
 import acUnitGlobals as glbs
 import acUnitStateMachine
 import time
 
 import sensorObjects as so
-import jsonParse
 
-parse = jsonParse.jsonParser()
+
+parse = glbs.jsonParse
 
 # Renaming global variables to reduce number of things.with.references.to.other.things
 hw = glbs.acHardware
@@ -95,7 +99,7 @@ def gather_data(iteration=0):
         time.sleep(0.9899)
         #benchmark_process(loop_start_time)
 
-        pack.dump_json()
+        #pack.dump_json()
         #print(iteration)
         #return iteration
 
@@ -111,7 +115,7 @@ def benchmark_process(process_start_time):
     print(f"Average Loop Time: {average_loop_time}")
 
 #async def json_interface(iteration=0):
-def json_interface(iteration=0):
+def local_json_interface(iteration=0):
     global thread_running
     while(thread_running):
         command = parse.user_input_json()
@@ -124,6 +128,10 @@ def json_interface(iteration=0):
         iteration += 1
         #time.sleep(1)
     #await asyncio.sleep(1)
+
+
+
+
 
 
 #TODO Move this to JSON parser
@@ -173,7 +181,7 @@ def main():
     global thread_running
     try:
         #t1 = Thread(target=state_machine)
-        #t2 = Thread(target=gather_data)
+        t2 = Thread(target=gather_data)
         #t3 = Thread(target=json_interface)
 
         #t2.daemon = True
@@ -201,12 +209,22 @@ def main():
         #loop = asyncio.get_event_loop()
 
         i = i+1
-    except:
+    except SystemExit or KeyboardInterrupt:
+        print("User Terminated Program")
+    except Exception as ex:  ## generic exception handler
+        template = "An exception of type {0} occured. Arguments: \n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        print(message)
         thread_running = False
+        print(" ")
         #t1.join()
         #t2.join()
         #t3.join()
-        print("Program Halted or Error")
+        print(traceback.format_exc())
+        pdb.post_mortem()
+        print("Program Error")
+        raise
+
 
 
 
