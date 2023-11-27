@@ -1,10 +1,16 @@
 INFO:root:Logging Module Started
 INFO:root:State Machine: init_state
 INFO:root:State Machine: wait_state
-INFO:root:websocketClient: Connected to Server: <socket.socket fd=556, family=2, type=1, proto=0, laddr=('10.42.0.5', 47881), raddr=('10.42.0.1', 65432)>
-INFO:root:websocketClient: Connected to Server: <socket.socket fd=760, family=2, type=1, proto=0, laddr=('10.42.0.5', 47887), raddr=('10.42.0.1', 65432)>
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set","fans":"on"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:StateMachine: Command[0]:fans, Command[1]:True
-INFO:root:StateMachine: fans is set to True
-INFO:root:State Machine: wait_state
+ERROR:root:websocketClient Generic Exception Handler Triggered: cannot access local variable 'connection_error' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\commandClient.py", line 27, in commandClient
+    s.connect((HOST, PORT))
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\commandClient.py", line 53, in commandClient
+    print(f"Caught Connection Error, number since last connect: {connection_error}")
+                                                                 ^^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'connection_error' where it is not associated with a value

@@ -24,12 +24,14 @@ import time
 
 import sensorObjects as so
 
-import websocketClient as wsc
+import commandClient as cc
+import reportingClient as rc
 
-parse = glbs.jsonParse
+
 
 # Renaming global variables to reduce number of things.with.references.to.other.things
 hw = glbs.acHardware
+parse = glbs.jsonParse
 pack = glbs.jsonPack
 # State machine must be defined here to avoid circular references
 #sm = acUnitStateMachine.init_state()
@@ -131,11 +133,15 @@ def local_json_interface(iteration=0):
         #time.sleep(1)
     #await asyncio.sleep(1)
 
-def websocket_json_interface():
+def command_client():
     global thread_running
     while(thread_running):
-        wsc.websocketClient()
+        cc.commandClient()
 
+def reporting_client():
+    global thread_running
+    while(thread_running):
+        rc.reportingClient()
 
 
 
@@ -188,20 +194,22 @@ def main():
     try:
         t1 = Thread(target=state_machine)
         t2 = Thread(target=gather_data)
-        t3 = Thread(target=websocket_json_interface)
-        #t3 = Thread(target=json_interface)
+        t3 = Thread(target=command_client)
+        #t4 = Thread(target=reporting_client)
 
         t2.daemon = True
         t3.daemon = True
-
+        #t4.daemon = True
 
         t1.start()
         t2.start()
         t3.start()
+        #t4.start()
 
         #t1.join()
         t2.join()
         t3.join()
+        #t4.join()
 
         #while t1.isAlive():
         #    do.you.subthread.thing()
@@ -222,6 +230,7 @@ def main():
         t1.join()
         t2.join()
         t3.join()
+        #t4.join()
     except Exception as ex:  ## generic exception handler
         glbs.generic_exception_handler(ex, "main")
         thread_running = False

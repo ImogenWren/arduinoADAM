@@ -6,7 +6,7 @@ https://stackoverflow.com/questions/2101961/python-state-machine-design
 '''
 import time
 
-import time
+
 #print(time.time())
 
 #print(round(time.time()))
