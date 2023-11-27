@@ -3,14 +3,14 @@ INFO:root:State Machine: init_state
 INFO:root:State Machine: wait_state
 ERROR:root:websocketClient Generic Exception Handler Triggered: cannot access local variable 'connection_error' where it is not associated with a value
 Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\commandClient.py", line 27, in commandClient
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 33, in reportingClient
     s.connect((HOST, PORT))
 ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\commandClient.py", line 53, in commandClient
-    print(f"Caught Connection Error, number since last connect: {connection_error}")
-                                                                 ^^^^^^^^^^^^^^^^
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 47, in reportingClient
+    print(f"reportingClient: Caught Connection Error, number since last connect: {connection_error}")
+                                                                                  ^^^^^^^^^^^^^^^^
 UnboundLocalError: cannot access local variable 'connection_error' where it is not associated with a value

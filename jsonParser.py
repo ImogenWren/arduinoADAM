@@ -123,7 +123,7 @@ class jsonParser:
                 #print("Set Command Received")
                 #TODO RETURN KEYS THEN CHECK AGAINST OUTPUT LISTS - DONE
                 key_list = list(command_dic.keys())
-                if any(x in key_list for x in self.outputs_list):
+                if any(x.lower() in key_list for x in self.outputs_list) or any(x.upper() in key_list for x in self.outputs_list):
                     print("jsonParse: key exists")
                 else:
                     print("jsonParse: KEY DOES NOT EXIST")
