@@ -53,7 +53,8 @@ CRITICAL: Serious error indicating software may be unable to continue running
 default is WARNING, everything below this level is logged
 '''
 def init_logging():
-    logging.basicConfig(filename='acunit.log', filemode='w', encoding='utf-8', level=logging.DEBUG)
+    logging.basicConfig(filename='acunit.log', filemode='w', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
     logging.info("Logging Module Started")
 
 

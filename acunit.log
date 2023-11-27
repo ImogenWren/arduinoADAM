@@ -1,20 +1,10 @@
-INFO:root:Logging Module Started
-INFO:root:State Machine: init_state
-INFO:root:State Machine: wait_state
-INFO:root:reportingClient: Connected to Server: <socket.socket fd=780, family=2, type=1, proto=0, laddr=('10.42.0.5', 23375), raddr=('10.42.0.1', 65433)>
-INFO:root:websocketClient: Connected to Server: <socket.socket fd=492, family=2, type=1, proto=0, laddr=('10.42.0.5', 23374), raddr=('10.42.0.1', 65432)>
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:StateMachine: Command[0]:V1, Command[1]:True
-INFO:root:StateMachine: V1 is set to True
-INFO:root:State Machine: wait_state
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:StateMachine: Command[0]:V1, Command[1]:True
-INFO:root:StateMachine: V1 is set to True
-INFO:root:State Machine: wait_state
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:StateMachine: Command[0]:V1, Command[1]:True
-INFO:root:StateMachine: V1 is set to True
-INFO:root:State Machine: wait_state
+2023-11-27 16:30:48 INFO     Logging Module Started
+2023-11-27 16:30:48 INFO     State Machine: init_state
+2023-11-27 16:30:48 INFO     State Machine: wait_state
+2023-11-27 16:30:48 INFO     websocketClient: Connected to Server: <socket.socket fd=748, family=2, type=1, proto=0, laddr=('10.42.0.5', 24094), raddr=('10.42.0.1', 65432)>
+2023-11-27 16:30:48 INFO     websocketClient: JSON Message Parsed: b' {"cmd":"set", "V1":"open"}'
+2023-11-27 16:30:48 INFO     State Machine: check_cmd_que
+2023-11-27 16:30:48 INFO     reportingClient: Connected to Server: <socket.socket fd=492, family=2, type=1, proto=0, laddr=('10.42.0.5', 24095), raddr=('10.42.0.1', 65433)>
+2023-11-27 16:30:48 INFO     StateMachine: Command[0]:V1, Command[1]:True
+2023-11-27 16:30:48 INFO     StateMachine: V1 is set to True
+2023-11-27 16:30:48 INFO     State Machine: wait_state
