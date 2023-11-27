@@ -33,7 +33,7 @@ def reportingClient():
                 try:
                     s.connect((HOST, PORT))
                     print(f"Connected to {s}")
-                    glbs.logging.info(f"websocketClient: Connected to Server: {s}")
+                    glbs.logging.info(f"reportingClient: Connected to Server: {s}")
                     connection_error = 0
                     init_time = time.time()
                     while(1):
@@ -49,7 +49,7 @@ def reportingClient():
                         time.sleep(1)
                 except ConnectionError:
                     print(f"reportingClient: Caught Connection Error, number since last connect: {connection_error}")
-                    if connection_error > 1:  ## prevent this being written to log over and over
+                    if connection_error < 1:  ## prevent this being written to log over and over
                         print("reportingClient: logging exception as first instance")
                         glbs.logging.exception(f"reportingClient: Caught Connection Error, restarting")
                     connection_error += 1

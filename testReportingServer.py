@@ -30,7 +30,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print(f"Connected by {addr}")
         #s.setblocking(False)
         while True:
-            data = conn.recv(1024)
+            data = conn.recv(2048)
+            print(data)
             data_dic = pack.unpack_json(data)
             print(data_dic)
             if not data:
