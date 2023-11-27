@@ -33,7 +33,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             data = conn.recv(2048)
             print(data)
             data_dic = pack.unpack_json(data)
-            print(data_dic)
+            pack.print_json(data_dic)
             if not data:
                 break
             else:
