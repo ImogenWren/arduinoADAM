@@ -64,9 +64,9 @@ class jsonPacker:
         self.status_list = glbs.status_list
 
     def dump_json(self):
-        self.json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
-        print(self.json_template)
-        return self.json_template
+        json_template = json.dumps(glbs.acUnit_dictionary, indent=2)
+        #print(json_template)
+        return json_template
 
     def print_json(self, dic):
         json_print = json.dumps(dic, indent=2)
