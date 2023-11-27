@@ -54,12 +54,12 @@ def commandClient():
                     print(f"Caught Connection Error, number since last connect: {connection_error}")
                     if connection_error < 1:  ## prevent this being written to log over and over
                         print("logging exception as first instance")
-                        glbs.logging.exception(f"websocketClient: Caught Connection Error, restarting")
+                        glbs.logging.exception(f"commandClient: Caught Connection Error, restarting")
                     connection_error += 1
     except KeyboardInterrupt:
-        print("Caught keyboard interrupt, exiting")
+        print("commandClient: Caught keyboard interrupt, exiting")
     except Exception as ex:
-        glbs.generic_exception_handler(ex, "websocketClient")
+        glbs.generic_exception_handler(ex, "commandClient")
         raise
 
         #time.sleep(5)

@@ -37,13 +37,16 @@ def reportingClient():
                     connection_error = 0
                     init_time = time.time()
                     while(1):
-                        if time.time() - init_time >= json_delay:
+                        elapsed_time = time.time() - init_time
+                        print(f"reportingClient: init_time={init_time}, Time.time = {time.time()}, diff={elapsed_time}")
+                        if elapsed_time >= json_delay:
                             print("reportingClient: Sending JSON reply")
                             json_message = pack.dump_json()
                             s.sendall(json_message.encode("UTF-8"))
                             init_time = time.time()
-                        data = s.recv(1024)
-                        print(data)
+                            data = s.recv(1024)
+                            print(data)
+                        time.sleep(1)
                 except ConnectionError:
                     print(f"reportingClient: Caught Connection Error, number since last connect: {connection_error}")
                     if connection_error > 1:  ## prevent this being written to log over and over
@@ -53,7 +56,7 @@ def reportingClient():
     except KeyboardInterrupt:
         print("reportingClient: Caught keyboard interrupt, exiting")
     except Exception as ex:
-        glbs.generic_exception_handler(ex, "websocketClient")
+        glbs.generic_exception_handler(ex, "reportingClient")
         raise
 
         #time.sleep(5)
