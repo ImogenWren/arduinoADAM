@@ -11,18 +11,21 @@ External modules used:
 I believe this was all that was nessissary to install to run the software on RPi Ubuntu
 
 ## Setup
- 1. Ensure that `manualServer.py` HOST variable is set to loopback address `127.0.0.1` OR address of server host.
- 2. Ensure that `websocketClient.py` HOST variable is set to same address as server
- 3. If testing without hardware, ensure that `simulate_hardware = True` set in `acUnitGlobals.py`
- 4. Run `manualServer.py`
- 5. Run `main.py`. It should connect to server with no issues
+ 1. Ensure that `testCommandServer.py` HOST variable is set to loopback address `127.0.0.1` OR address of server host.
+ 2. Ensure that `testReportingServer.py` HOST variable is set to loopback address `127.0.0.1` OR address of server host.
+ 3. Ensure that `commandClient.py` HOST variable is set to same address as server
+ 4. Ensure that `reportingClient.py` HOST variable is set to same address as server
+ 5. If testing without hardware, ensure that `simulate_hardware = True` set in `acUnitGlobals.py`
+ 6. Run `testCommandServer.py` and `testReportingServer.py` on host server
+ 7. Run `main.py` on client server (raspberrypi/SBC in final implementation) It should connect to server with no issues
 
 ## Operation
-Enter commands as prompted in `manualServer.py` CLI. Track changes in state and function using CLI for `main.py`. view logfile during operation for debug messages, based on logging level set in `init_logging` in `acUnitGlobals`
+1. Enter commands as prompted in `testCommandServer.py` CLI. Track changes in state and function using CLI for `main.py`. view logfile during operation for debug messages, based on logging level set in `init_logging` in `acUnitGlobals`
+2. Ensure that JSON messages reported by `testReportingServer.py` display "correct" values (if simulated hardware these values somewhat random and static at the moment
 
 ## Issues
 
-1. NOTE: 1st command sent from `manualServer.py` causes websocket to loose connection & reset. All commands after this should be handled normally.
+1. NOTE: 1st command sent from `testCommandServer.py` causes websocket to loose connection & reset. All commands after this should be handled normally.
 
 ## Command Examples
 `{"cmd":"set","{item}":"{state}"}`
@@ -61,3 +64,5 @@ All the following words evaluate to False:
 "close","shut","closed","off","false","low","stop"
     
 ```
+
+
