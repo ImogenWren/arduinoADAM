@@ -21,6 +21,7 @@ TESTHOST = "10.42.0.1"
 HOST = TESTHOST
 PORT = 65433   ## command server is port 65432
 
+iteration = 0
 print("Test Reporting Server: Starting")
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -30,6 +31,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print(f"Connected by {addr}")
         #s.setblocking(False)
         while True:
+
             data = conn.recv(2048)
             print(data)
             data_dic = pack.unpack_json(data)
@@ -39,6 +41,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             else:
                 success = "0"
                 conn.sendall(success.encode("UTF-8"))
+                print(f"iteration:{iteration}")
+                iteration +=1
 
         '''
         except ConnectionResetError:
