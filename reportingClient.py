@@ -40,18 +40,19 @@ def reportingClient():
                         elapsed_time = time.time() - init_time
                         #print(f"reportingClient: init_time={init_time}, Time.time = {time.time()}, diff={elapsed_time}")
                         if elapsed_time >= json_delay:
-                            print("reportingClient: Sending JSON reply")
+                            #print("reportingClient: Sending sensor data JSON message")
                             json_message = pack.dump_json()
                             s.sendall(json_message.encode("UTF-8"))
                             init_time = time.time()
                             data = s.recv(1024)
                             message = int(data.decode())
-                            print(f" Response: {message}")
+                            #print(f" Response: {message}")
                             if message == 0:
-                                print("Success")
+                                continue
+                                #print("reportingClient: Success sending JSON data Message")
                             else:
                                 print("reportingClient: JSON Message failed to send")
-
+                                glbs.logging.error(f"reportingClient: JSON Message failed to send")
                         time.sleep(1)
                 except ConnectionError:
                     print(f"reportingClient: Caught Connection Error, number since last connect: {connection_error}")

@@ -1,10 +1,4 @@
 INFO:root:Logging Module Started
 INFO:root:State Machine: init_state
 INFO:root:State Machine: wait_state
-INFO:root:reportingClient: Connected to Server: <socket.socket fd=376, family=2, type=1, proto=0, laddr=('10.42.0.5', 23087), raddr=('10.42.0.1', 65433)>
-ERROR:root:reportingClient: Caught Connection Error, restarting
-Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 47, in reportingClient
-    data = s.recv(1024)
-           ^^^^^^^^^^^^
-ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+INFO:root:reportingClient: Connected to Server: <socket.socket fd=708, family=2, type=1, proto=0, laddr=('10.42.0.5', 23335), raddr=('10.42.0.1', 65433)>

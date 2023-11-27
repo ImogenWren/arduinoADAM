@@ -21,10 +21,11 @@ TESTHOST = "10.42.0.1"
 HOST = TESTHOST
 PORT = 65433   ## command server is port 65432
 
-iteration = 0
+
 print("Test Reporting Server: Starting")
 while (1):
     try:
+        iteration = 0
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
             s.listen()
@@ -42,7 +43,7 @@ while (1):
                     else:
                         success = "0"
                         conn.sendall(success.encode("UTF-8"))
-                        print(f"iteration:{iteration}")
+                        print(f"iterations since last drop: {iteration}")
                         iteration +=1
     except ConnectionResetError:
         print("Caught Connection Reset Error: Likely Cause Client Drop Connection")
