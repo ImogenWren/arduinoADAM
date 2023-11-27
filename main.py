@@ -194,21 +194,21 @@ def main():
     try:
         t1 = Thread(target=state_machine)
         t2 = Thread(target=gather_data)
-        #t3 = Thread(target=command_client)
+        t3 = Thread(target=command_client)
         t4 = Thread(target=reporting_client)
 
         t2.daemon = True
-        #t3.daemon = True
+        t3.daemon = True
         t4.daemon = True
 
         t1.start()
         t2.start()
-        #t3.start()
+        t3.start()
         t4.start()
 
         #t1.join()
         t2.join()
-        #t3.join()
+        t3.join()
         t4.join()
 
         #while t1.isAlive():
@@ -229,7 +229,7 @@ def main():
         thread_running = False
         t1.join()
         t2.join()
-        #t3.join()
+        t3.join()
         t4.join()
     except Exception as ex:  ## generic exception handler
         glbs.generic_exception_handler(ex, "main")

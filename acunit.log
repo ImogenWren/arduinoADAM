@@ -1,4 +1,20 @@
 INFO:root:Logging Module Started
 INFO:root:State Machine: init_state
 INFO:root:State Machine: wait_state
-INFO:root:reportingClient: Connected to Server: <socket.socket fd=708, family=2, type=1, proto=0, laddr=('10.42.0.5', 23335), raddr=('10.42.0.1', 65433)>
+INFO:root:reportingClient: Connected to Server: <socket.socket fd=780, family=2, type=1, proto=0, laddr=('10.42.0.5', 23375), raddr=('10.42.0.1', 65433)>
+INFO:root:websocketClient: Connected to Server: <socket.socket fd=492, family=2, type=1, proto=0, laddr=('10.42.0.5', 23374), raddr=('10.42.0.1', 65432)>
+INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
+INFO:root:State Machine: check_cmd_que
+INFO:root:StateMachine: Command[0]:V1, Command[1]:True
+INFO:root:StateMachine: V1 is set to True
+INFO:root:State Machine: wait_state
+INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
+INFO:root:State Machine: check_cmd_que
+INFO:root:StateMachine: Command[0]:V1, Command[1]:True
+INFO:root:StateMachine: V1 is set to True
+INFO:root:State Machine: wait_state
+INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
+INFO:root:State Machine: check_cmd_que
+INFO:root:StateMachine: Command[0]:V1, Command[1]:True
+INFO:root:StateMachine: V1 is set to True
+INFO:root:State Machine: wait_state
