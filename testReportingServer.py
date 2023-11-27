@@ -23,29 +23,28 @@ PORT = 65433   ## command server is port 65432
 
 iteration = 0
 print("Test Reporting Server: Starting")
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind((HOST, PORT))
-    s.listen()
-    conn, addr = s.accept()
-    with conn:
-        print(f"Connected by {addr}")
-        #s.setblocking(False)
-        while True:
-
-            data = conn.recv(2048)
-            print(data)
-            data_dic = pack.unpack_json(data)
-            pack.print_json(data_dic)
-            if not data:
-                break
-            else:
-                success = "0"
-                conn.sendall(success.encode("UTF-8"))
-                print(f"iteration:{iteration}")
-                iteration +=1
-
-        '''
-        except ConnectionResetError:
+while (1):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((HOST, PORT))
+            s.listen()
+            conn, addr = s.accept()
+            with conn:
+                print(f"Connected by {addr}")
+                #s.setblocking(False)
+                while True:
+                    data = conn.recv(4096)
+                    print(data)
+                    data_dic = pack.unpack_json(data)
+                    pack.print_json(data_dic)
+                    if not data:
+                        break
+                    else:
+                        success = "0"
+                        conn.sendall(success.encode("UTF-8"))
+                        print(f"iteration:{iteration}")
+                        iteration +=1
+    except ConnectionResetError:
         print("Caught Connection Reset Error: Likely Cause Client Drop Connection")
         print("Restarting")
     except KeyboardInterrupt:
@@ -54,8 +53,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     except Exception as ex:  ## generic exception handler
         glbs.generic_exception_handler(ex)
         print("Exception Handled, restarting")
-        exceptions += 1
-        '''
+        #exceptions += 1
 print("Program Quit")
 
 

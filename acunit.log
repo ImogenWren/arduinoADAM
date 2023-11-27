@@ -1,16 +1,10 @@
 INFO:root:Logging Module Started
 INFO:root:State Machine: init_state
 INFO:root:State Machine: wait_state
-ERROR:root:websocketClient Generic Exception Handler Triggered: cannot access local variable 'connection_error' where it is not associated with a value
-Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 33, in reportingClient
-    s.connect((HOST, PORT))
-ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
-
-During handling of the above exception, another exception occurred:
-
+INFO:root:reportingClient: Connected to Server: <socket.socket fd=376, family=2, type=1, proto=0, laddr=('10.42.0.5', 23087), raddr=('10.42.0.1', 65433)>
+ERROR:root:reportingClient: Caught Connection Error, restarting
 Traceback (most recent call last):
   File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 47, in reportingClient
-    print(f"reportingClient: Caught Connection Error, number since last connect: {connection_error}")
-                                                                                  ^^^^^^^^^^^^^^^^
-UnboundLocalError: cannot access local variable 'connection_error' where it is not associated with a value
+    data = s.recv(1024)
+           ^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
