@@ -20,7 +20,7 @@ pack = glbs.jsonPack
 #TESTHOST = "10.42.0.1"
 #HOST = TESTHOST
 HOST = glbs.REPORT_SERVER_IP
-PORT = glbs.COMMAND_PORT   ## command server is port 65432
+PORT = glbs.REPORT_PORT   ## command server is port 65432
 
 
 
