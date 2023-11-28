@@ -8,6 +8,18 @@ import jsonPacker
 import jsonParser
 import acUnitHardware
 
+# USER OPTIONS
+COMMAND_SERVER_IP = "10.42.0.1"
+REPORT_SERVER_IP = "10.42.0.1"
+
+#SERVER_IP = "127.0.0.1"
+
+COMMAND_PORT = 65432
+REPORT_PORT = 65433
+
+simulate_hardware = False
+
+
 #Wrap all this inside a class?
 
 acUnitState = "init"
@@ -31,7 +43,7 @@ jsonPack = jsonPacker.jsonPacker()
 
 
 
-simulate_hardware = True
+
 command_received = False
 command_queue = []  ##  queue is processed by state machine untill empty
 
@@ -53,7 +65,8 @@ CRITICAL: Serious error indicating software may be unable to continue running
 default is WARNING, everything below this level is logged
 '''
 def init_logging():
-    logging.basicConfig(filename='acunit.log', filemode='w', encoding='utf-8', level=logging.DEBUG)
+    logging.basicConfig(filename='acunit.log', filemode='w', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(levelname)-8s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
     logging.info("Logging Module Started")
 
 

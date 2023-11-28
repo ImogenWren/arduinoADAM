@@ -17,9 +17,10 @@ import acUnitGlobals as glbs
 pack = glbs.jsonPack
 
 #HOST = "127.0.0.1"
-TESTHOST = "10.42.0.1"
-HOST = TESTHOST
-PORT = 65432
+#TESTHOST = "10.42.0.1"
+#HOST = TESTHOST
+HOST = glbs.COMMAND_SERVER_IP
+PORT = glbs.COMMAND_PORT
 
 TEST_COMMAND = '{"cmd":"set", "V1":"open"}'
 
@@ -28,7 +29,7 @@ exceptions = 0
 while(exceptions < 2):
     stop = False
     try:
-        print(f"Starting acUnit Manual Test Server:\nListening on {HOST}:{PORT}")
+        print(f"Starting acUnit Command Test Server:\nListening on {HOST}:{PORT}")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
             while (stop == False):

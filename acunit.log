@@ -1,20 +1,15 @@
-INFO:root:Logging Module Started
-INFO:root:State Machine: init_state
-INFO:root:State Machine: wait_state
-INFO:root:reportingClient: Connected to Server: <socket.socket fd=780, family=2, type=1, proto=0, laddr=('10.42.0.5', 23375), raddr=('10.42.0.1', 65433)>
-INFO:root:websocketClient: Connected to Server: <socket.socket fd=492, family=2, type=1, proto=0, laddr=('10.42.0.5', 23374), raddr=('10.42.0.1', 65432)>
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:StateMachine: Command[0]:V1, Command[1]:True
-INFO:root:StateMachine: V1 is set to True
-INFO:root:State Machine: wait_state
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:StateMachine: Command[0]:V1, Command[1]:True
-INFO:root:StateMachine: V1 is set to True
-INFO:root:State Machine: wait_state
-INFO:root:websocketClient: JSON Message Parsed: b'{"cmd":"set", "V1":"open"}'
-INFO:root:State Machine: check_cmd_que
-INFO:root:StateMachine: Command[0]:V1, Command[1]:True
-INFO:root:StateMachine: V1 is set to True
-INFO:root:State Machine: wait_state
+2023-11-28 15:42:11 INFO     Logging Module Started
+2023-11-28 15:42:11 INFO     State Machine: init_state
+2023-11-28 15:42:11 INFO     websocketClient: Connected to Server: <socket.socket fd=456, family=2, type=1, proto=0, laddr=('127.0.0.1', 5211), raddr=('127.0.0.1', 65432)>
+2023-11-28 15:42:13 ERROR    reportingClient: Caught Connection Error, restarting
+Traceback (most recent call last):
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 35, in reportingClient
+    s.connect((HOST, PORT))
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+2023-11-28 15:42:15 INFO     State Machine: wait_state
+2023-11-28 15:47:46 ERROR    commandClient: Caught Connection Error, restarting
+Traceback (most recent call last):
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\commandClient.py", line 40, in commandClient
+    data = s.recv(1024)
+           ^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host

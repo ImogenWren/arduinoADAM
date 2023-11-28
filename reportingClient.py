@@ -18,9 +18,10 @@ pack = glbs.jsonPack
 
 
 #HOST = "127.0.0.1"  # The server's hostname or IP address
-TESTHOST = "10.42.0.1"
-HOST = TESTHOST
-PORT = 65433  # The port used by the server
+#TESTHOST = "10.42.0.1"
+HOST = glbs.REPORT_SERVER_IP
+#HOST = TESTHOST
+PORT = glbs.REPORT_PORT  # The port used by the server
 
 json_delay = 1   ## time between json messages to server
 connection_error = 0

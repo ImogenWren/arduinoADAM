@@ -160,8 +160,10 @@ class acUnitHardware:
         compressorState = self.adamDIO_B.get_coil_state(2)
         if (compressorState[0] == state):
             print(f"Compressor set to {state}")
+            return 0
         else:
             print(f"Error Compressor state")
+            return 1
 
     def set_fans(self,state):
         self.adamDIO_B.set_coil(0, state)
@@ -176,6 +178,10 @@ class acUnitHardware:
             print(f"Fan B set to {state}")
         else:
             print(f"Error Setting Fan B state")
+        if (fanA_state[0] == state and fanB_state[0] == state):
+            return 0
+        else:
+            return 1
 
 
     def get_power_relays(self, sim_hw=False):
@@ -287,8 +293,8 @@ def main():
         time.sleep(1)
         iteration = iteration + 1
         ## Functions for setting acUnit State
-        #ac.set_valve(5, True)    ## abstracted method setting ac valve state
-        ##ac.set_valve(6, True)
+        ac.set_valve(5, True)    ## abstracted method setting ac valve state
+        ac.set_valve(6, True)
         #ac.set_compressor(True)
         #ac.set_fans(True)
         #time.sleep(5)

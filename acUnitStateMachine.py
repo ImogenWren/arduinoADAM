@@ -50,19 +50,27 @@ class init_state(stateMachine):
         self.__call += 1
         #state functions
         error = 0
+        time.sleep(2)  ## error connecting to adamDIO_A - too fast?
         if simulate_hardware:
             print("StateMachine: Simulate: Init Hardware")
         else:
-            error += hw.adamDIO_A.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  # direct method setting specific controller coil states
-            error += hw.adamDIO_B.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])  ## All direct hardware calls return 0 if success would like to add errors but leaving for later
-            error += hw.adamDIO_A.get_all_coils()
-            error += hw.adamDIO_B.get_all_coils()
-            error += hw.set_compressor(False)
-            error += hw.set_fans(False)
+            error = (hw.adamDIO_A.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0])) # direct method setting specific controller coil states
+            print(f"Set Coils adamDIO_A error code: {error}")
+            error =  (hw.adamDIO_B.set_all_coils([0, 0, 0, 0, 0, 0, 0, 0]))  ## All direct hardware calls return 0 if success would like to add errors but leaving for later
+            print(f"Set Coils adamDIO.B error code: {error}")
+            error =  (hw.adamDIO_A.get_all_coils())
+            error =  (hw.adamDIO_B.get_all_coils())
+            error =  (hw.set_compressor(False))
+            print(f"Set compressor error code: {error}")
+            error =  (hw.set_fans(False))
+            print(f"Set fans error code: {error}")
         #transition
         if error == 0:
             self.next_state(wait_state)
+            print("init completed no errors")
         else:
+            print("stateMachine: ERROR init failed")
+            glbs.update_error_status(9, "State Machine: ERROR init failed")  ## Errors are updated into global dictionary
             self.next_state(error_state)
 
 class error_state(stateMachine):
