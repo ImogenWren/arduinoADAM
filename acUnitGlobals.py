@@ -31,7 +31,7 @@ jsonPack = jsonPacker.jsonPacker()
 
 
 
-simulate_hardware = True
+simulate_hardware = False
 command_received = False
 command_queue = []  ##  queue is processed by state machine untill empty
 
