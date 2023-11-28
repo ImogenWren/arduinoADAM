@@ -19,7 +19,7 @@ pack = glbs.jsonPack
 
 #HOST = "127.0.0.1"  # The server's hostname or IP address
 #TESTHOST = "10.42.0.1"
-HOST = glbs.SERVER_IP
+HOST = glbs.REPORT_SERVER_IP
 #HOST = TESTHOST
 PORT = glbs.REPORT_PORT  # The port used by the server
 

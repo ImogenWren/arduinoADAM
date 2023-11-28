@@ -9,7 +9,9 @@ import jsonParser
 import acUnitHardware
 
 # USER OPTIONS
-SERVER_IP = "10.42.0.1"
+COMMAND_SERVER_IP = "10.42.0.1"
+REPORT_SERVER_IP = "10.42.0.1"
+
 #SERVER_IP = "127.0.0.1"
 
 COMMAND_PORT = 65432
