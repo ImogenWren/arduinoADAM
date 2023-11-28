@@ -29,7 +29,7 @@ exceptions = 0
 while(exceptions < 2):
     stop = False
     try:
-        print(f"Starting acUnit Manual Test Server:\nListening on {HOST}:{PORT}")
+        print(f"Starting acUnit Command Test Server:\nListening on {HOST}:{PORT}")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
             while (stop == False):

@@ -23,9 +23,10 @@ HOST = glbs.REPORT_SERVER_IP
 PORT = glbs.COMMAND_PORT   ## command server is port 65432
 
 
-print("Test Reporting Server: Starting")
+
 while (1):
     try:
+        print(f"Starting acUnit Reporting Test Server:\nListening on {HOST}:{PORT}")
         iteration = 0
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
