@@ -4,10 +4,10 @@
  Current Testing Instructions:
 
  ## Prerequisits
-`Python3`
-External modules used:
-`pyModbusTCP`
-`numpy`
+`Python3` <br>
+External modules used: <br>
+`pyModbusTCP` <br>
+`numpy` <br>
 I believe this was all that was nessissary to install to run the software on RPi Ubuntu
 
 ## Setup
@@ -64,5 +64,7 @@ All the following words evaluate to False:
 "close","shut","closed","off","false","low","stop"
     
 ```
+
+![image](https://github.com/ImogenWren/adam-controller/assets/97303986/7265be20-a3c5-4dae-9d01-df3e64b89851)
 
 
