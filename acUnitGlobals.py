@@ -8,6 +8,11 @@ import jsonPacker
 import jsonParser
 import acUnitHardware
 
+# USER OPTIONS
+SERVER_IP = "10.42.0.1"
+simulate_hardware = False
+
+
 #Wrap all this inside a class?
 
 acUnitState = "init"
@@ -31,7 +36,7 @@ jsonPack = jsonPacker.jsonPacker()
 
 
 
-simulate_hardware = False
+
 command_received = False
 command_queue = []  ##  queue is processed by state machine untill empty
 

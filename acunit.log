@@ -1,28 +1,15 @@
-2023-11-28 14:39:03 INFO     Logging Module Started
-2023-11-28 14:39:03 INFO     State Machine: init_state
-2023-11-28 14:39:03 INFO     State Machine: wait_state
-2023-11-28 14:39:05 ERROR    commandClient: Caught Connection Error, restarting
+2023-11-28 15:42:11 INFO     Logging Module Started
+2023-11-28 15:42:11 INFO     State Machine: init_state
+2023-11-28 15:42:11 INFO     websocketClient: Connected to Server: <socket.socket fd=456, family=2, type=1, proto=0, laddr=('127.0.0.1', 5211), raddr=('127.0.0.1', 65432)>
+2023-11-28 15:42:13 ERROR    reportingClient: Caught Connection Error, restarting
 Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\commandClient.py", line 28, in commandClient
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 35, in reportingClient
     s.connect((HOST, PORT))
 ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
-2023-11-28 14:39:05 ERROR    reportingClient: Caught Connection Error, restarting
+2023-11-28 15:42:15 INFO     State Machine: wait_state
+2023-11-28 15:47:46 ERROR    commandClient: Caught Connection Error, restarting
 Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 34, in reportingClient
-    s.connect((HOST, PORT))
-ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
-2023-11-28 14:39:27 INFO     reportingClient: Connected to Server: <socket.socket fd=704, family=2, type=1, proto=0, laddr=('10.42.0.5', 23092), raddr=('10.42.0.1', 65433)>
-2023-11-28 14:39:29 ERROR    reportingClient: Caught Connection Error, restarting
-Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 47, in reportingClient
+  File "C:\Users\dheard\Documents\0000-python\adam-controller\commandClient.py", line 40, in commandClient
     data = s.recv(1024)
            ^^^^^^^^^^^^
-ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
-2023-11-28 14:39:29 INFO     reportingClient: Connected to Server: <socket.socket fd=704, family=2, type=1, proto=0, laddr=('10.42.0.5', 23094), raddr=('10.42.0.1', 65433)>
-2023-11-28 14:40:04 INFO     websocketClient: Connected to Server: <socket.socket fd=740, family=2, type=1, proto=0, laddr=('10.42.0.5', 23116), raddr=('10.42.0.1', 65432)>
-2023-11-28 14:40:44 ERROR    reportingClient: Caught Connection Error, restarting
-Traceback (most recent call last):
-  File "C:\Users\dheard\Documents\0000-python\adam-controller\reportingClient.py", line 47, in reportingClient
-    data = s.recv(1024)
-           ^^^^^^^^^^^^
-ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host

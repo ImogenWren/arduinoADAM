@@ -17,8 +17,9 @@ import acUnitGlobals as glbs
 pack = glbs.jsonPack
 
 #HOST = "127.0.0.1"
-TESTHOST = "10.42.0.1"
-HOST = TESTHOST
+#TESTHOST = "10.42.0.1"
+#HOST = TESTHOST
+HOST = glbs.SERVER_IP
 PORT = 65433   ## command server is port 65432
 
 
