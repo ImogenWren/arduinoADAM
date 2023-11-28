@@ -10,6 +10,11 @@ import acUnitHardware
 
 # USER OPTIONS
 SERVER_IP = "10.42.0.1"
+#SERVER_IP = "127.0.0.1"
+
+COMMAND_PORT = 65432
+REPORT_PORT = 65433
+
 simulate_hardware = False
 
 
