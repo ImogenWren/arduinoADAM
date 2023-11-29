@@ -34,7 +34,7 @@ def pretty_print_data(data):
     misc_list = []
     for sensor_name in data["sensors"]["misc"]:
         misc_list.append(data["sensors"]["misc"][sensor_name]["val"])
-    print(f'{data["valves"]} {data["power_relays"]} PSx:{pressure_list} TSx:{temp_list} flow:{misc_list[0]} power:{misc_list[1]}')
+    print(f'{data["valves"]} {data["power_relays"]} PSx:{pressure_list} TSx:{temp_list} flow:{misc_list[0]} power:{misc_list[1]} {data["status"]}')
 
 def reportingServer():
     while (1):
