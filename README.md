@@ -1,8 +1,74 @@
 # adam-controller
- Python and alternative software interfaces for controlling ADAM industrial Controllers
+Arduino/C++, Python, & LabVIEW interfaces for controlling ADAM industrial Controllers
 
- Current Testing Instructions:
+# Arduino/C++ Implementation
 
+
+
+## adamController - Example
+**NOTE:** This will be simplified when I have time to reflect JUST the Arduino library & example adamController-example
+ 
+- Electronics:
+	- Arduino Mega 2560 development board
+	- [Arduino Ethernet Shield 2](https://uk.rs-online.com/web/p/shields-for-arduino/8732285?gb=s)
+	- 2x [ADAM 6052 Advantech Data Aquisition Module (DIO)](https://www.impulse-embedded.co.uk/products/adam_6052--Ethernet-Digital-IO-Module.htm) 
+	- 2x [ADAM 6271 Advantech Data Aquisition Module (AI)](https://www.impulse-embedded.co.uk/products/adam_6217--Ethernet-Analog-Input-Module.htm)
+	- Network Switch
+	- 3x DPDT Relays, 24v coil, 240VAC Switching
+	- SBC (Single Board Computer) Raspberry Pi/Odroid or similar
+
+## Connecting Automation Hardware
+* For detailed wiring diagram see ******
+
+5. Arduino Ethernet sheild can now be mated to Arduino Mega 2560 development board
+6. Connect Arduino Mega 2560 to SBC using USB cable
+7. Connect Arduino Ethernet Shield to Network Switch using Ethernet Cables
+8. Connect 4x ADAM modules to Network Switch using Ethernet Cables
+
+
+## Controlling Experiment
+The experimental hardware can now be controlled using JSON formatted commands sent over Serial USB or UART connection to the Arduino.
+
+### Features:
+- Arduino will report system status including all sensor data every 1000mS in JSON format
+
+## Running Experiment (Example Commands)
+To setup experiment for basic operation, use the following commands:
+
+## Commands List
+_list of suitable commands (Examples, not exhaustive)_
+```
+{"valve":1, "state":0}
+{"valve":2, "state":0}
+{"valve":3, "state":0}
+{"valve":4, "state":0}
+{"valve":5, "state":0}
+{"valve":6, "state":0}
+{"valve":7, "state":0}
+
+{"valve":1, "state":1}
+{"valve":2, "state":1}
+{"valve":3, "state":1}
+{"valve":4, "state":1}
+{"valve":5, "state":1}
+{"valve":6, "state":1}
+{"valve":7, "state":1}
+
+{"fans":0}
+{"fans":1}
+  
+{"comp":0}
+{"comp":1}
+
+{"mode":"stop"}
+
+{"cmd":"fans","param":0}  
+ 
+```
+
+
+
+# Python Implementation
  ## Prerequisits
 `Python3` <br>
 External modules used: <br>
