@@ -1,0 +1,654 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+<style type="text/css">
+body {background-color:#242424;color:#D3D3D3; font-family: "Lucida Console", "Courier New", monospace;}
+td.Fix {color:#D3D3D3;text-align:center;vertical-align:bottom;width:52px;}
+td {color:#D3D3D3;text-align:center;vertical-align:bottom;}
+img {height:32px;width:32px;margin-left:auto;margin-right:auto;}
+button
+{
+-webkit-border-radius: 0;
+width:200px;
+height:36px
+}
+</style>
+</head> 
+<body onload="pageOnInit()">
+<center>
+<header>
+<span style="color:#D3D3D3;font-style:bold;font-size:20px">ADAM-6052<br>16-ch Source Type Digital I/O Module</span>
+</header>
+<hr>
+
+
+<canvas id="adamCanvas" style="border:1px solid #d3d3d3;">
+Your browser doesn't support Canvas! Historical data disabled!</canvas>
+
+<table border="1" id="TBL0">
+<tr bgcolor="#474747" color="#D3D3D3">
+<th colspan="8">Digital Input Values</th>
+</tr>
+<tr>
+<td id="DIPOLL" colspan="8">Waiting...</td>
+</tr>
+<tr>
+<td class="Fix">DI<br>0</td>
+<td class="Fix">DI<br>1</td>
+<td class="Fix">DI<br>2</td>
+<td class="Fix">DI<br>3</td>
+<td class="Fix">DI<br>4</td>
+<td class="Fix">DI<br>5</td>
+<td class="Fix">DI<br>6</td>
+<td class="Fix">DI<br>7</td>
+</tr>
+<tr>
+<td><img id="DI0" alt="0"></td>
+<td><img id="DI1" alt="0"></td>
+<td><img id="DI2" alt="0"></td>
+<td><img id="DI3" alt="0"></td>
+<td><img id="DI4" alt="0"></td>
+<td><img id="DI5" alt="0"></td>
+<td><img id="DI6" alt="0"></td>
+<td><img id="DI7" alt="0"></td>
+</tr>
+<tr bgcolor="#474747">
+<th colspan="8">Digital Output Values</th>
+</tr>
+<tr>
+<td id="DOPOLL" colspan="8">Waiting...</td>
+</tr>
+<tr>
+<td>DO<br>0</td>
+<td>DO<br>1</td>
+<td>DO<br>2</td>
+<td>DO<br>3</td>
+<td>DO<br>4</td>
+<td>DO<br>5</td>
+<td>DO<br>6</td>
+<td>DO<br>7</td>
+</tr>
+<tr>
+<td><img id="DO0" alt="0"></td>
+<td><img id="DO1" alt="0"></td>
+<td><img id="DO2" alt="0"></td>
+<td><img id="DO3" alt="0"></td>
+<td><img id="DO4" alt="0"></td>
+<td><img id="DO5" alt="0"></td>
+<td><img id="DO6" alt="0"></td>
+<td><img id="DO7" alt="0"></td>
+
+</tr>
+<tr bgcolor="#474747">
+<th colspan="8"><label for="ALL" onclick="">All Channels Output:</label><input type="checkbox" id="ALL" onclick="pageOnCbxClick(99)"></th>
+</tr>
+<tr>
+<td><input type="checkbox" id="CHK0" onclick="pageOnCbxClick(0)"><label for="CHK0" onclick=""><br>DO<br>0</label></td>
+<td><input type="checkbox" id="CHK1" onclick="pageOnCbxClick(1)"><label for="CHK1" onclick=""><br>DO<br>1</label></td> 
+<td><input type="checkbox" id="CHK2" onclick="pageOnCbxClick(2)"><label for="CHK2" onclick=""><br>DO<br>2</label></td>
+<td><input type="checkbox" id="CHK3" onclick="pageOnCbxClick(3)"><label for="CHK3" onclick=""><br>DO<br>3</label></td>
+<td><input type="checkbox" id="CHK4" onclick="pageOnCbxClick(4)"><label for="CHK4" onclick=""><br>DO<br>4</label></td>
+<td><input type="checkbox" id="CHK5" onclick="pageOnCbxClick(5)"><label for="CHK5" onclick=""><br>DO<br>5</label></td>
+<td><input type="checkbox" id="CHK6" onclick="pageOnCbxClick(6)"><label for="CHK6" onclick=""><br>DO<br>6</label></td>
+<td><input type="checkbox" id="CHK7" onclick="pageOnCbxClick(7)"><label for="CHK7" onclick=""><br>DO<br>7</label></td>
+
+</tr>
+<tr>
+<td colspan="8"><button id="BTN0" onclick="pageOnApplyClick()"><font face="arial" size="4">Apply Output</font></button></td>
+</tr>
+</table> 
+<br> 
+<a target="_self" href="/">Back to Login</a>
+<footer>
+<hr>
+Version 1.00.<br>
+Copyright &copy;2013 by <a target="_blank" href="http://www.advantech.com/eautomation/">Advantech Corp.</a>
+</footer>
+</center>
+</body>
+</html>
+
+<script>
+
+var canvas;
+var ctx;
+var scanInterval = 1000;
+var diTotal = 8;
+var doTotal = 8;
+var padSize = 30;
+var gridSize = 16;
+var columnInc = 0;
+var stepSize = 8;
+var fontSize = 10;
+var lightOnSrc, lightOffSrc;
+var diStatus;
+var doStatus;
+var cntMaxTotal, cntIndex, cntTotal;
+var diDataArray; 
+var doDataArray;
+var diPolling, diPollingCount;
+var doPolling, doPollingCount;
+var diFailCount, diWaitCount;
+var doFailCount, doWaitCount;
+var maxWait = 5;
+var maxFail = 3;
+
+function AdamTrend_Init()
+{
+	diStatus = new Array(diTotal);
+	doStatus = new Array(doTotal);
+	lightOnSrc  = "data:image/png;base64,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";
+	lightOffSrc = "data:image/png;base64,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";
+	diPollingCount = 0;
+	doPollingCount = 0;
+	diPolling = 0;
+	doPolling = 0;
+	diFailCount = 0;
+	doFailCount = 0;
+	diWaitCount = 0; 
+	doWaitCount = 0;
+	
+	for (var iCh=0; iCh<diTotal; iCh++)
+	{
+		diStatus[iCh] = 0;
+		document.getElementById("DI"+iCh).src = lightOffSrc;
+	}
+	//
+	for (var iCh=0; iCh<doTotal; iCh++)
+	{
+		doStatus[iCh] = 0;
+		document.getElementById("DO"+iCh).src = lightOffSrc;
+	}
+	//
+	canvas = document.getElementById("adamCanvas");
+	try
+	{
+		ctx = canvas.getContext("2d");
+		canvas.width = document.getElementById("TBL0").offsetWidth;
+		canvas.height = padSize*2 + gridSize*(diTotal+doTotal)+gridSize/2;
+		// deal with data
+		cntMaxTotal = Math.floor((canvas.clientWidth - padSize*2)/stepSize) + 1;
+		cntTotal = 0;
+		cntIndex = 0;
+	}
+	catch (e)
+	{
+		ctx = null;
+		alert("Your browser doesn't support Canvas! The historical data will not be shown!");
+	}
+}
+
+function AdamTrend_DrawLabel()
+{
+	var iCnt, x, y1, y2;
+
+	diDataArray = new Array(diTotal);
+	doDataArray = new Array(doTotal);
+	ctx.font=fontSize+"px Arial";
+	// new data array & draw label
+	x = canvas.width - padSize + 1;
+	y1 = padSize+((gridSize+fontSize)/2);
+	for (var iCh=0; iCh<diTotal; iCh++)
+	{
+		diDataArray[iCh] = new Array(cntMaxTotal);
+		y2 = y1 + gridSize*iCh;
+		ctx.fillText("DI-"+iCh, 0, y2);
+		ctx.fillText("DI-"+iCh, x, y2);
+	}
+	// new data array & draw label
+	y1 = padSize+gridSize*diTotal+((gridSize+fontSize)/2);
+	for (var iCh=0; iCh<doTotal; iCh++)
+	{
+		doDataArray[iCh] = new Array(cntMaxTotal);
+		y2 = y1 + gridSize*iCh;
+		ctx.fillText("DO-"+iCh, 0, y2);
+		ctx.fillText("DO-"+iCh, x, y2);
+	}
+	// draw buttom label
+	y1 = canvas.clientHeight - padSize;
+	y2 = y1 + 10;
+	x = canvas.clientWidth - padSize;
+    ctx.fillStyle="#D3D3D3";
+	ctx.strokeStyle="#D3D3D3";
+	ctx.lineWidth=1;
+	iCnt = 0;
+	while (x >= padSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(x, y1);
+		ctx.lineTo(x, y2);
+		ctx.stroke();
+		if (iCnt < 10)
+			ctx.fillText(iCnt, x-3, y2+fontSize+2);
+		else
+			ctx.fillText(iCnt, x-6, y2+fontSize+2);
+		//
+		iCnt += Math.floor((gridSize*2/stepSize)*scanInterval/1000);
+		x -= gridSize*2;
+	}
+}
+
+function AdamTrend_UpdateData()
+{
+	if (cntTotal == 0)
+	{
+		cntIndex = 0;
+		cntTotal = 1;
+	}
+	else if (cntTotal < cntMaxTotal)
+	{
+		cntTotal++;
+		cntIndex++;
+	}
+	else
+	{
+		if (cntIndex < cntMaxTotal - 1)
+			cntIndex++;
+		else
+			cntIndex = 0;
+	}
+	//
+	for (var iCh=0; iCh<diTotal; iCh++)
+		diDataArray[iCh][cntIndex] = diStatus[iCh];
+	for (var iCh=0; iCh<doTotal; iCh++)
+		doDataArray[iCh][cntIndex] = doStatus[iCh];
+}
+
+function AdamTrend_RefreshDataLine(iType, iCh)
+{
+	var iCnt, iIdx, x, yOn, yOff
+	var preX, preVal, val;
+	var y = new Array(2);
+	if (cntTotal > 1)
+	{
+		if (iType == 0) // DI
+		{
+			y[0] = padSize+gridSize+gridSize*iCh; // channel OFF
+			y[1] = padSize+gridSize+gridSize*iCh-gridSize/2; // channel ON
+			ctx.strokeStyle="#FFA500";
+			ctx.fillStyle="#FFA500";
+		}
+		else
+		{
+			y[0] = padSize+gridSize*(diTotal+1)+gridSize*iCh; // channel OFF
+			y[1] = padSize+gridSize*(diTotal+1)+gridSize*iCh-gridSize/2; // channel ON
+			ctx.strokeStyle="#FF3300";
+			ctx.fillStyle="#FF3300";
+		}
+		iCnt = 0;
+		iIdx = cntIndex;
+		ctx.lineWidth=1;
+		ctx.beginPath();
+		while (iCnt < cntTotal)
+		{
+			x = canvas.clientWidth - padSize - stepSize*iCnt -1;
+			if (x < padSize)
+				x = padSize;
+			if (iType == 0) // DI
+				val = diDataArray[iCh][iIdx];
+			else
+				val = doDataArray[iCh][iIdx];
+			//
+			if (iCnt == 0)
+				ctx.moveTo(x, y[val]);
+			else
+			{
+				if (preVal == val)
+					ctx.lineTo(x, y[val]);
+				else
+				{
+					ctx.lineTo(preX, y[val]);
+					ctx.lineTo(x, y[val]);
+				}
+				// to fill high part
+				if (val == 1)
+					ctx.fillRect(x, y[1], stepSize, gridSize/2 + 1);
+			}
+			//
+			preX = x;
+			preVal = val;
+			if (iIdx == 0)
+				iIdx = cntTotal - 1;
+			else
+				iIdx--;
+			iCnt++;
+		}
+		ctx.stroke();
+	}
+}
+
+function AdamTrend_RefreshCanvas()
+{
+	// Fill with gradient
+	ctx.fillStyle="#FFFAFA";
+	ctx.fillRect(padSize, padSize, canvas.clientWidth - padSize*2, canvas.clientHeight - padSize*2);
+	// draw row	
+	ctx.strokeStyle="#DCDCDC";//"#E6E6FA";
+	ctx.lineWidth=1;
+	for (var y=padSize; y<canvas.clientHeight - padSize; y+=gridSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(padSize, y);
+		ctx.lineTo(canvas.clientWidth - padSize, y);
+		ctx.stroke();
+	}
+	// draw column
+	for (var x = canvas.clientWidth - padSize - columnInc; x > padSize; x -= gridSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(x, padSize);
+		ctx.lineTo(x, canvas.clientHeight - padSize);
+		ctx.stroke();
+	}
+	columnInc += stepSize;
+	if (columnInc >= gridSize)
+		columnInc -= gridSize;
+	// draw data line
+	for (var iCh=0; iCh<diTotal; iCh++)
+		AdamTrend_RefreshDataLine(0, iCh);
+	for (var iCh=0; iCh<doTotal; iCh++)
+		AdamTrend_RefreshDataLine(1, iCh);
+	// draw border
+	ctx.strokeStyle="#E6E6FA";
+	ctx.lineWidth=2;
+	ctx.beginPath();
+	ctx.moveTo(padSize - 1, padSize - 1);
+	ctx.lineTo(canvas.clientWidth - padSize + 1, padSize - 1);
+	ctx.lineTo(canvas.clientWidth - padSize + 1, canvas.clientHeight - padSize + 1);
+	ctx.lineTo(padSize - 1, canvas.clientHeight - padSize + 1);
+	ctx.lineTo(padSize - 1, padSize - 1);
+	ctx.stroke();
+}
+
+function pageOnInit()
+{
+	AdamTrend_Init();
+	if (ctx != null)
+		AdamTrend_DrawLabel();
+	pageOnTimer();
+}
+
+function pageOnTimer()
+{
+	httpGetDiData();
+	httpGetDoData();
+	if (ctx != null)
+	{
+		AdamTrend_UpdateData();
+		AdamTrend_RefreshCanvas();
+	}
+	pageUpdateLights();
+	if (diFailCount == maxFail)
+	{
+		document.getElementById("BTN0").disabled = true;
+		alert("DI polling has failed " + maxFail + " times, polling suspended!");
+	}
+	else if (doFailCount == maxFail)
+	{
+		document.getElementById("BTN0").disabled = true;
+		alert("DO polling has failed " + maxFail + " times, polling suspended!");
+	}
+	else
+	    setTimeout(function(){pageOnTimer()}, scanInterval);
+}
+
+function pageUpdateLights()
+{
+	for (var iCh=0; iCh<diTotal; iCh++)
+	{
+		if (document.getElementById("DI" + iCh).alt == "0" && diStatus[iCh] == 1)
+		{
+			document.getElementById("DI" + iCh).alt = "1";
+			document.getElementById("DI" + iCh).src = lightOnSrc;
+		}
+		else if (document.getElementById("DI" + iCh).alt == "1" && diStatus[iCh] == 0)
+		{
+			document.getElementById("DI" + iCh).alt = "0";
+			document.getElementById("DI" + iCh).src = lightOffSrc;
+		}
+	}
+	for (var iCh=0; iCh<doTotal; iCh++)
+	{
+		if (document.getElementById("DO" + iCh).alt == "0" && doStatus[iCh] == 1)
+		{
+			document.getElementById("DO" + iCh).alt = "1";
+			document.getElementById("DO" + iCh).src = lightOnSrc;
+		}
+		else if (document.getElementById("DO" + iCh).alt == "1" && doStatus[iCh] == 0)
+		{
+			document.getElementById("DO" + iCh).alt = "0";
+			document.getElementById("DO" + iCh).src = lightOffSrc;
+		}
+	}
+}
+
+function pageOnCbxClick(iDo)
+{
+	var bAll = true;
+	if (iDo == 99)
+	{
+		for (var iCh=0; iCh<doTotal; iCh++)
+			document.getElementById("CHK"+iCh).checked = document.getElementById("ALL").checked;
+	}
+	else
+	{
+		for (var iCh=0; iCh<doTotal; iCh++)
+		{
+			if (document.getElementById("CHK"+iCh).checked == false)
+			{
+				bAll = false;
+				break;
+			}
+		}
+		document.getElementById("ALL").checked = bAll;
+	}
+}
+
+function pageOnApplyClick()
+{
+	var szPostData = "";
+	var xmlHttp = null;
+	
+	for (var iCh=0; iCh<doTotal; iCh++)
+	{
+		if (document.getElementById("CHK"+iCh).checked)
+			szPostData += "DO" + iCh + "=1";
+		else
+			szPostData += "DO" + iCh + "=0";
+		if (iCh<doTotal-1)
+			szPostData += "&";
+	}
+	try
+	{
+		if (window.XMLHttpRequest)
+		{// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlHttp=new XMLHttpRequest();
+		}
+		else
+		{// code for IE6, IE5
+			xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlHttp.onreadystatechange=function()
+		{
+			if (xmlHttp.readyState==4)
+			{
+				if (xmlHttp.status==200)
+				{
+					xmlDoc=xmlHttp.responseXML;
+					if (xmlDoc.documentElement.attributes[0].nodeValue != "OK")
+						alert("Set DO failed! " + xmlDoc.documentElement.attributes[0].nodeValue);
+				}
+				else
+					alert(" DoOutErr:" + xmlHttp.status + "!");
+			}
+		}
+		xmlHttp.open( "POST", "digitaloutput/all/value", true );
+		xmlHttp.send(szPostData);
+	}
+	catch(e)
+	{
+		alert(e);
+	}
+}
+
+function httpGetDiData()
+{
+	var xmlHttp = null;
+	
+	try
+	{
+		if (diPolling == 0)
+		{
+            diWaitCount = 0;
+			if (window.XMLHttpRequest)
+			{// code for IE7+, Firefox, Chrome, Opera, Safari
+				xmlHttp=new XMLHttpRequest();
+			}
+			else
+			{// code for IE6, IE5
+				xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			xmlHttp.onreadystatechange=function()
+			{
+				var szPoll;
+				var xmlDoc;
+				var diRecords;
+				var iCh;
+				
+				if (xmlHttp.readyState==4)
+				{
+					if (xmlHttp.status==200)
+					{
+						xmlDoc=xmlHttp.responseXML;
+						if (xmlDoc.documentElement.attributes[0].nodeValue == "OK")
+						{
+							diRecords = xmlDoc.getElementsByTagName("DI");
+							if (diRecords != null)
+							{
+							    for (var iCnt=0; iCnt<diRecords.length; iCnt++)
+							    {
+								    iCh = diRecords[iCnt].getElementsByTagName("ID")[0].childNodes[0].nodeValue;
+								    if (iCh < diTotal)
+									    diStatus[iCh] = diRecords[iCnt].getElementsByTagName("VALUE")[0].childNodes[0].nodeValue;
+							    }
+						    }
+						    else
+								document.getElementById("DIPOLL").innerHTML += " DiErr0:DI null!";
+						}
+						else
+							document.getElementById("DIPOLL").innerHTML += " DiErr1:" + xmlDoc.documentElement.attributes[0].nodeValue + "!";
+					}
+					else
+						document.getElementById("DIPOLL").innerHTML += " DiErr2:" + xmlHttp.status + "!";
+					diPolling = 0;
+					diFailCount = 0; // reset fail count
+				}
+			}
+			xmlHttp.open( "GET", "digitalinput/all/value", true );
+			xmlHttp.send();
+			diPolling = 1;
+			diPollingCount++;
+			document.getElementById("DIPOLL").innerHTML = "Polling " + diPollingCount + " times...";
+		}
+		else
+		{
+			diWaitCount++;
+			if (diWaitCount == maxWait)
+			{
+				diFailCount++;
+				if (diFailCount < maxFail)
+				{
+					diPolling = 0; // resend
+				}
+			}
+		}
+	}
+	catch(e)
+	{
+		diPolling = 0;
+		document.getElementById("DIPOLL").innerHTML = "DiErr3:" + e + "!";
+	}
+}
+
+function httpGetDoData()
+{
+	var xmlHttp = null;
+	
+	try
+	{
+		if (doPolling == 0)
+		{
+			doWaitCount = 0;
+			if (window.XMLHttpRequest)
+			{// code for IE7+, Firefox, Chrome, Opera, Safari
+				xmlHttp=new XMLHttpRequest();
+			}
+			else
+			{// code for IE6, IE5
+				xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			xmlHttp.onreadystatechange=function()
+			{
+				var szPoll;
+				var xmlDoc;
+				var doRecords;
+				var iCh;
+				
+				if (xmlHttp.readyState==4)
+				{
+					if (xmlHttp.status==200)
+					{
+						xmlDoc=xmlHttp.responseXML;
+						if (xmlDoc.documentElement.attributes[0].nodeValue == "OK")
+						{
+							doRecords = xmlDoc.getElementsByTagName("DO");
+							if (doRecords != null)
+							{
+							    for (var iCnt=0; iCnt<doRecords.length; iCnt++)
+							    {
+								     iCh = doRecords[iCnt].getElementsByTagName("ID")[0].childNodes[0].nodeValue;
+								     if (iCh < doTotal)
+									     doStatus[iCh] = doRecords[iCnt].getElementsByTagName("VALUE")[0].childNodes[0].nodeValue;
+							    }
+						    }
+						    else
+								document.getElementById("DOPOLL").innerHTML += " DoErr1:DO null!";
+						}
+						else
+							document.getElementById("DOPOLL").innerHTML += " DoErr1:" + xmlDoc.documentElement.attributes[0].nodeValue + "!";
+					}
+					else
+						document.getElementById("DOPOLL").innerHTML += " DoErr2:" + xmlHttp.status + "!";
+					doPolling = 0;
+					doFailCount = 0; // reset fail count
+				}
+			}
+			xmlHttp.open( "GET", "digitaloutput/all/value", true );
+			xmlHttp.send();
+			doPolling = 1;
+			doPollingCount++;
+			document.getElementById("DOPOLL").innerHTML = "Polling " + doPollingCount + " times...";
+		}
+		else
+		{
+			doWaitCount++;
+			if (doWaitCount == maxWait)
+			{
+				doFailCount++;
+				if (doFailCount < maxFail)
+				{
+					doPolling = 0; // resend
+				}
+			}
+		}
+	}
+	catch(e)
+	{
+		doPolling = 0;
+		document.getElementById("DOPOLL").innerHTML = "DoErr3:" + e + "!";
+	}
+}
+
+</script>

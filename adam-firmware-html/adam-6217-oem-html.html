@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+<style type="text/css">
+body {background-color:#ADD8E6;}
+td.Fix {text-align:center;vertical-align:bottom;width:110px;}
+td {text-align:center;vertical-align:bottom;}
+</style>
+</head> 
+<body onload="pageOnInit()">
+<center>
+<header>
+<span style="color:brown;font-style:italic;font-size:20px">ADAM-6217<br>8-ch Isolated Analog Input Module</span>
+</header>
+<hr>
+<canvas id="adamCanvas" style="border:1px solid #d3d3d3;">
+Your browser doesn't support Canvas! Historical data disabled!</canvas>
+
+<table border="1" id="TBL0">
+<tr bgcolor="#7FFFD1">
+<th colspan="4">Analog Input Values</th>
+</tr>
+<tr>
+<td id="AIPOLL" colspan="4">Waiting...</td>
+</tr>
+<tr>
+<td id="LA0" class="Fix" onclick=pageOnTdClick(0)>AI-0</td>
+<td id="LA1" class="Fix" onclick=pageOnTdClick(1)>AI-1</td>
+<td id="LA2" class="Fix" onclick=pageOnTdClick(2)>AI-2</td>
+<td id="LA3" class="Fix" onclick=pageOnTdClick(3)>AI-3</td>
+</tr>
+<tr>
+<td id="AI0" onclick=pageOnTdClick(0)>0</td>
+<td id="AI1" onclick=pageOnTdClick(1)>0</td>
+<td id="AI2" onclick=pageOnTdClick(2)>0</td>
+<td id="AI3" onclick=pageOnTdClick(3)>0</td>
+</tr>
+<tr>
+<td id="LA4" class="Fix" onclick=pageOnTdClick(4)>AI-4</td>
+<td id="LA5" class="Fix" onclick=pageOnTdClick(5)>AI-5</td>
+<td id="LA6" class="Fix" onclick=pageOnTdClick(6)>AI-6</td>
+<td id="LA7" class="Fix" onclick=pageOnTdClick(7)>AI-7</td>
+</tr>
+<tr>
+<td id="AI4" onclick=pageOnTdClick(4)>0</td>
+<td id="AI5" onclick=pageOnTdClick(5)>0</td>
+<td id="AI6" onclick=pageOnTdClick(6)>0</td>
+<td id="AI7" onclick=pageOnTdClick(7)>0</td>
+</tr>
+</table>
+<br> 
+<a target="_self" href="/">Back to Login</a>
+<footer>
+<hr>
+Version 1.04.<br>
+Copyright &copy;2012 by <a target="_blank" href="http://www.advantech.com/eautomation/">Advantech Corp.</a>
+</footer>
+</center>
+</body>
+</html>
+
+<script>
+
+var canvas;
+var ctx;
+var scanInterval = 1000;
+var aiTotal = 8;
+var padSize = 30;
+var gridSize = 12;
+var columnInc = 0;
+var stepSize = 6;
+var fontSize = 12;
+var aiRangeReady = false;
+var aiRangeName, aiRangeMax, aiRangeMin, aiRangeUnit;
+var aiValue, aiColor;
+var cntMaxTotal, cntIndex, cntTotal;
+var aiDataArray;
+var aiPolling, aiPollingCount;
+var aiFailCount;
+var preTd = -1;
+
+function AdamTrend_Init()
+{
+	aiValue = new Array(aiTotal);
+	aiRangeName = new Array(aiTotal);
+	aiRangeMax = new Array(aiTotal);
+	aiRangeMin = new Array(aiTotal);
+	aiRangeUnit = new Array(aiTotal);
+	aiColor = new Array(aiTotal);
+	aiPollingCount = 0;
+	aiPolling = 0;
+	aiFailCount = 0;
+	
+	aiColor[0] = "#FF0040"; // red
+	aiColor[1] = "#FFA500"; // orange
+	aiColor[2] = "#FFD700"; // gold
+	aiColor[3] = "#00FF00"; // lime
+	aiColor[4] = "#00BFFF";//"#0000FF"; // blue
+	aiColor[5] = "#BA55D3";//"#800080"; // purple
+	aiColor[6] = "#80A080"; // gray
+	aiColor[7] = "#FF00FF"; // pink
+	//
+	for (var iCh=0; iCh<aiTotal; iCh++)
+	{
+		aiValue[iCh] = 0;
+		document.getElementById("AI"+iCh).innerHTML = "----";
+	}
+	//
+	canvas = document.getElementById("adamCanvas");
+	try
+	{
+		ctx = canvas.getContext("2d");
+		canvas.width = document.getElementById("TBL0").offsetWidth;
+		canvas.height = padSize*2 + 240;
+		// deal with data
+		cntMaxTotal = Math.floor((canvas.clientWidth - padSize*2)/stepSize) + 1;
+		cntTotal = 0;
+		cntIndex = 0;
+	}
+	catch (e)
+	{
+		ctx = null;
+		alert("Your browser doesn't support Canvas! The historical data will not be shown!");
+	}
+}
+
+function AdamTrend_DrawLabel()
+{
+	var iCnt, x, y1, y2;
+
+	aiDataArray = new Array(aiTotal);
+	ctx.font=fontSize+"px Arial";
+	// new data array & draw label
+	x = canvas.width - padSize + 1;
+	y1 = padSize+((gridSize+fontSize)/2);
+	for (var iCh=0; iCh<aiTotal; iCh++)
+	{
+		aiDataArray[iCh] = new Array(cntMaxTotal);
+		y2 = y1 + (gridSize + 10)*iCh;
+		// fill channel background
+		ctx.fillStyle=aiColor[iCh];
+		ctx.fillRect(x - 1, y2 - 1, padSize - 2, fontSize + 2);
+		// fill channel text
+		ctx.fillStyle="#FFFFFF";
+		ctx.fillText("AI-"+iCh, x, y2 - 1 + fontSize);
+	}
+	// draw buttom label
+	y1 = canvas.clientHeight - padSize;
+	y2 = y1 + 10;
+	x = canvas.clientWidth - padSize;
+	ctx.fillStyle="#000000";
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth=1;
+	iCnt = 0;
+	while (x >= padSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(x, y1);
+		ctx.lineTo(x, y2);
+		ctx.stroke();
+		if (iCnt < 10)
+			ctx.fillText(iCnt, x-3, y2+fontSize+2);
+		else
+			ctx.fillText(iCnt, x-6, y2+fontSize+2);
+		//
+		iCnt += Math.floor((gridSize*2/stepSize)*scanInterval/1000);
+		x -= gridSize*2;
+	}
+}
+
+function AdamTrend_UpdateData()
+{
+	if (cntTotal == 0)
+	{
+		cntIndex = 0;
+		cntTotal = 1;
+	}
+	else if (cntTotal < cntMaxTotal)
+	{
+		cntTotal++;
+		cntIndex++;
+	}
+	else
+	{
+		if (cntIndex < cntMaxTotal - 1)
+			cntIndex++;
+		else
+			cntIndex = 0;
+	}
+	//
+	for (var iCh=0; iCh<aiTotal; iCh++)
+		aiDataArray[iCh][cntIndex] = aiValue[iCh];
+}
+
+function AdamTrend_RefreshDataLine(iCh)
+{
+	var iCnt, iIdx, x, yOn, yOff
+	var val, rectHeight, startPoint;
+	var y;
+	if (cntTotal > 1)
+	{
+		iCnt = 0;
+		iIdx = cntIndex;
+		startPoint = canvas.clientHeight - padSize;
+		rectHeight = canvas.clientHeight - padSize * 2;
+		ctx.strokeStyle = aiColor[iCh];
+		if (preTd == iCh)
+			ctx.lineWidth=3;
+		else
+			ctx.lineWidth=1;
+		ctx.beginPath();
+		while (iCnt < cntTotal)
+		{
+			x = canvas.clientWidth - padSize - stepSize*iCnt -1;
+			if (x < padSize)
+				x = padSize;
+			val = aiDataArray[iCh][iIdx];
+			y = Math.floor(startPoint - rectHeight*parseInt(val, 16)/65535);
+			//
+			if (iCnt == 0)
+				ctx.moveTo(x, y);
+			else
+				ctx.lineTo(x, y);
+			//
+			if (iIdx == 0)
+				iIdx = cntTotal - 1;
+			else
+				iIdx--;
+			iCnt++;
+		}
+		ctx.stroke();
+	}
+}
+
+function AdamTrend_RefreshCanvas()
+{
+	// Fill with gradient
+	ctx.fillStyle="#FFFAFA";
+	ctx.fillRect(padSize, padSize, canvas.clientWidth - padSize*2, canvas.clientHeight - padSize*2);
+	// draw row	
+	ctx.strokeStyle="#DCDCDC";//"#E6E6FA";
+	ctx.lineWidth=1;
+	for (var y=padSize; y<canvas.clientHeight - padSize; y+=gridSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(padSize, y);
+		ctx.lineTo(canvas.clientWidth - padSize, y);
+		ctx.stroke();
+	}
+	// draw column
+	for (var x = canvas.clientWidth - padSize - columnInc; x > padSize; x -= gridSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(x, padSize);
+		ctx.lineTo(x, canvas.clientHeight - padSize);
+		ctx.stroke();
+	}
+	columnInc += stepSize;
+	if (columnInc >= gridSize)
+		columnInc -= gridSize;
+	// draw data line
+	for (var iCh=0; iCh<aiTotal; iCh++)
+		AdamTrend_RefreshDataLine(iCh);
+	// draw border
+	ctx.strokeStyle="#E6E6FA";
+	ctx.lineWidth=2;
+	ctx.beginPath();
+	ctx.moveTo(padSize - 1, padSize - 1);
+	ctx.lineTo(canvas.clientWidth - padSize + 1, padSize - 1);
+	ctx.lineTo(canvas.clientWidth - padSize + 1, canvas.clientHeight - padSize + 1);
+	ctx.lineTo(padSize - 1, canvas.clientHeight - padSize + 1);
+	ctx.lineTo(padSize - 1, padSize - 1);
+	ctx.stroke();
+}
+
+function pageOnInit()
+{
+	AdamTrend_Init();
+	if (ctx != null)
+		AdamTrend_DrawLabel();
+	httpGetAiRange();
+	pageOnTimer();
+}
+
+function pageOnTimer()
+{
+	if (aiRangeReady == true)
+	{
+		httpGetAiData();
+		if (ctx != null)
+		{
+			AdamTrend_UpdateData();
+			AdamTrend_RefreshCanvas();
+		}
+		pageUpdateData();
+	}
+	else
+		aiFailCount++;
+	//
+	if (aiFailCount > 5)
+		alert("AI polling has failed more than 5 times, polling suspended!");
+	else
+		setTimeout(function(){pageOnTimer()}, scanInterval);
+}
+
+function pageUpdateData()
+{
+	var engVal;
+
+	for (var iCh=0; iCh<aiTotal; iCh++)
+	{
+		engVal = parseInt(aiRangeMin[iCh]) + parseInt(aiValue[iCh],16)*(aiRangeMax[iCh] - aiRangeMin[iCh])/65535;
+		document.getElementById("AI"+iCh).innerHTML = engVal.toFixed(3) + " " + aiRangeUnit[iCh];
+	}
+}
+
+function pageOnTdClick(iAi)
+{
+	var preLab, nowLab, preEle, nowEle;
+
+	if (ctx != null && aiRangeReady == true && preTd != iAi)
+	{
+		if (preTd >= 0)
+		{
+			preLab = document.getElementById("LA"+preTd);
+			preEle = document.getElementById("AI"+preTd);
+			preLab.style.backgroundColor = "#ADD8E6";
+			preEle.style.backgroundColor = "#ADD8E6";
+		}
+		nowLab = document.getElementById("LA"+iAi);
+		nowEle = document.getElementById("AI"+iAi);
+		nowLab.style.backgroundColor = aiColor[iAi];
+		nowEle.style.backgroundColor = aiColor[iAi];
+		// fill background
+		ctx.fillStyle = aiColor[iAi];
+		ctx.fillRect(1, padSize - fontSize/2, padSize - 3, fontSize + 2);
+		ctx.fillRect(1, (canvas.clientHeight - fontSize)/2, padSize - 3, fontSize + 2);
+		ctx.fillRect(1, canvas.clientHeight - padSize - fontSize/2, padSize - 3, fontSize + 2);
+		// fill channel text
+		ctx.fillStyle="#000000";
+		ctx.fillText(aiRangeMax[iAi], 2, padSize - fontSize/2 + fontSize - 1);
+		ctx.fillText(aiRangeUnit[iAi], 2, (canvas.clientHeight - fontSize)/2 + fontSize - 1);
+		ctx.fillText(aiRangeMin[iAi], 2, canvas.clientHeight - padSize - fontSize/2 + fontSize - 1);
+		//
+		preTd = iAi;
+	}
+}
+
+function httpGetAiRange()
+{
+	var xmlHttp = null;
+	
+	try
+	{
+		if (window.XMLHttpRequest)
+		{// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlHttp=new XMLHttpRequest();
+		}
+		else
+		{// code for IE6, IE5
+			xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlHttp.onreadystatechange=function()
+		{
+			var szPoll;
+			var xmlDoc;
+			var aiRecords;
+			var iCh;
+			
+			if (xmlHttp.readyState==4)
+			{
+				if (xmlHttp.status==200)
+				{
+					xmlDoc=xmlHttp.responseXML;
+					if (xmlDoc.documentElement.attributes[0].nodeValue == "OK")
+					{
+						aiRecords = xmlDoc.getElementsByTagName("AI");
+						for (var iCnt=0; iCnt<aiRecords.length; iCnt++)
+						{
+							iCh = aiRecords[iCnt].getElementsByTagName("ID")[0].childNodes[0].nodeValue;
+							if (iCh < aiTotal)
+							{
+								aiRangeName[iCh] = aiRecords[iCnt].getElementsByTagName("NAME")[0].childNodes[0].nodeValue;
+								aiRangeMax[iCh] = aiRecords[iCnt].getElementsByTagName("MAX")[0].childNodes[0].nodeValue;
+								aiRangeMin[iCh] = aiRecords[iCnt].getElementsByTagName("MIN")[0].childNodes[0].nodeValue;
+								aiRangeUnit[iCh] = aiRecords[iCnt].getElementsByTagName("UNIT")[0].childNodes[0].nodeValue;
+							}
+						}
+						aiRangeReady = true;
+						pageOnTdClick(0);
+					}
+					else
+						document.getElementById("AIPOLL").innerHTML += " AiErr1:" + xmlDoc.documentElement.attributes[0].nodeValue + "!";
+				}
+				else
+					document.getElementById("AIPOLL").innerHTML += " AiErr2:" + xmlHttp.status + "!";
+			}
+		}
+		xmlHttp.open( "GET", "analoginput/all/range", true );
+		xmlHttp.send();
+	}
+	catch(e)
+	{
+		alert(e);
+	}
+}
+
+function httpGetAiData()
+{
+	var xmlHttp = null;
+	
+	try
+	{
+		if (aiPolling == 0)
+		{
+			aiFailCount = 0;
+			if (window.XMLHttpRequest)
+			{// code for IE7+, Firefox, Chrome, Opera, Safari
+				xmlHttp=new XMLHttpRequest();
+			}
+			else
+			{// code for IE6, IE5
+				xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			xmlHttp.onreadystatechange=function()
+			{
+				var szPoll;
+				var xmlDoc;
+				var aiRecords;
+				var iCh;
+				
+				if (xmlHttp.readyState==4)
+				{
+					if (xmlHttp.status==200)
+					{
+						xmlDoc=xmlHttp.responseXML;
+						if (xmlDoc.documentElement.attributes[0].nodeValue == "OK")
+						{
+							aiRecords = xmlDoc.getElementsByTagName("AI");
+							if (aiRecords != null)
+							{
+								for (var iCnt=0; iCnt<aiRecords.length; iCnt++)
+								{
+									iCh = aiRecords[iCnt].getElementsByTagName("ID")[0].childNodes[0].nodeValue;
+									if (iCh < aiTotal)
+										aiValue[iCh] = aiRecords[iCnt].getElementsByTagName("VALUE")[0].childNodes[0].nodeValue;
+								}
+							}
+							else
+								document.getElementById("AIPOLL").innerHTML += " AiErr0:AI null!";
+						}
+						else
+							document.getElementById("AIPOLL").innerHTML += " AiErr1:" + xmlDoc.documentElement.attributes[0].nodeValue + "!";
+					}
+					else
+						document.getElementById("AIPOLL").innerHTML += " AiErr2:" + xmlHttp.status + "!";
+					aiPolling = 0;
+				}
+			}
+			xmlHttp.open( "GET", "analoginput/all/value", true );
+			xmlHttp.send();
+			aiPolling = 1;
+			aiPollingCount++;
+			document.getElementById("AIPOLL").innerHTML = "Polling " + aiPollingCount + " times...";
+		}
+		else
+			aiFailCount++;
+	}
+	catch(e)
+	{
+		aiPolling = 0;
+		document.getElementById("AIPOLL").innerHTML = "AiErr3:" + e + "!";
+	}
+}
+
+</script>
