@@ -1,5 +1,5 @@
-# adam-controller
-Arduino/C++, Python, & LabVIEW interfaces for controlling ADAM industrial Controllers
+# adam-tcp-controller
+Arduino/C++, Python, & LabVIEW interfaces for controlling ADAM industrial Controllers using Ethernet/TCP/ModBus
 
 # Arduino/C++ Implementation
 
