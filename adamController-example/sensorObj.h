@@ -63,7 +63,7 @@ public:
   float currentVal = 0;  //current value of the sensor
   uint32_t timeStamp;   // timeStamp for last datapoint taken
 
-  // Should be called in series to get sensor calibration correctly
+   // Should be called before calcProcessVar() to set sensor calibration
   void setCalibration(float _process_min= 0, float _process_max = 100, float _adc_min = 0, float _daq_max=65535, float _postoffset= 0);
 
   float calcProcessVar(float _adcVal);   // generic method uses set range functions to do a quick scaling operation and return the process val. Explicit conversion methods will be added below
@@ -77,6 +77,7 @@ public:
   //std::vector<float> sensorHistory;
 
   void updateHistory(float _sensorVal);
+  // Not Implemented yet
   float calAverage();
   float calcMin();
   float calcMax();
