@@ -39,26 +39,49 @@ $aaM  = $01M
 
 
 void adamController::begin() {
+  modbusTCP.begin(serverIP, 502);
+  W5100.setRetransmissionTime(0x03E8);  // seems to work with all of these and the include for the w5100 library in header file
+  W5100.setRetransmissionCount(1);
+  modbusTCP.setTimeout(1000);  // doesnt seem to be working
+  ethClient.setConnectionTimeout(1000);
   adamController::check_modbus_connect();
 }
 
 
 
-void adamController::check_modbus_connect() {
+bool adamController::check_modbus_connect() {
+#if DEBUG_MODBUS == true
+  Serial.print("DEBUG_MODBUS: ");
+  Serial.println(moduleName);
+#endif
   if (!modbusTCP.connected()) {
+
+#if DEBUG_MODBUS == true
     // client not connected, start the Modbus TCP client
-    Serial.print(moduleName);
-    Serial.println(F(": Attempting to connect to Modbus TCP server"));
+    Serial.print("DEBUG_MODBUS: ");
+    Serial.println(moduleName);
+    Serial.println(F(": modbus not connected. Attempting to connect to Modbus TCP server"));
+#endif
+
     modbusConnected = false;
     if (!modbusTCP.begin(serverIP, 502)) {
-      Serial.println(F(": Modbus TCP Client failed to connect!"));
-
+#if DEBUG_MODBUS == true
+      Serial.print("DEBUG_MODBUS: ");
+      Serial.println(moduleName);
+      Serial.print(F(": Modbus TCP Client failed to connect!"));
+      Serial.println(F("\"}"));  //JSON error message footer
+#endif
     } else {
+      modbusConnected = true;
+#if DEBUG_MODBUS == true
       Serial.print(moduleName);
       Serial.println(F(": Modbus TCP Client connected"));
-      modbusConnected = true;
+#endif
     }
+  } else {
+    modbusConnected = true;
   }
+  return modbusConnected;
 }
 
 
@@ -77,17 +100,18 @@ int16_t adamController::set_coil(int coilNum, bool coilState) {
 
   if ((coilNum >= 0) && (coilNum < 8)) {
     if (!modbusTCP.coilWrite(d_out[coilNum], state)) {
-      sprintf(buffer, "%s: Failed to set coil: %i ( %#0x ) to %i. %s", moduleName, coilNum, d_out[coilNum], coilState, modbusTCP.lastError());
+      sprintf(buffer, "{\"error\":\"%s: Failed to set coil: %i ( %#0x ) to %i. %s\"}", moduleName, coilNum, d_out[coilNum], coilState, modbusTCP.lastError());
       coilState = -1;
       // Serial.println(modbusTCP.lastError());
     } else {
-      sprintf(buffer, "%s: Setting Coil: %i ( %#0x ) to %i", moduleName, coilNum, d_out[coilNum], coilState);
+      sprintf(buffer, "{\"status\":\"%s: Set Coil: %i ( %#0x ) to %i\"}", moduleName, coilNum, d_out[coilNum], coilState);
     }
   } else {
-    sprintf(buffer, "%s: Unable to set Coil %i - out of range :(", moduleName, coilNum);
+    sprintf(buffer, "{\"error\":\"%s: Unable to set Coil %i - out of range :(\"}", moduleName, coilNum);
     coilState = -1;
   }
 #if DEBUG_ADAM == true
+  Serial.print("DEBUG_ADAM: ");
   Serial.println(buffer);
 #endif
   return coilState;
@@ -110,14 +134,15 @@ int16_t adamController::set_coils(uint8_t coilStates) {
   char buffer[64];
 
   if (response == 1) {
-    sprintf(buffer, "%s: Set Coils:   %s%s ", moduleName, leadingZeros[zeroPadding], binString);
+    sprintf(buffer, "{\"status\":\"%s: Set Coils:   %s%s \"}", moduleName, leadingZeros[zeroPadding], binString);
   } else {
-    sprintf(buffer, "%s: ERROR: Unable to Set Coils to: %s%s ", moduleName, leadingZeros[zeroPadding], binString);
+    sprintf(buffer, "{\"error\":\"%s: Unable to Set Coils to: %s%s \"}", moduleName, leadingZeros[zeroPadding], binString);
     coilStates = -1;
   }
-  // g_coilState = coilStates;
+  // g_DO_State = coilStates;
 //  Serial.println(response);
-#if DEBUG == true
+#if DEBUG_ADAM == true
+  Serial.print("DEBUG_ADAM: ");
   Serial.println(buffer);
 #endif
   return coilStates;
@@ -131,15 +156,16 @@ int16_t adamController::read_coil(uint8_t outputNum) {
   if (outputNum < 8) {
     outState = modbusTCP.coilRead(d_out[outputNum]);
     if (outState == -1) {
-      sprintf(buffer, "%s: Error Code %i: Unable to Read Output Status %i :(", moduleName, outState, outputNum);
+      sprintf(buffer, "{\"error\":\" %s: Error Code %i: Unable to Read Output Status %i :(\"} ", moduleName, outState, outputNum);
     } else {
-      sprintf(buffer, "%s: Output %i Status: %i", moduleName, outputNum, outState);
+      sprintf(buffer, "{\"status\":\" %s: Output %i Status: %i\"} ", moduleName, outputNum, outState);
     }
   } else {
-    sprintf(buffer, "%s: Unable to Read Output Status %i - out of range :(", moduleName, outputNum);
+    sprintf(buffer, "{\"error\":\" %s: Unable to Read Output Status %i - out of range :(\"} ", moduleName, outputNum);
     outState = -1;
   }
 #if DEBUG_ADAM == true
+  Serial.print("DEBUG_ADAM: ");
   Serial.println(buffer);
 #endif
   return outState;
@@ -163,12 +189,13 @@ int16_t adamController::read_coils() {
     itoa(coilStates, binString, 2);  //trying some magic to make sprinf work to print status in columns
     int zeroPadding = int(8 - strlen(binString));
 
-    sprintf(buffer, "%s: Read Coils:  %s%s ", moduleName, leadingZeros[zeroPadding], binString);
+    sprintf(buffer, "{\"status\":\"%s: Read Coils:  %s%s \"} ", moduleName, leadingZeros[zeroPadding], binString);
   } else {
-    sprintf(buffer, "%s: ERROR: Unable to read coil status ", moduleName);
+    sprintf(buffer, "{\"error\":\"%s: ERROR: Unable to read coil status \"}", moduleName);
   }
-  g_coilState = coilStates;
+  g_DO_State = coilStates;
 #if DEBUG_ADAM == true
+  Serial.print("DEBUG_ADAM: ");
   Serial.println(buffer);
 #endif
   return coilStates;
@@ -184,12 +211,12 @@ int16_t adamController::read_digital_input(uint8_t inputNum) {
   if (inputNum < 8) {
     inputState = modbusTCP.discreteInputRead(inputNum);
     if (inputState == -1) {
-      sprintf(buffer, "%s: Error Code %i: Unable to Read Input %i :(", moduleName, inputState, inputNum);
+      sprintf(buffer, "{\"error\":\"%s: Error Code %i: Unable to Read Input %i :(\"}", moduleName, inputState, inputNum);
     } else {
-      sprintf(buffer, "%s: Input %i Status: %i", moduleName, inputNum, inputState);
+      sprintf(buffer, "{\"status\":\"%s: Input %i Status: %i\"}", moduleName, inputNum, inputState);
     }
   } else {
-    sprintf(buffer, "%s: Unable to Read Input %i - out of range :(", moduleName, inputNum);
+    sprintf(buffer, "{\"error\":\"%s: Unable to Read Input %i - out of range :(\"}", moduleName, inputNum);
     inputState = -1;
   }
 #if DEBUG_ADAM == true
@@ -197,7 +224,6 @@ int16_t adamController::read_digital_input(uint8_t inputNum) {
 #endif
   return inputState;
 }
-
 
 
 
@@ -216,24 +242,28 @@ int16_t adamController::read_digital_inputs() {
     itoa(inputStates, binString, 2);  //trying some magic to make sprinf work to print status in columns
     int zeroPadding = int(8 - strlen(binString));
 
-    sprintf(buffer, "%s: Read Digital Inputs: %s%s ", moduleName, leadingZeros[zeroPadding], binString);
+    sprintf(buffer, "{\"status\":\" %s: Read Digital Inputs: %s%s\"}", moduleName, leadingZeros[zeroPadding], binString);
   } else {
-    sprintf(buffer, "%s: ERROR: Unable to read input status ", moduleName);
-    inputStates = -1;
+    sprintf(buffer, "{\"error\":\" %s: ERROR: Unable to read input status\"}", moduleName);
+    inputStates = 0;  // used to be set to -1 but was unsigned so not sensible
   }
-  g_inputState = inputStates;
+  g_DI_State = inputStates;
+  // Serial.println(buffer);  // TODO MOVED THIS BECAUSE NOT PRINTING WAHH
 #if DEBUG_ADAM == true
+  Serial.print(F("DEBUG_ADAM: "));
   Serial.println(buffer);
 #endif
   return inputStates;
 }
 
-void adamController::printBin(int16_t binaryVal) {
-  char buffer[42];
+
+
+void adamController::printBin(uint8_t binaryVal) {
+  char buffer[64];
   char binString[9];
   itoa(binaryVal, binString, 2);  //trying some magic to make sprinf work to print status in columns
   int zeroPadding = int(8 - strlen(binString));
-  sprintf(buffer, "%s: Read Digital Inputs: %s%s ", moduleName, leadingZeros[zeroPadding], binString);
+  sprintf(buffer, "{\"status\":\"%s: Printing Binary: %s%s\"}", moduleName, leadingZeros[zeroPadding], binString);
   Serial.println(buffer);
 }
 
@@ -243,7 +273,6 @@ adamController::dataArray adamController::read_analog_inputs() {
   int response = modbusTCP.requestFrom(INPUT_REGISTERS, a_in[0], 0x08);  //HOLDING_REGISTERS
   int numReadings = modbusTCP.available();                               // Is this line even needed? requestFrom returns number of readings
   uint16_t readBuffer[numReadings];
-  int inputStates = 0;
   char buffer[514] = { 0 };
   if (response > 0) {
     for (int i = 0; i < numReadings; i++) {
@@ -256,38 +285,118 @@ adamController::dataArray adamController::read_analog_inputs() {
           d_array.f_data[i] = float(d_array.i_data[i]);
           break;
         case VOLTAGE_OUTPUT:
-          d_array.f_data[i] = adamController::daq_to_voltage(readBuffer[i]);  // do the conversion to voltage/current here
+          d_array.f_data[i] = adamController::adc_to_voltage(readBuffer[i]);  // do the conversion to voltage/current here
           break;
         case CURRENT_OUTPUT:
-          d_array.f_data[i] = adamController::daq_to_current(readBuffer[i]);  // do the conversion to voltage/current here
+          d_array.f_data[i] = adamController::adc_to_current(readBuffer[i]);  // do the conversion to voltage/current here
+          break;
+        case TEMP_OUTPUT:
+          d_array.f_data[i] = adamController::adc_to_temperature(readBuffer[i]);  // do the conversion to voltage/current here
           break;
         default:
+          d_array.f_data[i] = float(d_array.i_data[i]);
           Serial.print(moduleName);
-          Serial.println(F(": Error: Unknown analog data type requested"));
+          Serial.println(F("{\"error\":\"Error: Unknown analog data type requested\"}"));
           break;
       }
     }
-    sprintf(buffer, "%s: Read Analog Inputs (DAC): %u, %u, %u, %u, %u, %u ", moduleName, readBuffer[0], readBuffer[1], readBuffer[2], readBuffer[3], readBuffer[4], readBuffer[5]);
+#if PRINT_SCALED_DATA == true
+    char floatString[8][8];
+    for (int i = 0; i < numReadings; i++) {
+      dtostrf(d_array.f_data[i], 2, 2, floatString[i]);
+    }
+    sprintf(buffer, "{\"status\":\"%s: Read Analog Inputs %s: %s, %s, %s, %s, %s, %s\"}", moduleName, dataTypeName[analogType], floatString[0], floatString[1], floatString[2], floatString[3], floatString[4], floatString[5]);
+#elif PRINT_RAW_DATA == true
+    sprintf(buffer, "{\"status\":\"%s: Read Analog Inputs (ADC): %u, %u, %u, %u, %u, %u\"}", moduleName, readBuffer[0], readBuffer[1], readBuffer[2], readBuffer[3], readBuffer[4], readBuffer[5]);
+#endif
   } else {
-    sprintf(buffer, "%s: ERROR: Unable to read input status ", moduleName);
-    inputStates = -1;
+    sprintf(buffer, "{\"error\":\"%s: Unable to read input status\"}", moduleName);
+    // inputStates = -1;
   }
-
-#if PRINT_RAW_DATA == true
+#if PRINT_RAW_DATA == true || PRINT_SCALED_DATA == true
+  Serial.print(F("PRINT_X_DATA: "));
   Serial.println(buffer);
 #endif
   //delete buffer;  // doesnt work
   return d_array;
 }
 
-float adamController::daq_to_voltage(uint16_t daq_value) {
-  float voltage = float(daq_value) - 32768.0;
+
+
+int16_t adamController::set_mA_analog_output(int outputNum, float outputVal) {
+  int16_t response;
+  uint16_t dac_val;
+  // int16_t holdingVal;
+  //holdingVal =  modbusTCP.holdingRegisterRead(10);
+
+  dac_val = current_4_20mA_to_dac(outputVal);
+  response = modbusTCP.holdingRegisterWrite(a_out[outputNum], dac_val);
+
+#if DEBUG_ADAM == true
+  Serial.print(F("DEBUG_ADAM: Response: "));
+  Serial.print(response);
+  Serial.print(" mA_val: ");
+  Serial.print(outputVal);
+  Serial.print(" DAC_val: ");
+  Serial.print(dac_val);
+  Serial.println("");
+#endif
+  return response;
+}
+
+
+
+uint8_t adamController::analogAsDigital(float dataArray[8]) {
+  //  Serial.println("Data In: ");
+  // adamController::printBin(fuzzyData);
+  for (int i = 0; i < 8; i++) {  // this function looks odd, but its basically just sorting a float into high or low, or the origional value
+                                 //   Serial.print(dataArray[i]);
+                                 //    Serial.print(" ");
+                                 //   Serial.print(bitmask[i]);
+                                 //   Serial.print(" ");
+    if (dataArray[i] >= FUZZY_LOGIC_HIGH) {
+      g_AIasDI_State |= bitmask[i];
+      //     Serial.print(" 1 ");
+    } else if (dataArray[i] <= FUZZY_LOGIC_LOW) {
+      //    Serial.print(" 0 ");
+      g_AIasDI_State &= not_bitmask[i];  // bitmask should be all 1s then 0 for clearing bit
+    }                                    // flips the bitmask and resets all 0s (should just be 1)
+                                         //    adamController::printBin(fuzzyData);
+                                         //   Serial.println();
+  }
+#if DEBUG_ANALOG_AS_DIGITAL == true
+  Serial.print("DEBUG_ANALOG_AS_DIGITAL: ");
+  adamController::printBin(g_AIasDI_State);
+#endif
+  return g_AIasDI_State;
+}
+
+
+
+float adamController::adc_to_voltage(uint16_t _adcvalue) {
+  float voltage = float(_adcvalue) - 32768.0;
   voltage = voltage / 3257.333;
   return voltage;
 }
 
-float adamController::daq_to_current(uint16_t daq_value) {
-  float current = float(daq_value);  // - 32768.0;
+float adamController::adc_to_current(uint16_t _adcvalue) {
+  float current = float(_adcvalue);  // - 32768.0;
   current = current / 3276.799;
   return current;
+}
+
+float adamController::adc_to_temperature(uint16_t _adcvalue) {
+  float temperature = float(_adcvalue);  // - 32768.0;
+  temperature = temperature * 0.0209;
+  return temperature;
+}
+
+// DAC is 10 bits so max val = 4095
+uint16_t adamController::current_4_20mA_to_dac(float _mA_value) {
+  if (_mA_value < 4) {
+    _mA_value = 4;
+  }
+  _mA_value = _mA_value - 4;
+  uint16_t dac_value = round(_mA_value * 255.9375);
+  return dac_value;
 }
