@@ -227,8 +227,8 @@ int16_t adamController::read_digital_input(uint8_t inputNum) {
 
 
 
-int16_t adamController::read_digital_inputs() {
-  int response = modbusTCP.requestFrom(DISCRETE_INPUTS, d_in[0], 0x08);
+int16_t adamController::read_digital_inputs(uint8_t numInputs) {
+  int response = modbusTCP.requestFrom(DISCRETE_INPUTS, d_in[0], numInputs);
   int numReadings = modbusTCP.available();  // Is this line even needed? requestFrom returns number of readings
   int readBuffer[numReadings];
   int inputStates = 0;
@@ -268,10 +268,10 @@ void adamController::printBin(uint8_t binaryVal) {
 }
 
 
-adamController::dataArray adamController::read_analog_inputs() {
+adamController::dataArray adamController::read_analog_inputs(uint8_t numInputs) {
   // dataArray analogVals; // Use the global variable its easier!
-  int response = modbusTCP.requestFrom(INPUT_REGISTERS, a_in[0], 0x08);  //HOLDING_REGISTERS
-  int numReadings = modbusTCP.available();                               // Is this line even needed? requestFrom returns number of readings
+  int response = modbusTCP.requestFrom(INPUT_REGISTERS, a_in[0], numInputs);  //HOLDING_REGISTERS
+  int numReadings = modbusTCP.available();                                    // Is this line even needed? requestFrom returns number of readings
   uint16_t readBuffer[numReadings];
   char buffer[514] = { 0 };
   if (response > 0) {
@@ -328,9 +328,24 @@ int16_t adamController::set_mA_analog_output(int outputNum, float outputVal) {
   uint16_t dac_val;
   // int16_t holdingVal;
   //holdingVal =  modbusTCP.holdingRegisterRead(10);
+// all this for debugging
+ // Serial.print("Output Number: ");
+ // Serial.print(a_out[outputNum], HEX);
+ // Serial.print("  outputValue: ");
+ // Serial.print(outputVal);
 
   dac_val = current_4_20mA_to_dac(outputVal);
-  response = modbusTCP.holdingRegisterWrite(a_out[outputNum], dac_val);
+
+//  Serial.print("  dac_val: ");
+ // Serial.println(dac_val);
+
+  //adamController::report_modbus_status();
+
+  if (modbusConnected) {  // specific guard clause placed to avoid timeout bug NEEDS TESTING not sure how well used this variable is
+     response = modbusTCP.holdingRegisterWrite(a_out[outputNum], dac_val);  // <- This is also the line that is causing the hangup (when ethernet unplugged from startup) issue, when commented out no issues
+  } else {
+    Serial.println("{\"ERROR\":\"I can't do that dave. ModBus is disconnected\"");
+  }
 
 #if DEBUG_ADAM == true
   Serial.print(F("DEBUG_ADAM: Response: "));
@@ -399,4 +414,12 @@ uint16_t adamController::current_4_20mA_to_dac(float _mA_value) {
   _mA_value = _mA_value - 4;
   uint16_t dac_value = round(_mA_value * 255.9375);
   return dac_value;
+}
+
+bool adamController::report_modbus_status() {
+  if (modbusConnected) {
+    Serial.println("ModBus connected");
+  } else {
+    Serial.println("No ModBus Connection");
+  }
 }

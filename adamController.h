@@ -27,8 +27,8 @@
 #include "WProgram.h"
 #endif
 
-#define DEBUG_MODBUS true
-#define DEBUG_ADAM true  // debug ADAM functions within library
+#define DEBUG_MODBUS false
+#define DEBUG_ADAM false  // debug ADAM functions within library
 #define PRINT_RAW_DATA false
 #define PRINT_SCALED_DATA false
 #define DEBUG_ANALOG_AS_DIGITAL false
@@ -56,7 +56,7 @@ private:
 public:
 
 
-
+  bool moduleActive = true;
 
   // Constructor
 
@@ -100,12 +100,12 @@ public:
 
 
   int16_t read_digital_input(uint8_t inputNum);
-  int16_t read_digital_inputs();
+  int16_t read_digital_inputs(uint8_t numInputs = 0x08);
 
   int16_t read_analog_input(uint8_t inputNum);
-  dataArray read_analog_inputs();
+  dataArray read_analog_inputs(uint8_t numInputs = 0x06);
 
-  int16_t set_mA_analog_output(int outputNum, float outputVal);
+  int16_t set_mA_analog_output(int outputNum = 0xA, float outputVal = 0);
 
   float adc_to_voltage(uint16_t _adcvalue);
   float adc_to_current(uint16_t _acdvalue);
@@ -121,6 +121,8 @@ public:
 
 
   void printBin(uint8_t binaryVal);
+
+  bool report_modbus_status();
 
   // Variables
   char moduleName[32] = { "ADAM-xxxxA" };
