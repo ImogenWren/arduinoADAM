@@ -242,7 +242,7 @@ int16_t adamController::read_digital_inputs(uint8_t numInputs) {
     itoa(inputStates, binString, 2);  //trying some magic to make sprinf work to print status in columns
     int zeroPadding = int(8 - strlen(binString));
 
-    sprintf(buffer, "{\"status\":\" %s: Read Digital Inputs: %s%s\"}", moduleName, leadingZeros[zeroPadding], binString);
+    sprintf(buffer, "{\"status\":\" %s: Digital Inputs: %s%s\"}", moduleName, leadingZeros[zeroPadding], binString);
   } else {
     sprintf(buffer, "{\"error\":\" %s: ERROR: Unable to read input status\"}", moduleName);
     inputStates = 0;  // used to be set to -1 but was unsigned so not sensible
@@ -263,7 +263,7 @@ void adamController::printBin(uint8_t binaryVal) {
   char binString[9];
   itoa(binaryVal, binString, 2);  //trying some magic to make sprinf work to print status in columns
   int zeroPadding = int(8 - strlen(binString));
-  sprintf(buffer, "{\"status\":\"%s: Printing Binary: %s%s\"}", moduleName, leadingZeros[zeroPadding], binString);
+  sprintf(buffer, "{\"status\":\"%s: Binary: %s%s\"}", moduleName, leadingZeros[zeroPadding], binString);
   Serial.println(buffer);
 }
 
@@ -305,9 +305,9 @@ adamController::dataArray adamController::read_analog_inputs(uint8_t numInputs) 
     for (int i = 0; i < numReadings; i++) {
       dtostrf(d_array.f_data[i], 2, 2, floatString[i]);
     }
-    sprintf(buffer, "{\"status\":\"%s: Read Analog Inputs %s: %s, %s, %s, %s, %s, %s\"}", moduleName, dataTypeName[analogType], floatString[0], floatString[1], floatString[2], floatString[3], floatString[4], floatString[5]);
+    sprintf(buffer, "{\"status\":\"%s: Analog Inputs %s: %s, %s, %s, %s, %s, %s\"}", moduleName, dataTypeName[analogType], floatString[0], floatString[1], floatString[2], floatString[3], floatString[4], floatString[5]);
 #elif PRINT_RAW_DATA == true
-    sprintf(buffer, "{\"status\":\"%s: Read Analog Inputs (ADC): %u, %u, %u, %u, %u, %u\"}", moduleName, readBuffer[0], readBuffer[1], readBuffer[2], readBuffer[3], readBuffer[4], readBuffer[5]);
+    sprintf(buffer, "{\"status\":\"%s: Analog Inputs (ADC): %u, %u, %u, %u, %u, %u\"}", moduleName, readBuffer[0], readBuffer[1], readBuffer[2], readBuffer[3], readBuffer[4], readBuffer[5]);
 #endif
   } else {
     sprintf(buffer, "{\"error\":\"%s: Unable to read input status\"}", moduleName);
@@ -322,42 +322,75 @@ adamController::dataArray adamController::read_analog_inputs(uint8_t numInputs) 
 }
 
 
+int16_t adamController::write_holding_register(uint16_t base, uint16_t outputVal) {
+  int16_t response = -1;
+  if (modbusConnected) {
+    response = modbusTCP.holdingRegisterWrite(base, outputVal);
+  } else {
+  }
+  return response;
+}
 
-int16_t adamController::set_mA_analog_output(int outputNum, float outputVal) {
-  int16_t response;
-  uint16_t dac_val;
-  // int16_t holdingVal;
-  //holdingVal =  modbusTCP.holdingRegisterRead(10);
-// all this for debugging
- // Serial.print("Output Number: ");
- // Serial.print(a_out[outputNum], HEX);
- // Serial.print("  outputValue: ");
- // Serial.print(outputVal);
 
-  dac_val = current_4_20mA_to_dac(outputVal);
-
-//  Serial.print("  dac_val: ");
- // Serial.println(dac_val);
+int16_t adamController::set_DAC_analog_output(int outputNum, uint16_t outputVal) {
+  int16_t response = -1;
 
   //adamController::report_modbus_status();
 
   if (modbusConnected) {  // specific guard clause placed to avoid timeout bug NEEDS TESTING not sure how well used this variable is
-     response = modbusTCP.holdingRegisterWrite(a_out[outputNum], dac_val);  // <- This is also the line that is causing the hangup (when ethernet unplugged from startup) issue, when commented out no issues
+    //  response = modbusTCP.holdingRegisterWrite(a_out[outputNum], outputVal);  // <- This is also the line that is causing the hangup (when ethernet unplugged from startup) issue, when commented out no issues
+    response = modbusTCP.holdingRegisterWrite(a_out[outputNum], outputVal);
   } else {
-    Serial.println("{\"ERROR\":\"I can't do that dave. ModBus is disconnected\"");
+    //  Serial.println(F("{\"ERROR\":\"ModBus is disconnected\""));
   }
 
 #if DEBUG_ADAM == true
   Serial.print(F("DEBUG_ADAM: Response: "));
   Serial.print(response);
-  Serial.print(" mA_val: ");
+  Serial.print(F(" mA_val: "));
   Serial.print(outputVal);
-  Serial.print(" DAC_val: ");
+  Serial.println("");
+#endif
+  return response;
+}
+
+
+int16_t adamController::set_mA_analog_output(int outputNum, float outputVal) {
+  int16_t response = -1;
+  uint16_t dac_val;
+  // int16_t holdingVal;
+  //holdingVal =  modbusTCP.holdingRegisterRead(10);
+  // all this for debugging
+  // Serial.print("Output Number: ");
+  // Serial.print(a_out[outputNum], HEX);
+  // Serial.print("  outputValue: ");
+  // Serial.print(outputVal);
+
+  dac_val = current_4_20mA_to_dac(outputVal);
+
+  //  Serial.print("  dac_val: ");
+  // Serial.println(dac_val);
+
+  //adamController::report_modbus_status();
+
+  if (modbusConnected) {                                                   // specific guard clause placed to avoid timeout bug NEEDS TESTING not sure how well used this variable is
+    response = modbusTCP.holdingRegisterWrite(a_out[outputNum], dac_val);  // <- This is also the line that is causing the hangup (when ethernet unplugged from startup) issue, when commented out no issues
+  } else {
+    // Serial.println(F("{\"ERROR\":\"ModBus is disconnected\""));
+  }
+
+#if DEBUG_ADAM == true
+  Serial.print(F("DEBUG_ADAM: Response: "));
+  Serial.print(response);
+  Serial.print(F(" mA_val: "));
+  Serial.print(outputVal);
+  Serial.print(F(" DAC_val: "));
   Serial.print(dac_val);
   Serial.println("");
 #endif
   return response;
 }
+
 
 
 
@@ -380,7 +413,7 @@ uint8_t adamController::analogAsDigital(float dataArray[8]) {
                                          //   Serial.println();
   }
 #if DEBUG_ANALOG_AS_DIGITAL == true
-  Serial.print("DEBUG_ANALOG_AS_DIGITAL: ");
+  Serial.print(F("DEBUG_ANALOG_AS_DIGITAL: "));
   adamController::printBin(g_AIasDI_State);
 #endif
   return g_AIasDI_State;
@@ -418,8 +451,10 @@ uint16_t adamController::current_4_20mA_to_dac(float _mA_value) {
 
 bool adamController::report_modbus_status() {
   if (modbusConnected) {
-    Serial.println("ModBus connected");
+    Serial.println(F("ModBus connected"));
+    return true;
   } else {
-    Serial.println("No ModBus Connection");
+    Serial.println(F("No ModBus Connection"));
+    return false;
   }
 }
