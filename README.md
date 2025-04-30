@@ -1,6 +1,18 @@
 # adam-tcp-controller
 Arduino/C++, Python, & LabVIEW interfaces for controlling ADAM industrial Controllers using Ethernet/TCP/ModBus
 
+## ADAM MODBUS Address Tables
+### Adam6052
+// Also the offset address (in this case 40001) needs to be subtracted from the address to get the actual register address BECAUSE OF REASONS
+![image](https://github.com/user-attachments/assets/ed31bb5d-ccd5-46a1-8d0d-93ea91c8b07e)
+![image](https://github.com/user-attachments/assets/916079f0-1d2e-4938-b3a8-cedda9f3c793)
+![image](https://github.com/user-attachments/assets/65a07050-8725-43eb-8150-077c3cf52c9b)
+![image](https://github.com/user-attachments/assets/64ee1332-e22a-4c09-8f35-ca52f4799435)
+![image](https://github.com/user-attachments/assets/4631954c-7f9b-4a2c-b672-fe6a00645597)
+![image](https://github.com/user-attachments/assets/0e1aae3d-5a13-444d-a030-ce455d7b3331)
+
+
+
 # Arduino/C++ Implementation
 
 
