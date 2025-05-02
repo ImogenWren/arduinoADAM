@@ -392,18 +392,34 @@ void adamController::set_pulse_duty(int16_t output, float duty) {
 
 void adamController::set_pulse_percent(int16_t output, int16_t duty_percent) {
   float duty = float(duty_percent) / 100.0;
-  Serial.println(duty);
+  //Serial.println(duty);
   adamController::set_pulse_duty(output, duty);
 }
 
 void adamController::start_pulse_output(int16_t output) {
   adamController::write_holding_register(CH0_ABSOLUTE_PULSE + output * 2, 0);
+  // adamController::printBin(pulseState);
+  pulseState = pulseState | bitmask[output];  // track which pulses are set high
+                                              // adamController::printBin(pulseState);
 }
 
 // Cannot stop the pulse directly, but can write it to do 1 more absolute pulse
 void adamController::stop_pulse_output(int16_t output) {
-  adamController::write_holding_register(CH0_ABSOLUTE_PULSE + output * 2, 1);
+  //  adamController::printBin(pulseState);
+  if (pulseState & bitmask[output]) {
+    // Serial.print("pulse output: ");
+    //  Serial.print(output);
+    //  Serial.println(" stopped");
+    pulseState = pulseState & not_bitmask[output];  // remove high bit from disabled pulses
+    adamController::write_holding_register(CH0_ABSOLUTE_PULSE + output * 2, 1);
+  } else {
+    //  Serial.print("pulse output: ");
+    //  Serial.print(output);
+    // Serial.println(" not active");
+  }
+  //  adamController::printBin(pulseState);
 }
+
 
 
 

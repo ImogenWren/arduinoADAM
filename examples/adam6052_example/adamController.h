@@ -156,7 +156,7 @@ public:
   char moduleName[32] = { "ADAM-xxxxA" };
   bool modbusConnected = false;
 
-
+  uint8_t pulseState = 0b00000000;
 
   uint8_t bitmask[8] = {
     0b00000001,

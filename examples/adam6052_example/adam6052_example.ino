@@ -13,7 +13,7 @@ This example shows:
 
 Note: In order to use the PULSE settings (pulse high and pulse low registers), the output must be set to PULSE mode using the ADAM.NET utility. This will prevent the output from being used 
 as a typical DO output, and you must use the stop_pulse(uint16_t outputNum); method to stop this output (note, the stop_pulse() function will trigger one additional pulse before stopping due to limitations in the
-MODBUS command set)
+MODBUS command set) -> Now added feature to prevent pulses being added when stop method is called while PULSE state is already off
 
 */
 #include "adamController.h"
@@ -91,6 +91,7 @@ void setup() {
   adam6052.set_pulse_frequency(200);   // pulse frequency is global using this library. If use case exists for different frequencies this could be modified after
   adam6052.set_pulse_duty(0x00, 0.3);  //(output, duty)
   adam6052.set_pulse_percent(0x01, 100);
+  adam6052.stop_pulse_output(0);
   adam6052.start_pulse_output(1);
   adam6052.start_pulse_output(0);
 }
@@ -117,7 +118,7 @@ void loop() {
   adam6052.set_pulse_percent(0, percent);
   adam6052.set_pulse_duty(1, duty);
   adam6052.set_coil(2, coilstate);
-  delay(1000);
+  delay(1300);
 
   while (counter_one == 0) {
     //adam6052.set_coils(0b00000000);
@@ -128,7 +129,7 @@ void loop() {
     adam6052.stop_pulse_output(0);
     adam6052.stop_pulse_output(1);
     delay(2000);
-    adam6052.set_coils(0xFF);
+    adam6052.set_coils(0b11111100);
     counter_one = -1;
   }
   if (counter_one <= 0) counter_one = 50;
