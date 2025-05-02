@@ -54,8 +54,8 @@ bool adamController::check_modbus_connect() {
   Serial.print("DEBUG_MODBUS: ");
   Serial.println(moduleName);
 #endif
-  if (!modbusTCP.connected()) {
 
+  if (!modbusTCP.connected()) {
 #if DEBUG_MODBUS == true
     // client not connected, start the Modbus TCP client
     Serial.print("DEBUG_MODBUS: ");
@@ -104,10 +104,14 @@ int16_t adamController::set_coil(int coilNum, bool coilState) {
       coilState = -1;
       // Serial.println(modbusTCP.lastError());
     } else {
+#if DEBUG_ADAM == true
       sprintf(buffer, "{\"status\":\"%s: Set Coil: %i ( %#0x ) to %i\"}", moduleName, coilNum, d_out[coilNum], coilState);
+#endif
     }
   } else {
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"error\":\"%s: Unable to set Coil %i - out of range :(\"}", moduleName, coilNum);
+#endif
     coilState = -1;
   }
 #if DEBUG_ADAM == true
@@ -134,9 +138,13 @@ int16_t adamController::set_coils(uint8_t coilStates) {
   char buffer[64];
 
   if (response == 1) {
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"status\":\"%s: Set Coils:   %s%s \"}", moduleName, leadingZeros[zeroPadding], binString);
+#endif
   } else {
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"error\":\"%s: Unable to Set Coils to: %s%s \"}", moduleName, leadingZeros[zeroPadding], binString);
+#endif
     coilStates = -1;
   }
   // g_DO_State = coilStates;
@@ -156,12 +164,18 @@ int16_t adamController::read_coil(uint8_t outputNum) {
   if (outputNum < 8) {
     outState = modbusTCP.coilRead(d_out[outputNum]);
     if (outState == -1) {
+#if DEBUG_ADAM == true
       sprintf(buffer, "{\"error\":\" %s: Error Code %i: Unable to Read Output Status %i :(\"} ", moduleName, outState, outputNum);
+#endif
     } else {
+#if DEBUG_ADAM == true
       sprintf(buffer, "{\"status\":\" %s: Output %i Status: %i\"} ", moduleName, outputNum, outState);
+#endif
     }
   } else {
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"error\":\" %s: Unable to Read Output Status %i - out of range :(\"} ", moduleName, outputNum);
+#endif
     outState = -1;
   }
 #if DEBUG_ADAM == true
@@ -188,10 +202,13 @@ int16_t adamController::read_coils() {
     char binString[9];
     itoa(coilStates, binString, 2);  //trying some magic to make sprinf work to print status in columns
     int zeroPadding = int(8 - strlen(binString));
-
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"status\":\"%s: Read Coils:  %s%s \"} ", moduleName, leadingZeros[zeroPadding], binString);
+#endif
   } else {
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"error\":\"%s: ERROR: Unable to read coil status \"}", moduleName);
+#endif
   }
   g_DO_State = coilStates;
 #if DEBUG_ADAM == true
@@ -211,12 +228,18 @@ int16_t adamController::read_digital_input(uint8_t inputNum) {
   if (inputNum < 8) {
     inputState = modbusTCP.discreteInputRead(inputNum);
     if (inputState == -1) {
+#if DEBUG_ADAM == true
       sprintf(buffer, "{\"error\":\"%s: Error Code %i: Unable to Read Input %i :(\"}", moduleName, inputState, inputNum);
+#endif
     } else {
+#if DEBUG_ADAM == true
       sprintf(buffer, "{\"status\":\"%s: Input %i Status: %i\"}", moduleName, inputNum, inputState);
+#endif
     }
   } else {
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"error\":\"%s: Unable to Read Input %i - out of range :(\"}", moduleName, inputNum);
+#endif
     inputState = -1;
   }
 #if DEBUG_ADAM == true
@@ -241,10 +264,13 @@ int16_t adamController::read_digital_inputs(uint8_t numInputs) {
     char binString[9];
     itoa(inputStates, binString, 2);  //trying some magic to make sprinf work to print status in columns
     int zeroPadding = int(8 - strlen(binString));
-
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"status\":\" %s: Digital Inputs: %s%s\"}", moduleName, leadingZeros[zeroPadding], binString);
+#endif
   } else {
+#if DEBUG_ADAM == true
     sprintf(buffer, "{\"error\":\" %s: ERROR: Unable to read input status\"}", moduleName);
+#endif
     inputStates = 0;  // used to be set to -1 but was unsigned so not sensible
   }
   g_DI_State = inputStates;
@@ -330,6 +356,55 @@ int16_t adamController::write_holding_register(uint16_t base, uint16_t outputVal
   }
   return response;
 }
+
+int16_t adamController::read_holding_register(uint16_t base) {
+  int16_t response = -1;
+  if (modbusConnected) {
+    response = modbusTCP.holdingRegisterRead(base);
+  } else {
+  }
+  return response;
+}
+
+
+/// sets global pulse frequency
+void adamController::set_pulse_frequency(int16_t frequency = 200) {
+  pulse_frequency = frequency;
+}
+
+
+void adamController::set_pulse_duty(int16_t output, float duty) {
+  // time high & low are set in periods of 100uS, so 1 second = 10000
+  float period = 10000 / pulse_frequency;
+  int16_t time_high = int16_t(round(period * duty));
+  int16_t time_low = int16_t(round(period)) - time_high;
+  // Serial.print("Period: ");
+  //  Serial.print(period);
+  //  Serial.print(", high: ");
+  ////  Serial.print(time_high);
+  // Serial.print(", low: ");
+  //  Serial.print(time_low);
+  //  Serial.println();
+  adamController::write_holding_register(CH0_PULSE_LOW_ADDR + output * 2, time_low);
+  adamController::write_holding_register(CH0_PULSE_HIGH_ADDR + output * 2, time_high);
+}
+
+
+void adamController::set_pulse_percent(int16_t output, int16_t duty_percent) {
+  float duty = float(duty_percent) / 100.0;
+  Serial.println(duty);
+  adamController::set_pulse_duty(output, duty);
+}
+
+void adamController::start_pulse_output(int16_t output) {
+  adamController::write_holding_register(CH0_ABSOLUTE_PULSE + output * 2, 0);
+}
+
+// Cannot stop the pulse directly, but can write it to do 1 more absolute pulse
+void adamController::stop_pulse_output(int16_t output) {
+  adamController::write_holding_register(CH0_ABSOLUTE_PULSE + output * 2, 1);
+}
+
 
 
 int16_t adamController::set_DAC_analog_output(int outputNum, uint16_t outputVal) {

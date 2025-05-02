@@ -357,6 +357,55 @@ int16_t adamController::write_holding_register(uint16_t base, uint16_t outputVal
   return response;
 }
 
+int16_t adamController::read_holding_register(uint16_t base) {
+  int16_t response = -1;
+  if (modbusConnected) {
+    response = modbusTCP.holdingRegisterRead(base);
+  } else {
+  }
+  return response;
+}
+
+
+/// sets global pulse frequency
+void adamController::set_pulse_frequency(int16_t frequency = 200) {
+  pulse_frequency = frequency;
+}
+
+
+void adamController::set_pulse_duty(int16_t output, float duty) {
+  // time high & low are set in periods of 100uS, so 1 second = 10000
+  float period = 10000 / pulse_frequency;
+  int16_t time_high = int16_t(round(period * duty));
+  int16_t time_low = int16_t(round(period)) - time_high;
+  // Serial.print("Period: ");
+  //  Serial.print(period);
+  //  Serial.print(", high: ");
+  ////  Serial.print(time_high);
+  // Serial.print(", low: ");
+  //  Serial.print(time_low);
+  //  Serial.println();
+  adamController::write_holding_register(CH0_PULSE_LOW_ADDR + output * 2, time_low);
+  adamController::write_holding_register(CH0_PULSE_HIGH_ADDR + output * 2, time_high);
+}
+
+
+void adamController::set_pulse_percent(int16_t output, int16_t duty_percent) {
+  float duty = float(duty_percent) / 100.0;
+  Serial.println(duty);
+  adamController::set_pulse_duty(output, duty);
+}
+
+void adamController::start_pulse_output(int16_t output) {
+  adamController::write_holding_register(CH0_ABSOLUTE_PULSE + output * 2, 0);
+}
+
+// Cannot stop the pulse directly, but can write it to do 1 more absolute pulse
+void adamController::stop_pulse_output(int16_t output) {
+  adamController::write_holding_register(CH0_ABSOLUTE_PULSE + output * 2, 1);
+}
+
+
 
 int16_t adamController::set_DAC_analog_output(int outputNum, uint16_t outputVal) {
   int16_t response = -1;

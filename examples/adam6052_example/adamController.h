@@ -27,11 +27,11 @@
 #endif
 
 // ADAM User Options
-#define ZERO_OP_ON_STARTUP false    // NOT IMPLEMENTED YET
+#define ZERO_OP_ON_STARTUP false  // NOT IMPLEMENTED YET
 
 // ADAM Debugging Options
-#define DEBUG_MODBUS false 
-#define DEBUG_ADAM false // debug ADAM functions within library
+#define DEBUG_MODBUS false
+#define DEBUG_ADAM false  // debug ADAM functions within library
 #define PRINT_RAW_DATA false
 #define PRINT_SCALED_DATA false
 #define DEBUG_ANALOG_AS_DIGITAL false
@@ -54,9 +54,9 @@ typedef enum {
 // ASome modbus addresses are doubled up eg 49 = 50
 // Also the offset address (in this case 40001) needs to be subtracted from the address to get the actual register address BECAUSE OF REASONS
 #define CH0_ABSOLUTE_PULSE 48     //40049-50     // for CH0 sets number of pulses, write 0 for continuous
-#define CH0_INCREMENTAL_PULSE 64  //40065-66   // for CH0 adds additional pulses ontop of absolute 
-#define CH0_PULSE_LOW_ADDR 16     //40017-18     //  for CH0 low pulse time (W) 
-#define CH0_PULSE_HIGH_ADDR 32    //40033-34    // for CH0 high pulse time (W) 
+#define CH0_INCREMENTAL_PULSE 64  //40065-66   // for CH0 adds additional pulses ontop of absolute
+#define CH0_PULSE_LOW_ADDR 16     //40017-18     //  for CH0 low pulse time (W)
+#define CH0_PULSE_HIGH_ADDR 32    //40033-34    // for CH0 high pulse time (W)
 
 #define ALL_DO_ADDR 302  //40303
 
@@ -125,14 +125,15 @@ public:
   int16_t write_holding_register(uint16_t base, uint16_t outputVal);
   int16_t read_holding_register(uint16_t base);
 
-  void set_pulse_frequency(int16_t frequency = 200);   /// sets global pulse frequency
-  int16_t set_pulse_duty(int16_t output, float duty);
-  int16_t start_pulse_output(int16_t output);
-  int16_t stop_pulse_output(int16_t output);
+  void set_pulse_frequency(int16_t frequency = 200);  /// sets global pulse frequency
+  void set_pulse_duty(int16_t output, float duty);
+  void set_pulse_percent(int16_t output, int16_t duty_percent);
+  void start_pulse_output(int16_t output);
+  void stop_pulse_output(int16_t output);
 
-  int16_t set_DAC_analog_output(int outputNum = 0xA, uint16_t outputVal = 0); // output is 10bit so 4095 is max val
+  int16_t set_DAC_analog_output(int outputNum = 0xA, uint16_t outputVal = 0);  // output is 10bit so 4095 is max val
   int16_t set_mA_analog_output(int outputNum = 0xA, float outputVal = 0);
-  
+
 
   float adc_to_voltage(uint16_t _adcvalue);
   float adc_to_current(uint16_t _acdvalue);

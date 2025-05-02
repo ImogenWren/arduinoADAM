@@ -7,6 +7,9 @@ This example isnt a complete solution as every ADAM module has a little figuring
 For Full implementations see projects based off this library.
 
 This sketch is designed to test the Digital and PULSE outputs for ADAM6052 8DI8DO modules
+This example shows:
+- PULSE output on DO_0 and DO_1
+- DO on DO_2 and DO_3
 
 Note: In order to use the PULSE settings (pulse high and pulse low registers), the output must be set to PULSE mode using the ADAM.NET utility. This will prevent the output from being used 
 as a typical DO output, and you must use the stop_pulse(uint16_t outputNum); method to stop this output (note, the stop_pulse() function will trigger one additional pulse before stopping due to limitations in the
@@ -85,34 +88,45 @@ void setup() {
   ethernet_begin();
   adams_begin();
   //adam6052.write_holding_register(ABSOLUTE_PULSE, 0);  // Non abstracted method writing to holding registers directly. Trigger a continuous pulse to start
-  adam6052.set_pulse_frequency(200);
-  adam6052.set_pulse_duty(0x00, 0.5);
+  adam6052.set_pulse_frequency(200);   // pulse frequency is global using this library. If use case exists for different frequencies this could be modified after
+  adam6052.set_pulse_duty(0x00, 0.3);  //(output, duty)
+  adam6052.set_pulse_percent(0x01, 100);
+  adam6052.start_pulse_output(1);
   adam6052.start_pulse_output(0);
 }
 
 
 float duty = 0.1;
+int16_t percent = 100;
+bool coilstate = false;
 
 void loop() {
+  percent -= 5;
   duty = duty + 0.1;
   counter_one += -5;
   counter_two += 5;
+  coilstate = !coilstate;
   Serial.print("low: ");
- // Serial.print(adam6052.read_holding_register(PULSE_LOW_ADDR));
+  Serial.print(adam6052.read_holding_register(CH0_PULSE_LOW_ADDR));
   Serial.print(", high: ");
- // Serial.println(adam6052.read_holding_register(PULSE_HIGH_ADDR));
+  Serial.print(adam6052.read_holding_register(CH0_PULSE_HIGH_ADDR));
   //adam6052.write_holding_register(PULSE_LOW_ADDR, counter_one);
   //adam6052.write_holding_register(PULSE_HIGH_ADDR, counter_two);
-  adam6052.set_pulse_duty(0, duty);
+  Serial.print(" Percent: ");
+  Serial.println(percent);
+  adam6052.set_pulse_percent(0, percent);
+  adam6052.set_pulse_duty(1, duty);
+  adam6052.set_coil(2, coilstate);
   delay(1000);
 
   while (counter_one == 0) {
     //adam6052.set_coils(0b00000000);
     adam6052.write_holding_register(ALL_DO_ADDR, 0);  // Alternative way of setting all outputs  (except pulse)
-    //adam6052.write_holding_register(PULSE_LOW_ADDR, 100);
-    //adam6052.write_holding_register(ABSOLUTE_PULSE, 1);  // this seems like the best way to "cheat" and stop the pulse output
-    //adam6052.write_holding_register(PULSE_HIGH_ADDR, 0);
+                                                      //adam6052.write_holding_register(PULSE_LOW_ADDR, 100);
+                                                      //adam6052.write_holding_register(ABSOLUTE_PULSE, 1);  // this seems like the best way to "cheat" and stop the pulse output
+                                                      //adam6052.write_holding_register(PULSE_HIGH_ADDR, 0);
     adam6052.stop_pulse_output(0);
+    adam6052.stop_pulse_output(1);
     delay(2000);
     adam6052.set_coils(0xFF);
     counter_one = -1;
@@ -120,4 +134,6 @@ void loop() {
   if (counter_one <= 0) counter_one = 50;
   if (counter_two >= 50) counter_two = 0;
   if (duty >= 1.0) duty = 0.0;
+  if (percent <= 0) percent = 100;
+  if (percent > 100) percent = 0;
 }
